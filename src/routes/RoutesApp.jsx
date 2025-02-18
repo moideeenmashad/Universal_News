@@ -3,8 +3,8 @@
 // import Loader from "@/Components/Loader/Loader";
 // const Main = lazy(() => import("@/Pages/Main"));
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Hero from "@/pages/home/Hero";
-import Navbar from "../components/layouts/Navbar/Navbar";
+import WorldNews from "@/pages/home/WorldNews";
+import Navbar from "@/components/layouts/Navbar/Navbar";
 
 const RoutesApp = () => {
   return (
@@ -13,7 +13,7 @@ const RoutesApp = () => {
       <Navbar />
       <Routes>
         {/* Default Route */}
-        <Route path="/" element={<Hero />} />
+        <Route path="/" element={<WorldNews />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>

@@ -11,7 +11,7 @@ const PrimaryNavbar = () => {
   };
 
   const NavItems = [
-    { id: 1, navItem: "World News", LinkTo: "/world_news" },
+    { id: 1, navItem: "World News", LinkTo: "/" },
     { id: 2, navItem: "Politics", LinkTo: "/politics" },
     { id: 3, navItem: "Business", LinkTo: "/business" },
     { id: 4, navItem: "Technology", LinkTo: "/technology" },
@@ -52,7 +52,7 @@ const PrimaryNavbar = () => {
           </svg>
         </div>
         <nav className="bg-white w-full z-20">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto my-2 border-primary border-y-2">
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto my-2 border-primary border-y-2 py-2 md:py-0">
             <a
               href="https://flowbite.com/"
               className="flex items-center space-x-3 rtl:space-x-reverse"
@@ -61,7 +61,7 @@ const PrimaryNavbar = () => {
               <button
                 onClick={toggleNavbar}
                 type="button"
-                className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 "
                 aria-controls="navbar-sticky"
                 aria-expanded={isOpen ? "true" : "false"}
               >
