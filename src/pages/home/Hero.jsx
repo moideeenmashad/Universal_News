@@ -1,7 +1,5 @@
 // import React from "react";
-
 // import Navbar from "@/components/layouts/Navbar/Navbar";
-
 const Hero = () => {
   return (
     <>

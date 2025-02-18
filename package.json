@@ -16,9 +16,11 @@
     "@tailwindcss/vite": "^4.0.6",
     "framer-motion": "^12.4.3",
     "motion": "^12.4.3",
+    "next-google-fonts": "^2.2.0",
     "postcss-cli": "^11.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0",
     "react-router-dom": "^7.1.5",
     "tailwindcss": "^4.0.6"
   },

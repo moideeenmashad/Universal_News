@@ -1,6 +1,7 @@
 import "./App.css";
 import RoutesApp from "@/routes/RoutesApp";
 import "./index.css";
+import '@/assets/styles/font.css'
 function App() {
   return (
     <div className="App">
