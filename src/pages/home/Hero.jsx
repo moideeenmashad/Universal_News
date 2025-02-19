@@ -1,4 +1,7 @@
 // import React from "react";
+
+import Featured from "./Featured";
+
 // import Navbar from "@/components/layouts/Navbar/Navbar";
 const WorldNews = () => {
   return (
@@ -6,6 +9,7 @@ const WorldNews = () => {
       <div className="container max-w-screen-xl mx-auto text-center">
         Will be continued
       </div>
+      <Featured/>
     </>
   );
 };

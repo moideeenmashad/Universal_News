@@ -3,7 +3,7 @@
 // import Loader from "@/Components/Loader/Loader";
 // const Main = lazy(() => import("@/Pages/Main"));
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import WorldNews from "@/pages/home/WorldNews";
+import Hero from "@/pages/home/Hero";
 import Navbar from "@/components/layouts/Navbar/Navbar";
 
 const RoutesApp = () => {
@@ -13,7 +13,7 @@ const RoutesApp = () => {
       <Navbar />
       <Routes>
         {/* Default Route */}
-        <Route path="/" element={<WorldNews />} />
+        <Route path="/world_news" element={<Hero />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>

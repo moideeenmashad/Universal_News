@@ -11,7 +11,7 @@ const PrimaryNavbar = () => {
   };
 
   const NavItems = [
-    { id: 1, navItem: "World News", LinkTo: "/" },
+    { id: 1, navItem: "World News", LinkTo: "/world_news" },
     { id: 2, navItem: "Politics", LinkTo: "/politics" },
     { id: 3, navItem: "Business", LinkTo: "/business" },
     { id: 4, navItem: "Technology", LinkTo: "/technology" },

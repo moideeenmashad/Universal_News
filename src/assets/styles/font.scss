@@ -29,8 +29,8 @@
   }
 }
 // Spacings
-$spacer : 6.25rem;
-.spacer{
+$spacer: 6.25rem;
+.spacer {
   row-gap: $spacer;
   display: grid;
 }
@@ -40,20 +40,19 @@ $hover-color: #e63946;
 $active-color: #e63946;
 .text-primary {
   color: $primary-color !important;
-
-  &:hover {
-    color: $hover-color !important;
-    transition: 600ms;
-  }
   &:not(:hover) {
-    // color: $hover-color !important;
     transition: 600ms;
-  }
-  &:active {
-    color: $hover-color !important;
   }
   &.active {
     color: $active-color !important;
+  }
+}
+
+ul > a.text-primary {
+  &:hover,
+  &:active {
+    color: $hover-color !important;
+    transition: 600ms;
   }
 }
 
