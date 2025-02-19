@@ -96,7 +96,7 @@ const PrimaryNavbar = () => {
                     key={item.id}
                     to={item.LinkTo}
                     className={({ isActive }) =>
-                      `font-family-BG block py-2 px-3 text-primary rounded-sm md:bg-transparent hover:text-primary 
+                      `font-family-BG block py-2 px-3 text-primary rounded-sm md:bg-transparent hover:text-primary px-[20px]
                     ${isActive ? "active" : ""}`
                     }
                   >
