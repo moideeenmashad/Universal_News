@@ -28,7 +28,12 @@
     font-weight: $weight;
   }
 }
-
+// Spacings
+$spacer : 6.25rem;
+.spacer{
+  row-gap: $spacer;
+  display: grid;
+}
 // Theme Colors
 $primary-color: #202124;
 $hover-color: #e63946;

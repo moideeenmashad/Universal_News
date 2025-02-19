@@ -3,8 +3,8 @@
 const WorldNews = () => {
   return (
     <>
-      <div className="container">
-       Will be continued
+      <div className="container max-w-screen-xl mx-auto text-center">
+        Will be continued
       </div>
     </>
   );
