@@ -13,7 +13,7 @@ const RoutesApp = () => {
       <Navbar />
       <Routes>
         {/* Default Route */}
-        <Route path="/world_news" element={<Hero />} />
+        <Route path="/" element={<Hero />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>

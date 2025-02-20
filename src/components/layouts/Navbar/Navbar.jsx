@@ -4,8 +4,10 @@ import PrimaryNavbar from "./PrimaryNavbar";
 const Navbar = () => {
   return (
     <>
-      <PreNavabar />
-      <PrimaryNavbar />
+      <div className="mb-[100px]">
+        <PreNavabar />
+        <PrimaryNavbar />
+      </div>
     </>
   );
 };
