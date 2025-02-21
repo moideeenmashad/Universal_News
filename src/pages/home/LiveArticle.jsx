@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { VscCircleFilled } from "react-icons/vsc";
 
@@ -6,35 +7,33 @@ const LiveArticle = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-//   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-//   const API_URL = `http://localhost:5000`;
-//   const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=833d8462199090f03f9797f8435cfd5b`;
   const API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
   const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=${API_KEY}`;
-  console.log("API Key:", import.meta.env.VITE_GNEWS_API_KEY);
-  console.log(import.meta.env); // For Vite
 
-  useEffect(() => {
-    const fetchLatestNews = async () => {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-
+  const getLiveNews = () => {
+    axios
+      .get(API_URL)
+      .then((response) => {
+        const data = response.data;
+        setLoading(false);
+        console.log(data.articles.length);
+        // setLatestNews(data.articles[0]);
         if (data.articles && data.articles.length > 0) {
-          setLatestNews(data.articles[0]); // Get the latest news article
-          console.log(data);
+          setLatestNews(data.articles[0]);
+          console.log("Fetched News:", data);
         } else {
           setError("No latest news available.");
         }
-      } catch (err) {
-        console.log(err);
-        setError("Failed to fetch news.");
-      } finally {
+      })
+      .catch((err) => {
+        console.error("Error Fetching API:", err);
+        setError("please check your internet connection");
         setLoading(false);
-      }
-    };
+      });
+  };
 
-    fetchLatestNews();
+  useEffect(() => {
+    getLiveNews();
   }, []);
 
   return (
@@ -53,7 +52,7 @@ const LiveArticle = () => {
             className="live-article-image h-[580px] w-full rounded-sm object-cover object-center"
           />
           <span className="absolute top-[16px] left-[16px] bg-white text-xs font-medium px-[10px] py-[5px] rounded-sm flex items-center">
-            <VscCircleFilled style={{ color: "red", marginRight: "5px" }} />{" "}
+            <VscCircleFilled style={{ color: "red", marginRight: "5px" }} />
             Live Updates
           </span>
           <div className="bg-white p-4 rounded-sm">
