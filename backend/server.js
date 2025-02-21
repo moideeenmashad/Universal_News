@@ -1,7 +1,6 @@
 require("dotenv").config({ path: __dirname + "/.env" }); // Ensure correct path
 console.log("API KEY:", process.env.GNEWS_API_KEY); // Debugging output
 
-
 const express = require("express");
 const cors = require("cors");
 
