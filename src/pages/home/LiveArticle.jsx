@@ -8,8 +8,10 @@ const LiveArticle = () => {
 
 //   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 //   const API_URL = `http://localhost:5000`;
-  const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=833d8462199090f03f9797f8435cfd5b`;
-
+//   const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=833d8462199090f03f9797f8435cfd5b`;
+  const API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
+  const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=${API_KEY}`;
+  console.log("API Key:", import.meta.env.VITE_GNEWS_API_KEY);
   console.log(import.meta.env); // For Vite
 
   useEffect(() => {
