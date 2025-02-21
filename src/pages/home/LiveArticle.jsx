@@ -6,8 +6,9 @@ const LiveArticle = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-  const API_URL = `http://localhost:5000`;
+//   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+//   const API_URL = `http://localhost:5000`;
+  const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=833d8462199090f03f9797f8435cfd5b`;
 
   console.log(import.meta.env); // For Vite
 
