@@ -7,8 +7,10 @@ import LiveArticle from "./LiveArticle";
 const WorldNews = () => {
   return (
     <>
-      <Featured />
-      <LiveArticle />
+      <section>
+        <Featured />
+        <LiveArticle />
+      </section>
     </>
   );
 };

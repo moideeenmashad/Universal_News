@@ -55,7 +55,9 @@ ul > a.text-primary {
     transition: 600ms;
   }
 }
-
+.link:hover {
+  color: $active-color !important;
+}
 .border-primary {
   border-color: $primary-color !important;
 }

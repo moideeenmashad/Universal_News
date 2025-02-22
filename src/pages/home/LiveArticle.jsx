@@ -3,6 +3,8 @@ import { React, useState, useEffect } from "react";
 import { VscCircleFilled } from "react-icons/vsc";
 import { BsArrowRightCircle } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import { format } from "date-fns"; // Import date-fns for formatting
+
 const LiveArticle = () => {
   const [latestNews, setLatestNews] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ const LiveArticle = () => {
 
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
   // const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=${API_KEY}`;
-  const API_URL = `https://newsapi.org/v2/everything?q=keyword&apiKey=${API_KEY}`;
+  const API_URL = `https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=${API_KEY}`;
 
   const getLiveNews = () => {
     setLoading(true);
@@ -66,7 +68,14 @@ const LiveArticle = () => {
             </span>
           </div>
           <div className="flex justify-end">
-            <p className="text-xs">{latestNews.publishedAt}</p>
+            <p className="text-xs">
+              {latestNews.publishedAt
+                ? format(
+                    new Date(latestNews.publishedAt),
+                    "MMM d, yyyy  —  mm 'Minute'"
+                  )
+                : "Date not available"}
+            </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-4">
             <div className="col-span-3 items-center">
@@ -76,7 +85,7 @@ const LiveArticle = () => {
             </div>
             <div className="flex justify-end">
               <Link
-                className="flex items-center text-sm"
+                className="flex items-center text-sm link"
                 to={`/article/${latestNews.title}`}
                 state={{ article: latestNews }}
               >
