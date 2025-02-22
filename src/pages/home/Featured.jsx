@@ -36,7 +36,7 @@ const Featured = () => {
           <img
             src={value.img}
             alt={value.title}
-            className="w-20 h-20 rounded-sm mr-[10px]"
+            className="w-20 h-20 rounded-sm mr-[10px] object-cover object-center"
           />
           <div>
             <p className="font-semibold text-sm uppercase">{value.title}</p>
