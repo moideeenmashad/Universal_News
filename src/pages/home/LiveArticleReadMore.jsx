@@ -24,12 +24,12 @@ const LiveArticleReadMore = () => {
           <img
             src={article.urlToImage}
             alt={article.title}
-            className="w-full h-auto mb-[24px]"
+            className="w-full h-[300px] object-cover object-center mb-[24px]"
           />
           <div className="publisher border-y-2 border-primary py-2 flex item-center gap-x-[10px] mb-[24px] flex items-center">
             <img
-              className="inline-block size-10 rounded-full"
-              src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+              className="inline-block size-10 rounded-full object-center object-contain"
+              src="https://i.ibb.co/FZpNSmN/istockphoto-2151669184-612x612-removebg-preview.png"
               alt=""
             />
             <div className="article-profile">
@@ -40,15 +40,16 @@ const LiveArticleReadMore = () => {
               </div>
             </div>
           </div>
-
-          <h1 className="text-3xl font-bold mb-[30px]">{article.title}</h1>
-          <hr className="border-b-1 border-primary mb-[24px]" />
-          <div className="article-content-container gap-y-6">
-            <p className="text-lg">{article.description}</p>
-            <p className="text-lg">{article.content}</p>
+          <div className="article-content-container">
+            <h1 className="text-3xl font-bold mb-[30px]">{article.title}</h1>
+            <hr className="border-b-1 border-primary mb-[24px]" />
+            <div className="article-content-container gap-y-6">
+              {/* <p className="text-lg">{article.description}</p> */}
+              <p className="text-lg">{article.content}</p>
+            </div>
           </div>
         </div>
-        <div className=""></div>
+        {/* <div className="ads-container"></div> */}
       </div>
     </section>
   );

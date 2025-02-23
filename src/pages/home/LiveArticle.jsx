@@ -10,9 +10,11 @@ const LiveArticle = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // const API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
+  // VITE_NEWS_API_KEY
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
   // const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=${API_KEY}`;
-  const API_URL = `https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=${API_KEY}`;
+  const API_URL = `https://newsapi.org/v2/everything?q=keyword&apiKey=${API_KEY}`;
 
   const getLiveNews = () => {
     setLoading(true);
@@ -67,8 +69,8 @@ const LiveArticle = () => {
               Live Updates
             </span>
           </div>
-          <div className="flex justify-end">
-            <p className="text-xs">
+          <div className="flex justify-end mb-[12px]">
+            <p className="text-xs ">
               {latestNews.publishedAt
                 ? format(
                     new Date(latestNews.publishedAt),
@@ -83,7 +85,7 @@ const LiveArticle = () => {
                 {latestNews.title}
               </h1>
             </div>
-            <div className="flex justify-end">
+            <div className="flex items-start justify-end">
               <Link
                 className="flex items-center text-sm link"
                 to={`/article/${latestNews.title}`}
