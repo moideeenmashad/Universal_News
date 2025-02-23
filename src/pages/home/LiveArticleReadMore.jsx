@@ -44,7 +44,6 @@ const LiveArticleReadMore = () => {
             <h1 className="text-3xl font-bold mb-[30px]">{article.title}</h1>
             <hr className="border-b-1 border-primary mb-[24px]" />
             <div className="article-content-container gap-y-6">
-              {/* <p className="text-lg">{article.description}</p> */}
               <p className="text-lg">{article.content}</p>
             </div>
           </div>

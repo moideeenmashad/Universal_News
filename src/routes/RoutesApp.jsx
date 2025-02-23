@@ -6,7 +6,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Hero from "@/pages/home/Hero";
 import Navbar from "@/components/layouts/Navbar/Navbar";
 import LiveArticleReadMore from "@/pages/home/LiveArticleReadMore";
-import Test from "../components/layouts/NewsLayout/test";
+import Test from "../components/layouts/NewsLayout/Test";
 
 const RoutesApp = () => {
   return (
@@ -17,7 +17,7 @@ const RoutesApp = () => {
         {/* Default Route */}
         <Route path="/" element={<Hero />} />
         <Route path="/test" exact element={<Test />}/>
-        <Route path="/article/:id" element={<LiveArticleReadMore />} />
+        <Route path="/world_news/article/:id" element={<LiveArticleReadMore />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>

@@ -17,7 +17,7 @@ const LiveArticle = () => {
   const API_URL = `https://newsapi.org/v2/everything?q=keyword&apiKey=${API_KEY}`;
 
   const getLiveNews = () => {
-    setLoading(true);
+    // setLoading(true);
     axios
       .get(API_URL)
       .then((response) => {
@@ -27,8 +27,6 @@ const LiveArticle = () => {
         if (data.articles && data.articles.length > 0) {
           setLatestNews(data.articles[0]);
           console.log("Fetched News:", data);
-          console.log(data.publishedAt);
-          console.log(typeof data.publishedAt);
         } else {
           setError("No latest news available.");
         }
@@ -88,7 +86,7 @@ const LiveArticle = () => {
             <div className="flex items-start justify-end">
               <Link
                 className="flex items-center text-sm link"
-                to={`/article/${latestNews.title}`}
+                to={`/world_news/article/${latestNews.title}`}
                 state={{ article: latestNews }}
               >
                 Read Article
