@@ -13,13 +13,13 @@ const PrimaryNavbar = () => {
 
   const NavItems = [
     { id: 1, navItem: "World News", LinkTo: "/world_news" },
-    { id: 2, navItem: "Politics", LinkTo: "/politics" },
-    { id: 3, navItem: "Business", LinkTo: "/business" },
-    { id: 4, navItem: "Technology", LinkTo: "/technology" },
+    { id: 2, navItem: "Business", LinkTo: "/business" },
+    { id: 3, navItem: "Entertainment", LinkTo: "/entertainment" },
+    { id: 4, navItem: "General", LinkTo: "/general" },
     { id: 5, navItem: "Health", LinkTo: "/health" },
-    { id: 6, navItem: "Sports", LinkTo: "/sports" },
-    { id: 7, navItem: "Culture", LinkTo: "/culture" },
-    { id: 8, navItem: "Podcast", LinkTo: "/podcast" },
+    { id: 6, navItem: "Science", LinkTo: "/science" },
+    { id: 7, navItem: "Sports", LinkTo: "/sports" },
+    { id: 8, navItem: "Technology", LinkTo: "/technology" },
   ];
 
   return (

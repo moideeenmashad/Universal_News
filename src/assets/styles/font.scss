@@ -36,8 +36,13 @@ $spacer: 6.25rem;
 }
 // Theme Colors
 $primary-color: #202124;
+$secondary-color: #ffffff;
 $hover-color: #e63946;
 $active-color: #e63946;
+
+.text-light {
+  color: $secondary-color;
+}
 .text-primary {
   color: $primary-color !important;
   &:not(:hover) {
@@ -60,4 +65,10 @@ ul > a.text-primary {
 }
 .border-primary {
   border-color: $primary-color !important;
+}
+@media only screen and (max-width: 600px) {
+  body {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
 }

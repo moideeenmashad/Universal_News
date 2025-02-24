@@ -43,13 +43,13 @@ const LiveArticle = () => {
   }, []);
 
   return (
-    <div className="live-article-container mx-auto max-w-screen-xl relative">
+    <div className="live-article-container mx-auto max-w-screen-xl relative mb-[100px]">
       {loading ? (
         <div className="animate-pulse relative">
-          <div className="h-[580px] w-full rounded-sm bg-gray-200"></div>
-          <span className="absolute top-[16px] left-[16px] bg-white text-xs font-medium px-[10px] py-[10px] rounded-sm flex items-center">
-            <VscCircleFilled className="text-gray-600 mr-[5px]" />
-            <p className="h-[12px] rounded bg-gray-200 w-24"></p>
+          <div className="h-[580px] w-full rounded-sm bg-gray-200 animate-pulse" ></div>
+          <span className="absolute top-[16px] left-[16px] bg-white text-xs font-medium px-[10px] py-[10px] rounded-sm flex items-center animate-pulse">
+            <VscCircleFilled className="text-gray-600 mr-[5px] animate-pulse" />
+            <p className="h-[12px] rounded bg-gray-200 w-24 animate-pulse"></p>
           </span>
         </div>
       ) : error ? (
