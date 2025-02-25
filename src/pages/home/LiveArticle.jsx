@@ -1,32 +1,29 @@
 import axios from "axios";
-import { React, useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { VscCircleFilled } from "react-icons/vsc";
 import { BsArrowRightCircle } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import { format } from "date-fns"; // Import date-fns for formatting
+import { format } from "date-fns";
 
 const LiveArticle = () => {
   const [latestNews, setLatestNews] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const containerRef = useRef(null);
 
-  // const API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
-  // VITE_NEWS_API_KEY
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-  // const API_URL = `https://gnews.io/api/v4/search?q=example&apikey=${API_KEY}`;
   const API_URL = `https://newsapi.org/v2/everything?q=keyword&apiKey=${API_KEY}`;
 
   const getLiveNews = () => {
-    // setLoading(true);
     axios
       .get(API_URL)
       .then((response) => {
         const data = response.data;
         setLoading(false);
-
         if (data.articles && data.articles.length > 0) {
           setLatestNews(data.articles[0]);
-          console.log("Fetched News:", data);
+          console.log("Live News:", data.articles);
         } else {
           setError("No latest news available.");
         }
@@ -39,18 +36,45 @@ const LiveArticle = () => {
   };
 
   useEffect(() => {
-    getLiveNews();
-  }, []);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !hasLoaded) {
+          getLiveNews();
+          setHasLoaded(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, [hasLoaded]);
 
   return (
-    <div className="live-article-container mx-auto max-w-screen-xl relative mb-[100px]">
+    <div
+      ref={containerRef}
+      className="live-article-container mx-auto max-w-screen-xl relative mb-[100px]"
+    >
       {loading ? (
-        <div className="animate-pulse relative">
-          <div className="h-[580px] w-full rounded-sm bg-gray-200 animate-pulse" ></div>
-          <span className="absolute top-[16px] left-[16px] bg-white text-xs font-medium px-[10px] py-[10px] rounded-sm flex items-center animate-pulse">
-            <VscCircleFilled className="text-gray-600 mr-[5px] animate-pulse" />
-            <p className="h-[12px] rounded bg-gray-200 w-24 animate-pulse"></p>
-          </span>
+        <div className="skeleton">
+          <div className="animate-pulse relative">
+            <div className="h-[580px] w-full rounded-sm bg-gray-200 animate-pulse"></div>
+            <span className="absolute top-[16px] left-[16px] bg-white text-xs font-medium px-[10px] py-[10px] rounded-sm flex items-center animate-pulse">
+              <VscCircleFilled className="text-gray-600 mr-[5px] animate-pulse" />
+              <p className="h-[12px] rounded bg-gray-200 w-24 animate-pulse"></p>
+            </span>
+          </div>
+          <div className="h-[36px] bg-gray-200 w-2/3 animate-pulse mt-[26px]"></div>
+          <div className="h-[36px] bg-gray-200 w-1/3 animate-pulse mt-[26px]"></div>
         </div>
       ) : error ? (
         <p className="text-center text-lg text-red-500">{error}</p>
@@ -68,7 +92,7 @@ const LiveArticle = () => {
             </span>
           </div>
           <div className="flex justify-end mb-[12px]">
-            <p className="text-xs ">
+            <p className="text-xs">
               {latestNews.publishedAt
                 ? format(
                     new Date(latestNews.publishedAt),
