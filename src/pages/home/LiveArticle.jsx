@@ -111,7 +111,7 @@ const LiveArticle = (props) => {
               <Link
                 className="flex items-center text-sm link"
                 to={`/world_news/${props.articleUrlName(latestNews.title)}`}
-                state={{ article: latestNews }}
+                state={{ articles: latestNews }}
               >
                 Read Article
                 <BsArrowRightCircle className="ml-[5px] h-[20px] w-[20px]" />

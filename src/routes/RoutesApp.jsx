@@ -6,7 +6,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Hero from "@/pages/home/Hero";
 import Navbar from "@/components/layouts/Navbar/Navbar";
 import LiveArticleReadMore from "@/pages/home/LiveArticleReadMore";
-import Test from "../components/layouts/NewsLayout/Test";
+import Test from "@/components/layouts/NewsLayout/Test";
+import NewsList from "@/components/layouts/NewsLayout/NewsList";
+import Business from "@/pages/business/Business";
 
 const RoutesApp = () => {
   return (
@@ -16,8 +18,10 @@ const RoutesApp = () => {
       <Routes>
         {/* Default Route */}
         <Route path="/" element={<Hero />} />
-        <Route path="/test" exact element={<Test />}/>
+        <Route path="/test" exact element={<Test />} />
         <Route path="/world_news/:id" element={<LiveArticleReadMore />} />
+        <Route path="/business/"  element={<Business />} />
+        <Route path="/business/:id"  element={<NewsList />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>
