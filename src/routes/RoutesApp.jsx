@@ -17,7 +17,7 @@ const RoutesApp = () => {
         {/* Default Route */}
         <Route path="/" element={<Hero />} />
         <Route path="/test" exact element={<Test />}/>
-        <Route path="/world_news/article/:id" element={<LiveArticleReadMore />} />
+        <Route path="/world_news/:id" element={<LiveArticleReadMore />} />
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>

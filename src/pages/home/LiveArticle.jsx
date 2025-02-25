@@ -5,7 +5,7 @@ import { BsArrowRightCircle } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 
-const LiveArticle = () => {
+const LiveArticle = (props) => {
   const [latestNews, setLatestNews] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -110,7 +110,7 @@ const LiveArticle = () => {
             <div className="flex items-start justify-end">
               <Link
                 className="flex items-center text-sm link"
-                to={`/world_news/article/${latestNews.title}`}
+                to={`/world_news/${props.articleUrlName(latestNews.title)}`}
                 state={{ article: latestNews }}
               >
                 Read Article

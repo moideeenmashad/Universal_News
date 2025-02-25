@@ -4,7 +4,7 @@ import { format } from "date-fns"; // Import date-fns for formatting
 import { Link } from "react-router-dom";
 import { BsArrowRightCircle } from "react-icons/bs";
 
-const LatestNews = ({ title }) => {
+const LatestNews = ({title, articleUrlName}) => {
   const [articles, setArticles] = useState([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);
@@ -16,11 +16,10 @@ const LatestNews = ({ title }) => {
       .get(API_URL)
       .then((response) => {
         const data = response.data;
-        if (data.articles) {
-          const firstSix = data.articles.slice(1, 8);
-          setArticles(firstSix);
-          console.log("Latest News",firstSix)
-        }
+
+        const firstSix = data.articles.slice(1, 8);
+        setArticles(firstSix);
+        console.log("Latest News", firstSix);
       })
       .catch((error) => {
         console.error("Error fetching latest news:", error);
@@ -56,7 +55,7 @@ const LatestNews = ({ title }) => {
       {/* Section Header */}
       <div className="mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
         <h2 className="text-4xl font-medium text-primary uppercase">{title}</h2>
-        <hr className="flex-1 border-t-2 border-gray-300 mx-4" />
+        {/* <hr className="border-t-2 border-gray-300 mx-4" /> */}
         <div className="flex items-start justify-end">
           <Link className="flex items-center text-sm link" to="/world_news">
             View All
@@ -66,8 +65,13 @@ const LatestNews = ({ title }) => {
       </div>
 
       {/* Top Row */}
+
       <div className="grid grid-cols-1 gap-x-16 md:grid-cols-2 rounded">
         {/* 1) Large Featured Article (using articles[1]) */}
+        {/* <Link
+         to={`/world_news/${props.articleUrlName(firstSix[1].title)}`}
+         state={{ article: firstSix }}
+        > */}
         <div className="rounded-sm bg-white relative">
           <div className="overflow-hidden relative rounded-sm">
             {/* Overlay for darkening the image */}
@@ -100,6 +104,7 @@ const LatestNews = ({ title }) => {
             </p>
           </div>
         </div>
+        {/* </Link> */}
 
         {/* 2 & 3) Two Stacked Articles on the Right */}
         <div>
