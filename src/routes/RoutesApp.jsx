@@ -7,8 +7,10 @@ import Hero from "@/pages/home/Hero";
 import Navbar from "@/components/layouts/Navbar/Navbar";
 import LiveArticleReadMore from "@/pages/home/LiveArticleReadMore";
 import Test from "@/components/layouts/NewsLayout/Test";
-import NewsList from "@/components/layouts/NewsLayout/NewsList";
+// import NewsList from "@/components/layouts/NewsLayout/NewsList";
 import Business from "@/pages/business/Business";
+import Entertainment from "@/pages/entertainment/Entertainment";
+import General from "@/pages/general/General";
 
 const RoutesApp = () => {
   return (
@@ -20,8 +22,10 @@ const RoutesApp = () => {
         <Route path="/" element={<Hero />} />
         <Route path="/test" exact element={<Test />} />
         <Route path="/world_news/:id" element={<LiveArticleReadMore />} />
-        <Route path="/business/"  element={<Business />} />
-        <Route path="/business/:id"  element={<NewsList />} />
+        <Route path="/business" element={<Business />} />
+        {/* <Route path="/business/:id" element={<NewsList />} /> */}
+        <Route path="/entertainment" element={<Entertainment />} />
+        <Route path="/general" element={<General/>}/>
         {/* 404 Page Route */}
         {/* <Route path="*" element={<Page404 />} /> */}
       </Routes>
