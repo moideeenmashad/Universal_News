@@ -1,4 +1,4 @@
-import News from "../news/News";
+import News from "./News";
 
 const Entertainment = () => {
   return <News category="entertainment" title="Entertainment News" />;

@@ -1,4 +1,4 @@
-import News from "../news/News";
+import News from "./News";
 
 const General = () => {
   return <News category="general" title="General News" />;
