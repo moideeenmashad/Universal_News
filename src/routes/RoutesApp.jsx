@@ -18,7 +18,7 @@ const RoutesApp = () => {
       <Routes>
         {/* Default Route */}
         <Route path="/" element={<Hero />} />
-        <Route path="/world-news/:id" element={<LiveArticleReadMore />} />
+        <Route path="/world-news/:title" element={<LiveArticleReadMore />} />
 
         {/* Category Routes */}
         <Route path="/business" element={<Business />} />

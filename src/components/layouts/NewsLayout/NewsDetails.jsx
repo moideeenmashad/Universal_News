@@ -62,6 +62,7 @@ const NewsDetails = () => {
 
   return (
     <section className="mx-auto max-w-screen-xl">
+      
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-4 mb-[24px]">
         <div className="col-span-3">
           <img
