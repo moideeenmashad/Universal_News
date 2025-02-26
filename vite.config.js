@@ -4,7 +4,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 
-// Define __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -15,4 +14,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  server: {
+    port: 5173,
+    strictPort: true,
+    open: true,
+  },
+  build: {
+    outDir: "dist",
+  },
+  preview: {
+    port: 4173,
+    strictPort: true,
+  }
 });

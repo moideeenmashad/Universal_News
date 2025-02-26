@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import NewsList from "@/components/layouts/NewsLayout/NewsList";
 import axios from "axios";
 
@@ -13,7 +13,7 @@ const News = ({ category, title }) => {
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
   const API_URL = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=20&page=1&apiKey=${API_KEY}`;
 
-  // Fetch all news articles on mount
+  // Fetch all news articles on mount or when the category changes
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
@@ -21,7 +21,7 @@ const News = ({ category, title }) => {
       try {
         const response = await axios.get(API_URL);
         setArticles(response.data.articles || []);
-        console.log(response.data.articles)
+        console.log(response.data.articles);
       } catch (err) {
         console.error("Error fetching news:", err);
         setError("Failed to load news.");
@@ -30,7 +30,7 @@ const News = ({ category, title }) => {
     };
 
     fetchNews();
-  }, [category]); // Fetch only once when category changes
+  }, [category]);
 
   // Lazy Load Articles
   useEffect(() => {
@@ -51,7 +51,7 @@ const News = ({ category, title }) => {
     }
 
     return () => observer.current.disconnect();
-  }, [visibleCount, articles]); // Run when more articles are loaded
+  }, [visibleCount, articles]);
 
   return (
     <div>
@@ -60,6 +60,7 @@ const News = ({ category, title }) => {
         articles={articles.slice(0, visibleCount)} // Show only visible articles
         loading={loading}
         error={error}
+        category={category}
         lastArticleRef={(el) => {
           if (el) articleRefs.current.push(el);
         }}
