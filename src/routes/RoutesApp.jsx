@@ -6,7 +6,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Hero from "@/pages/home/Hero";
 import Navbar from "@/components/layouts/Navbar/Navbar";
 import LiveArticleReadMore from "@/pages/home/LiveArticleReadMore";
-import Test from "@/components/layouts/NewsLayout/Test";
 // import NewsList from "@/components/layouts/NewsLayout/NewsList";
 import Business from "@/pages/news/Business";
 import Entertainment from "@/pages/news/Entertainment";
@@ -15,7 +14,7 @@ import Health from "@/pages/news/Health";
 import Science from "@/pages/news/Science";
 import Sports from "@/pages/news/Sports";
 import Technology from "@/pages/news/Technology";
-import WorldNews from "../pages/news/WorldNews";
+// import WorldNews from "@/pages/news/WorldNews";
 
 const RoutesApp = () => {
   return (
@@ -25,9 +24,8 @@ const RoutesApp = () => {
       <Routes>
         {/* Default Route */}
         <Route path="/" element={<Hero />} />
-        <Route path="/test" exact element={<Test />} />
-        <Route path="/world-news" element={<WorldNews />} />
-        <Route path="/world_news/:id" element={<LiveArticleReadMore />} />
+        {/* <Route path="/world-news" element={<WorldNews />} /> */}
+        <Route path="/world-news/:id" element={<LiveArticleReadMore />} />
         <Route path="/business" element={<Business />} />
         <Route path="/entertainment" element={<Entertainment />} />
         <Route path="/general" element={<General />} />

@@ -1,133 +1,69 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import NewsList from "@/components/layouts/NewsLayout/NewsList";
 import axios from "axios";
 
 const News = ({ category, title }) => {
   const [articles, setArticles] = useState([]);
-  const articleUrlsRef = useRef(new Set()); // Store unique URLs
+  const articleRefs = useRef([]); // Store refs for lazy loading
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5); // Number of articles initially visible
   const observer = useRef(null);
 
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+  const API_URL = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=20&page=1&apiKey=${API_KEY}`;
 
-  const API_URL = useMemo(() => {
-    return `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=10&page=${page}&apiKey=${API_KEY}`;
-  }, [category, page, API_KEY]);
-
-  // Detect mobile view
+  // Fetch all news articles on mount
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Clear data when category changes
-  useEffect(() => {
-    setArticles([]);
-    articleUrlsRef.current.clear();
-    setPage(1);
-    setHasMore(true);
-  }, [category]);
-
-  // Fetch News Articles
-  const fetchNews = useCallback(async () => {
-    if (loading) return;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.get(API_URL);
-      const newArticles = response.data.articles || [];
-
-      // Filter out duplicate articles
-      const uniqueArticles = newArticles.filter((article) => 
-        !articleUrlsRef.current.has(article.url)
-      );
-
-      if (uniqueArticles.length > 0) {
-        uniqueArticles.forEach(article => articleUrlsRef.current.add(article.url));
-        setArticles((prev) => [...prev, ...uniqueArticles]); // Append new articles
-        setHasMore(true);
-      } else {
-        setHasMore(false);
+    const fetchNews = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(API_URL);
+        setArticles(response.data.articles || []);
+        console.log(response.data.articles)
+      } catch (err) {
+        console.error("Error fetching news:", err);
+        setError("Failed to load news.");
       }
-    } catch (err) {
-      console.error("Error fetching news:", err);
-      setError("Failed to load news.");
-      setHasMore(false);
-    }
-    setLoading(false);
-  }, [API_URL, loading]);
+      setLoading(false);
+    };
 
-  useEffect(() => {
     fetchNews();
-  }, [fetchNews]);
+  }, [category]); // Fetch only once when category changes
 
-  // Infinite Scroll: Only for desktop
-  const lastArticleRef = useCallback(
-    (node) => {
-      if (isMobile || loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prevPage) => prevPage + 1);
+  // Lazy Load Articles
+  useEffect(() => {
+    if (observer.current) observer.current.disconnect(); // Disconnect old observer
+
+    observer.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((prev) => prev + 5); // Load more articles when in viewport
         }
       });
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore, isMobile]
-  );
+    });
 
-  // Pagination handlers for mobile
-  const handlePrev = () => {
-    if (page > 1) {
-      setArticles([]);
-      articleUrlsRef.current.clear();
-      setPage((prev) => prev - 1);
+    if (articleRefs.current.length > 0) {
+      observer.current.observe(
+        articleRefs.current[articleRefs.current.length - 1]
+      );
     }
-  };
 
-  const handleNext = () => {
-    if (hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  };
+    return () => observer.current.disconnect();
+  }, [visibleCount, articles]); // Run when more articles are loaded
 
   return (
     <div>
       <NewsList
         title={title}
-        articles={articles}
+        articles={articles.slice(0, visibleCount)} // Show only visible articles
         loading={loading}
         error={error}
-        lastArticleRef={lastArticleRef}
-        hasMore={hasMore}
+        lastArticleRef={(el) => {
+          if (el) articleRefs.current.push(el);
+        }}
       />
-
-      {/* Pagination Controls for Mobile */}
-      {isMobile && (
-        <div className="flex justify-center mt-6 space-x-4">
-          <button
-            onClick={handlePrev}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            disabled={page === 1 || loading}
-          >
-            Previous
-          </button>
-          <button
-            onClick={handleNext}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            disabled={!hasMore || loading}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 };
