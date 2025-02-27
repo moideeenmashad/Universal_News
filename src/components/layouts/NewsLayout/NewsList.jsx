@@ -73,11 +73,15 @@ const NewsList = ({
                     })
                   }
                 >
-                  <img
-                    src={value.urlToImage || "https://via.placeholder.com/300"}
-                    alt={value.title || "News Image"}
-                    className="h-64 w-full object-cover rounded-sm"
-                  />
+                  <div className="image-container overflow-hidden relative rounded-sm">
+                    <img
+                      src={
+                        value.urlToImage || "https://via.placeholder.com/300"
+                      }
+                      alt={value.title || "News Image"}
+                      className="h-64 w-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                   <p className="text-xl font-semibold mt-4">
                     {value.title && value.title.length > 60
                       ? value.title.slice(0, 60) + "..."
