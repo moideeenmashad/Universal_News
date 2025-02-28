@@ -7,21 +7,25 @@ const News = ({ category, title }) => {
   const articleRefs = useRef([]); // Store refs for lazy loading
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(5); // Number of articles initially visible
+  const [visibleCount, setVisibleCount] = useState(5); // Initially visible articles
   const observer = useRef(null);
 
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-  const API_URL = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=20&page=1&apiKey=${API_KEY}`;
 
-  // Fetch all news articles on mount or when the category changes
+  // Fetch news articles on mount or when the category changes
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
       setError(null);
+
+      let API_URL = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=20&page=1&apiKey=${API_KEY}`;
+      if (category === "world-news") {
+        API_URL = `https://newsapi.org/v2/top-headlines?country=us&pageSize=20&page=1&apiKey=${API_KEY}`;
+      }
+
       try {
         const response = await axios.get(API_URL);
         setArticles(response.data.articles || []);
-        console.log(response.data.articles);
       } catch (err) {
         console.error("Error fetching news:", err);
         setError("Failed to load news.");
@@ -30,18 +34,16 @@ const News = ({ category, title }) => {
     };
 
     fetchNews();
-  }, [category]);
+  }, [category, API_KEY]);
 
   // Lazy Load Articles
   useEffect(() => {
     if (observer.current) observer.current.disconnect(); // Disconnect old observer
 
     observer.current = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setVisibleCount((prev) => prev + 5); // Load more articles when in viewport
-        }
-      });
+      if (entries[0].isIntersecting) {
+        setVisibleCount((prev) => prev + 5); // Load more articles when last one is visible
+      }
     });
 
     if (articleRefs.current.length > 0) {
@@ -62,7 +64,9 @@ const News = ({ category, title }) => {
         error={error}
         category={category}
         lastArticleRef={(el) => {
-          if (el) articleRefs.current.push(el);
+          if (el) {
+            articleRefs.current = [el]; // Track only the last article
+          }
         }}
       />
     </div>

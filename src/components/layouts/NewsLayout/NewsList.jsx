@@ -25,7 +25,7 @@ const NewsList = ({
   const isInitialLoad = articles.length === 0 && loading;
 
   return (
-    <section className="mx-auto max-w-screen-xl">
+    <section className="mx-auto max-w-screen-xl mb-[100px]">
       <div className="news-list-container mx-auto max-w-screen-xl">
         {/* Page Title */}
         <div className="flex items-center justify-between border-b border-primary pb-3 mb-10">

@@ -1,11 +1,16 @@
 // import React from "react";
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // import PreNavabar from "./PreNavabar";
 
 const PrimaryNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const gotoHome = () => {
+    navigate("/"); 
+  };
 
   const toggleNavbar = () => {
     setIsOpen(!isOpen);
@@ -33,6 +38,7 @@ const PrimaryNavbar = () => {
             viewBox="0 0 344 82"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            onClick={gotoHome}
           >
             <g clipPath="url(#clip0_3_26)">
               <path
@@ -53,11 +59,7 @@ const PrimaryNavbar = () => {
           </svg>
         </div>
         <nav className="bg-white w-full z-20">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto my-2 border-primary border-y-2 py-2 md:py-0">
-            <a
-              href="https://flowbite.com/"
-              className="flex items-center space-x-3 rtl:space-x-reverse"
-            ></a>
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-end lg:justify-center  mx-auto my-2 border-primary border-y-2 py-2 md:py-0">
             <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
               <button
                 onClick={toggleNavbar}

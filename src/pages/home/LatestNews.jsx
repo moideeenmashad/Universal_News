@@ -51,7 +51,7 @@ const LatestNews = ({title, articleUrlName}) => {
   }, [hasLoaded]);
 
   return (
-    <div className="mx-auto max-w-screen-xl" ref={containerRef}>
+    <div className="mx-auto max-w-screen-xl mb-[100px]" ref={containerRef}>
       {/* Section Header */}
       <div className="mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
         <h2 className="text-4xl font-medium text-primary uppercase">{title}</h2>

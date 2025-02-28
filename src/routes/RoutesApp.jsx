@@ -10,6 +10,8 @@ import Science from "@/pages/news/Science";
 import Sports from "@/pages/news/Sports";
 import Technology from "@/pages/news/Technology";
 import NewsDetails from "@/components/layouts/NewsLayout/NewsDetails";
+import WorldNews from "../pages/news/WorldNews";
+import TestUi from "./TestUi";
 
 const RoutesApp = () => {
   return (
@@ -21,6 +23,7 @@ const RoutesApp = () => {
         <Route path="/world-news/:title" element={<LiveArticleReadMore />} />
 
         {/* Category Routes */}
+        <Route path="/world-news" element={<WorldNews />} />
         <Route path="/business" element={<Business />} />
         <Route path="/entertainment" element={<Entertainment />} />
         <Route path="/general" element={<General />} />
@@ -31,6 +34,7 @@ const RoutesApp = () => {
 
         {/* Dynamic Article Detail Route */}
         <Route path="/:category/:title" element={<NewsDetails />} />
+        <Route path="/test" element={<TestUi />} />
       </Routes>
     </BrowserRouter>
   );

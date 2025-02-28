@@ -76,9 +76,9 @@ const LiveArticle = ({ articleUrlName }) => {
         <>
           <div className="image-container mb-[24px] overflow-hidden relative rounded-sm">
             <img
-              src={latestNews.urlToImage || "https://via.placeholder.com/600"}
+              src={latestNews.urlToImage}
               alt={latestNews.title}
-              className="live-article-image h-[580px] w-full rounded-sm object-cover hover:scale-105 transition-transform duration-300"
+              className="live-article-image h-[580px] w-full rounded-sm object-cover hover:scale-105 ease-in-out transition-transform duration-300"
             />
             <span className="absolute top-[18px] left-[18px] bg-white text-xs font-medium px-[12px] py-[12px] rounded-sm flex items-center">
               <span className="relative flex items-center justify-center mr-[8px]">
