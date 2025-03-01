@@ -10,6 +10,8 @@ const WorldNewsSection = ({ title, articleUrlName }) => {
   const containerRef = useRef(null);
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
   const API_URL = `https://newsapi.org/v2/everything?q=keyword&apiKey=${API_KEY}`;
+ console.log(API_KEY)
+
 
   const getLatestNews = () => {
     axios

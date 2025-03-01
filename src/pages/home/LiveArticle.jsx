@@ -14,6 +14,7 @@ const LiveArticle = ({ articleUrlName }) => {
 
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
   const API_URL = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${API_KEY}`;
+  
 
   const getLiveNews = () => {
     axios
