@@ -34,7 +34,7 @@ const PrimaryNavbar = () => {
         <div className="flex items-center justify-center py-2">
           <svg
             width="344"
-            height="42"
+            height="82"
             viewBox="0 0 344 82"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
