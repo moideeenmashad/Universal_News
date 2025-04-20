@@ -22,8 +22,8 @@ const WorldNews = () => {
       <section className="">
         <Featured className="" />
         <LiveArticle className="" articleUrlName={slugify} />
-        <LatestNews title={sectionTitle[0]} articleUrlName={slugify} />
-        <WorldNewsSection title={sectionTitle[1]} articleUrlName={slugify} />
+        {/* <LatestNews title={sectionTitle[0]} articleUrlName={slugify} />
+        <WorldNewsSection title={sectionTitle[1]} articleUrlName={slugify} /> */}
       </section>
     </>
   );
