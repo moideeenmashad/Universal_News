@@ -4,7 +4,7 @@ import { format } from "date-fns"; // Import date-fns for formatting
 import { Link } from "react-router-dom";
 import { BsArrowRightCircle } from "react-icons/bs";
 
-const LatestNews = ({title, articleUrlName}) => {
+const LatestNews = ({ title, articleUrlName }) => {
   const [articles, setArticles] = useState([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);
@@ -90,11 +90,16 @@ const LatestNews = ({title, articleUrlName}) => {
           <div className="absolute bottom-[40px] left-[26px] p-[20px]">
             <h3 className="mb-2 text-[22px] font-bold text-light underline">
               {articles[1]?.title ? (
-                articles[1].title
+                articles[1].title.length > 20 ? (
+                  articles[1].title.slice(0, 20) + "..."
+                ) : (
+                  articles[1].title
+                )
               ) : (
                 <span className="block h-2 w-1/2 rounded-sm bg-gray-400 animate-pulse"></span>
               )}
             </h3>
+
             <p className="text-light">
               {articles[1]?.publishedAt ? (
                 format(new Date(articles[1].publishedAt), "MMM d, yyyy")

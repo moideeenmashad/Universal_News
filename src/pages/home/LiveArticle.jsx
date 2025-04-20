@@ -14,9 +14,7 @@ const LiveArticle = ({ articleUrlName }) => {
 
   const API_KEY = import.meta.env.VITE_NEWS_DATA_API_KEY;
   // Update the API URL to the one you provided
-  // const API_URL = `https://newsdata.io/api/1/latest?apikey=${API_KEY}&country=us&prioritydomain=top`;
   const API_URL = `https://newsdata.io/api/1/latest?apikey=${API_KEY}&country=us&prioritydomain=top&language=en`;
-  // https://newsdata.io/api/1/latest?apikey=pub_725176a2440b0e4a1962c1e2967b4fea5d115&country=us&prioritydomain=top
 
   const getLiveNews = () => {
     axios
