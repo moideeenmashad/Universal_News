@@ -69,6 +69,7 @@ const NewsDetails = () => {
             src={article.urlToImage || "https://via.placeholder.com/300"}
             alt={article.title}
             className="w-full h-[300px] object-cover object-center mb-[24px]"
+            loading="lazy"
           />
           <div className="publisher border-y-2 border-primary py-2 flex items-center gap-x-[10px] mb-[24px]">
             <img
