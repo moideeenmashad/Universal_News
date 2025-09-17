@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { PiCalendarLight } from "react-icons/pi";
 import { format } from "date-fns";
 import axios from "axios";
+import Ads from "../Ads/Ads";
 
 const slugify = (text) =>
   text
@@ -62,7 +63,6 @@ const NewsDetails = () => {
 
   return (
     <section className="mx-auto max-w-screen-xl">
-      
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-4 mb-[24px]">
         <div className="col-span-3">
           <img
@@ -91,6 +91,9 @@ const NewsDetails = () => {
             <hr className="border-b-1 border-primary mb-[24px]" />
             <p className="text-lg">{article.content}</p>
           </div>
+        </div>
+        <div className="px-2 py-2">
+          <Ads />
         </div>
       </div>
     </section>
