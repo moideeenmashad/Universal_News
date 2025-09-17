@@ -78,6 +78,7 @@ const NewsList = ({
                       src={
                         value.urlToImage || "https://via.placeholder.com/300"
                       }
+                      loading="lazy"
                       alt={value.title || "News Image"}
                       className="h-64 w-full object-cover hover:scale-105 transition-transform duration-300"
                     />
