@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { newsService } from '../api/news';
-import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/src/types/news';
-import { QUERY_STALE_TIME } from '@/src/constants/config';
+import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/types/news';
+import { QUERY_STALE_TIME } from '@/constants/config';
 import { ApiError } from '../errors/ApiError';
 
 /**
@@ -73,7 +73,7 @@ export const useLatestNews = (
 };
 
 /**
- * Hook to fetch article by title slug
+ * Hook to fetch article by title slug in specific category
  * @param category - News category
  * @param title - Slugified article title
  */
@@ -85,6 +85,29 @@ export const useArticleByTitle = (
     queryKey: ['article', category, title],
     queryFn: () => newsService.getArticleByTitle(category, title),
     enabled: !!category && !!title,
+    staleTime: 5 * 60 * 1000, // 5 minutes for article details
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
+        return false;
+      }
+      return failureCount < 1;
+    },
+  });
+};
+
+/**
+ * Hook to fetch article by title slug across all sources (universal search)
+ * @param title - Slugified article title
+ * @param searchQuery - Optional search query to narrow down results
+ */
+export const useArticleByTitleUniversal = (
+  title: string,
+  searchQuery?: string
+): UseQueryResult<NewsArticle | null, ApiError> => {
+  return useQuery<NewsArticle | null, ApiError>({
+    queryKey: ['articleUniversal', title, searchQuery],
+    queryFn: () => newsService.getArticleByTitleUniversal(title, searchQuery),
+    enabled: !!title,
     staleTime: 5 * 60 * 1000, // 5 minutes for article details
     retry: (failureCount, error) => {
       if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {

@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import '@/src/styles/globals.css';
-import '@/src/assets/styles/font.scss';
+import '@/styles/globals.css';
+import '@/assets/styles/font.scss';
 import { Providers } from './providers';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className="lenis lenis-smooth">
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>

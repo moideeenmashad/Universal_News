@@ -13,6 +13,12 @@ dist-ssr
 *.local
 .env
 
+# Next.js
+.next/
+out/
+build/
+.vercel
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -24,4 +30,6 @@ dist-ssr
 *.sln
 *.sw?
 
-.vercel
+# OS files
+Thumbs.db
+.DS_Store

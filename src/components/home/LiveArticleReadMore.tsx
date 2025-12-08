@@ -2,13 +2,13 @@
 
 import { useMemo } from 'react';
 import { PiCalendarLight } from 'react-icons/pi';
-import { formatDate } from '@/src/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import Image from 'next/image';
-import { useLatestNews } from '@/src/lib/hooks/useNews';
-import { slugify } from '@/src/lib/utils/string';
-import { isValidNewsDataArticle } from '@/src/lib/utils/validation';
-import type { NewsDataArticle } from '@/src/types/news';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
+import { useLatestNews } from '@/lib/hooks/useNews';
+import { slugify } from '@/lib/utils/string';
+import { isValidNewsDataArticle } from '@/lib/utils/validation';
+import type { NewsDataArticle } from '@/types/news';
+import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface LiveArticleReadMoreProps {
@@ -28,7 +28,7 @@ export const LiveArticleReadMore = ({ title }: LiveArticleReadMoreProps) => {
   if (isLoading) {
     return (
       <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8" aria-label="Loading article">
-        <ArticleSkeleton count={1} variant="featured" />
+        <ArticleDetailSkeleton />
       </section>
     );
   }

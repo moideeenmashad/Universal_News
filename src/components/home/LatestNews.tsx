@@ -1,14 +1,11 @@
 'use client';
 
 import { useRef, useEffect, useMemo } from 'react';
-import { formatDate } from '@/src/lib/utils/date';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useEverything } from '@/src/lib/hooks/useNews';
-import { slugify } from '@/src/lib/utils/string';
-import { isValidArticle, sanitizeTitle } from '@/src/lib/utils/validation';
+import { useEverything } from '@/lib/hooks/useNews';
+import { isValidArticle } from '@/lib/utils/validation';
 import { ArticleSkeleton } from '../ui/ArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
+import { LazyNewsItem } from './LazyNewsItem';
 
 interface LatestNewsProps {
   title: string;
@@ -42,19 +39,6 @@ export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
     return allArticles.filter(isValidArticle);
   }, [data?.articles]);
 
-
-  const formatAuthor = (author: string | undefined): string => {
-    if (!author || author.trim() === '') return 'Unknown';
-    return sanitizeTitle(author);
-  };
-
-  const truncateTitle = (title: string): string => {
-    const sanitized = sanitizeTitle(title);
-    return sanitized.length > MAX_TITLE_LENGTH
-      ? sanitized.slice(0, MAX_TITLE_LENGTH) + '...'
-      : sanitized;
-  };
-
   return (
     <section
       className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0"
@@ -77,46 +61,15 @@ export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {articles.map((article, index) => {
-            const articleSlug = articleUrlName(article.title);
-            const articleUrl = `/general/${articleSlug}`;
-
-            return (
-              <article
-                key={article.url || `article-${index}`}
-                className="rounded-md cursor-pointer group"
-              >
-                <Link
-                  href={articleUrl}
-                  className="block hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md"
-                  aria-label={`Read article: ${article.title}`}
-                >
-                  <div className="image-container overflow-hidden relative rounded-sm mb-3">
-                    <div className="relative h-48 w-full">
-                      <Image
-                        src={article.urlToImage || 'https://via.placeholder.com/300'}
-                        alt={article.title || 'News article image'}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        loading={index < 4 ? 'eager' : 'lazy'}
-                      />
-                    </div>
-                  </div>
-                  <h3 className="text-base md:text-xl font-semibold line-clamp-2">
-                    {truncateTitle(article.title)}
-                  </h3>
-                  <div className="flex items-center text-xs text-primary mt-2 gap-x-[8px]">
-                    <span className="truncate">{formatAuthor(article.author)}</span>
-                    <span aria-hidden="true">•</span>
-                    <time dateTime={article.publishedAt} className="flex-shrink-0">
-                      {formatDate(article.publishedAt)}
-                    </time>
-                  </div>
-                </Link>
-              </article>
-            );
-          })}
+          {articles.map((article, index) => (
+            <LazyNewsItem
+              key={article.url || `article-${index}`}
+              article={article}
+              index={index}
+              articleUrlName={articleUrlName}
+              baseUrl="/general"
+            />
+          ))}
         </div>
       )}
     </section>

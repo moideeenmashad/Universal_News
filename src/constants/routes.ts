@@ -8,6 +8,7 @@ export const ROUTES = {
   SCIENCE: '/science',
   SPORTS: '/sports',
   TECHNOLOGY: '/technology',
+  SEARCH: '/search',
 } as const;
 
 export const CATEGORIES = {

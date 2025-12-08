@@ -2,8 +2,8 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { NewsList } from './NewsList';
-import { useTopHeadlines } from '@/src/lib/hooks/useNews';
-import { isValidCategory } from '@/src/lib/utils/validation';
+import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { isValidCategory } from '@/lib/utils/validation';
 
 interface NewsProps {
   category: string;

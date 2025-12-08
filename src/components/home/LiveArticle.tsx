@@ -5,12 +5,12 @@ import { VscCircleFilled } from 'react-icons/vsc';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import Link from 'next/link';
 import Image from 'next/image';
-import { formatRelativeTime } from '@/src/lib/utils/date';
-import { useLatestNews } from '@/src/lib/hooks/useNews';
-import { slugify } from '@/src/lib/utils/string';
-import { isValidNewsDataArticle } from '@/src/lib/utils/validation';
-import type { NewsDataArticle } from '@/src/types/news';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
+import { formatRelativeTime } from '@/lib/utils/date';
+import { useLatestNews } from '@/lib/hooks/useNews';
+import { slugify } from '@/lib/utils/string';
+import { isValidNewsDataArticle } from '@/lib/utils/validation';
+import type { NewsDataArticle } from '@/types/news';
+import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface LiveArticleProps {
@@ -51,7 +51,7 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
         ref={containerRef}
         className="live-article-container mx-auto max-w-screen-xl relative mb-[100px] px-4 md:px-0"
       >
-        <ArticleSkeleton count={1} variant="featured" />
+        <FeaturedArticleSkeleton />
       </div>
     );
   }

@@ -4,18 +4,19 @@ const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#000000',
+          DEFAULT: '#202124',
         },
         light: '#ffffff',
       },
       fontFamily: {
-        sans: ['var(--font-bricolage)', 'sans-serif'],
+        sans: ['BricolageGrotesque', 'sans-serif'],
+        bricolage: ['BricolageGrotesque', 'sans-serif'],
       },
     },
   },
@@ -23,4 +24,3 @@ const config: Config = {
 };
 
 export default config;
-

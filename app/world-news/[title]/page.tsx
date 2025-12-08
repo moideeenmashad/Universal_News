@@ -1,4 +1,4 @@
-import { LiveArticleReadMore } from '@/src/components/home/LiveArticleReadMore';
+import { LiveArticleReadMore } from '@/components/home/LiveArticleReadMore';
 
 interface PageProps {
   params: Promise<{ title: string }>;

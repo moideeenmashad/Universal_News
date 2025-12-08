@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { SlGlobe } from 'react-icons/sl';
 import { GoSearch, GoChevronRight } from 'react-icons/go';
+import { SearchModal } from '@/components/search/SearchModal';
 import './Navbar.css';
 
 export const PreNavabar = () => {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -13,16 +16,25 @@ export const PreNavabar = () => {
   });
 
   return (
-    <div className="pre-navbar-container max-w-screen-xl mx-auto px-4 flex justify-between items-center border-primary border-y-2 my-2">
-      <div className="flex items-center pb-2 pt-2 space-x-1">
-        <SlGlobe />
-        <p className="text-primary text-sm md:text-base">{today}</p>
+    <>
+      <div className="pre-navbar-container max-w-screen-xl mx-auto px-4 flex justify-between items-center border-primary border-y-2 my-2">
+        <div className="flex items-center pb-2 pt-2 space-x-1">
+          <SlGlobe />
+          <p className="text-primary text-sm md:text-base">{today}</p>
+        </div>
+        <div className="flex items-center pb-2 pt-2 space-x-2">
+          <p className="text-primary text-sm md:text-base">The Menu</p>
+          <GoChevronRight className="hidden md:block" />
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="cursor-pointer hover:opacity-70 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            aria-label="Open search"
+          >
+            <GoSearch className="w-5 h-5" />
+          </button>
+        </div>
       </div>
-      <div className="flex items-center pb-2 pt-2 space-x-2">
-        <p className="text-primary text-sm md:text-base">The Menu</p>
-        <GoChevronRight className="hidden md:block" />
-        <GoSearch className="cursor-pointer hover:opacity-70 transition-opacity" />
-      </div>
-    </div>
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };

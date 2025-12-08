@@ -1,4 +1,4 @@
-import type { NewsArticle, NewsDataArticle } from '@/src/types/news';
+import type { NewsArticle, NewsDataArticle } from '@/types/news';
 
 /**
  * Validates if an article has required fields

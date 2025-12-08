@@ -1,15 +1,95 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@layer base {
+  body {
+    font-family: "BricolageGrotesque", sans-serif;
+  }
+  
+  /* Lenis smooth scroll - Ultra Smooth Configuration */
+  html.lenis {
+    height: auto;
+  }
+  
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  
+  .lenis.lenis-scrolling iframe {
+    pointer-events: none;
+  }
+  
+  /* Enhanced smooth scroll performance */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  html {
+    scroll-behavior: auto; /* Let Lenis handle it */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  body {
+    overscroll-behavior-y: none; /* Prevent bounce on mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Smooth transitions for better feel */
+  a, button {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Section spacing - accounts for fixed navbar */
 section {
-  margin-top: 120px;
+  margin-top: 0;
   margin-left: auto !important;
   margin-right: auto !important;
 }
 
-@media (min-width: 768px) {
-  section {
-    margin-top: 220px;
+/* Skeleton Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
   }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-dark {
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 0%,
+    #e8e8e8 20%,
+    #e0e0e0 40%,
+    #e0e0e0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }
 
 @keyframes pulseWave {
@@ -44,4 +124,3 @@ section {
 .wave-animation {
   animation: pulseWave 1.5s infinite ease-out;
 }
-

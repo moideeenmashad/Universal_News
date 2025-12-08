@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ROUTES } from '@/src/constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 interface FeaturedItem {
   id: number;

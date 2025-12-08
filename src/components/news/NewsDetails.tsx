@@ -1,25 +1,35 @@
 'use client';
 
 import { PiCalendarLight } from 'react-icons/pi';
-import { formatDate } from '@/src/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import Image from 'next/image';
-import { useArticleByTitle } from '@/src/lib/hooks/useNews';
-import { isValidArticle } from '@/src/lib/utils/validation';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
+import { useArticleByTitle, useArticleByTitleUniversal } from '@/lib/hooks/useNews';
+import { isValidArticle } from '@/lib/utils/validation';
+import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface NewsDetailsProps {
   category: string;
   title: string;
+  searchQuery?: string;
 }
 
-export const NewsDetails = ({ category, title }: NewsDetailsProps) => {
-  const { data: article, isLoading, error } = useArticleByTitle(category, title);
+export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) => {
+  // Try category-specific first, then universal search
+  const { data: categoryArticle, isLoading: isLoadingCategory, error: categoryError } = useArticleByTitle(category, title);
+  const { data: universalArticle, isLoading: isLoadingUniversal } = useArticleByTitleUniversal(
+    title,
+    searchQuery
+  );
+
+  const article = categoryArticle || universalArticle;
+  const isLoading = isLoadingCategory || isLoadingUniversal;
+  const error = categoryError;
 
   if (isLoading) {
     return (
       <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8" aria-label="Loading article">
-        <ArticleSkeleton count={1} variant="featured" />
+        <ArticleDetailSkeleton />
       </section>
     );
   }
@@ -41,7 +51,6 @@ export const NewsDetails = ({ category, title }: NewsDetailsProps) => {
       </section>
     );
   }
-
 
   const authorName = article.author || article.source?.name || 'Unknown Author';
 

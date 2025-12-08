@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ROUTES } from '@/src/constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 interface NavItem {
   id: number;
