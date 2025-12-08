@@ -1,0 +1,52 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import '@/src/styles/globals.css';
+import '@/src/assets/styles/font.scss';
+import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Universal News - Latest News from Around the World',
+    template: '%s | Universal News',
+  },
+  description: 'Stay updated with the latest news from business, technology, sports, entertainment, health, science, and more.',
+  keywords: ['news', 'latest news', 'world news', 'breaking news', 'current events'],
+  authors: [{ name: 'Universal News' }],
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+  themeColor: '#000000',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Universal News',
+    title: 'Universal News - Latest News from Around the World',
+    description: 'Stay updated with the latest news from around the world',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className={inter.variable}>
+      <body className="antialiased">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+
