@@ -8,6 +8,7 @@ import { BsDashLg } from 'react-icons/bs';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
 import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
+import { getSafeImageUrl } from '@/lib/utils/imageConfig';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyArticleProps {
@@ -21,6 +22,7 @@ const MAX_TITLE_LENGTH = 60;
 
 export const LazyArticle = memo(({ article, index, category, onVisible }: LazyArticleProps) => {
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,6 +70,18 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
   const truncatedTitle = useMemo(() => truncateTitle(article.title), [article.title, truncateTitle]);
   const formattedAuthor = useMemo(() => formatAuthor(article.author), [article.author, formatAuthor]);
 
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
+
+  const imageSrc = useMemo(() => {
+    if (imageError) {
+      return getFallbackImageUrl(800, 600, 'News Image');
+    }
+    const fallback = getFallbackImageUrl(800, 600, 'News Image');
+    return getSafeImageUrl(article.urlToImage, fallback);
+  }, [imageError, article.urlToImage]);
+
   if (!isValidArticle(article)) return null;
 
   // Only render content when visible or has been visible
@@ -100,7 +114,7 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 md:h-64 w-full">
             <Image
-              src={article.urlToImage || getFallbackImageUrl(800, 600, 'News Image')}
+              src={imageSrc}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -109,6 +123,7 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
               priority={index < 3}
               placeholder="blur"
               blurDataURL={getShimmerBlurDataURL()}
+              onError={handleImageError}
             />
           </div>
         </div>

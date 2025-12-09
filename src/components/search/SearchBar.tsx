@@ -9,6 +9,8 @@ import { findArticleCategory } from '@/lib/utils/articleCategory';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getSafeImageUrl } from '@/lib/utils/imageConfig';
+import { getFallbackImageUrl } from '@/lib/utils/image';
 import type { NewsArticle } from '@/types/news';
 
 interface SearchBarProps {
@@ -205,7 +207,7 @@ export const SearchBar = ({ onClose, className = '' }: SearchBarProps) => {
                       {article.urlToImage && (
                         <div className="relative w-16 h-16 flex-shrink-0 rounded overflow-hidden">
                           <Image
-                            src={article.urlToImage}
+                            src={getSafeImageUrl(article.urlToImage, getFallbackImageUrl(64, 64, 'News'))}
                             alt=""
                             fill
                             className="object-cover"

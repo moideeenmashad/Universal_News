@@ -6,7 +6,9 @@ import Image from 'next/image';
 import { useArticleByTitle, useArticleByTitleUniversal } from '@/lib/hooks/useNews';
 import { isValidArticle } from '@/lib/utils/validation';
 import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
+import { getSafeImageUrl } from '@/lib/utils/imageConfig';
 import { ErrorMessage } from '../ui/ErrorMessage';
+import { useState, useCallback, useMemo } from 'react';
 
 interface NewsDetailsProps {
   category: string;
@@ -25,6 +27,21 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
   const article = categoryArticle || universalArticle;
   const isLoading = isLoadingCategory || isLoadingUniversal;
   const error = categoryError;
+
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
+
+  const imageSrc = useMemo(() => {
+    if (!article) return getFallbackImageUrl(1200, 800, 'Article Image');
+    if (imageError) {
+      return getFallbackImageUrl(1200, 800, 'Article Image');
+    }
+    const fallback = getFallbackImageUrl(1200, 800, 'Article Image');
+    return getSafeImageUrl(article.urlToImage, fallback);
+  }, [imageError, article]);
 
   if (isLoading) {
     return (
@@ -113,7 +130,7 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
         <div className="col-span-3">
           <div className="relative w-full h-[300px] md:h-[400px] mb-6 rounded-lg overflow-hidden">
             <Image
-              src={article.urlToImage || getFallbackImageUrl(1200, 800, 'Article Image')}
+              src={imageSrc}
               alt={article.title || 'Article image'}
               fill
               className="object-cover"
@@ -121,6 +138,7 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
               priority
               placeholder="blur"
               blurDataURL={getShimmerBlurDataURL()}
+              onError={handleImageError}
             />
           </div>
           <div className="publisher border-y-2 border-primary py-4 flex items-center gap-x-[10px] mb-6">

@@ -102,6 +102,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.forbes.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.insider.com',
+      },
       // Tech news
       {
         protocol: 'https',
@@ -114,6 +118,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.wired.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.searchenginejournal.com',
       },
       // Sports
       {
@@ -168,6 +176,22 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.futurecdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.hearstapps.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.vox-cdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.media-amazon.com',
       },
     ],
     formats: ['image/avif', 'image/webp'],
