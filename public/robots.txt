@@ -1,0 +1,40 @@
+# Universal News - Robots.txt
+# This file tells search engines which pages to crawl
+
+# Allow all legitimate search engines
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Slurp
+User-agent: DuckDuckBot
+User-agent: Baiduspider
+User-agent: YandexBot
+Allow: /
+
+# Block bad bots and scrapers
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: MJ12bot
+User-agent: DotBot
+User-agent: BLEXBot
+User-agent: MegaIndex
+Disallow: /
+
+# Block all other bots by default
+User-agent: *
+Disallow: /_next/
+Disallow: /api/
+Disallow: /search?
+
+# Allow crawling of main content
+Allow: /
+Allow: /business
+Allow: /entertainment
+Allow: /general
+Allow: /health
+Allow: /science
+Allow: /sports
+Allow: /technology
+Allow: /world-news
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
