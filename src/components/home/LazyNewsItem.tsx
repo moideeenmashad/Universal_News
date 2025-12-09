@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { formatDate } from '@/lib/utils/date';
 import Link from 'next/link';
 import Image from 'next/image';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
+import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyNewsItemProps {
@@ -17,7 +18,7 @@ interface LazyNewsItemProps {
 
 const MAX_TITLE_LENGTH = 60;
 
-export const LazyNewsItem = ({ article, index, articleUrlName, baseUrl }: LazyNewsItemProps) => {
+export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: LazyNewsItemProps) => {
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
 
@@ -47,22 +48,25 @@ export const LazyNewsItem = ({ article, index, articleUrlName, baseUrl }: LazyNe
     };
   }, [article, hasBeenVisible]);
 
-  if (!isValidArticle(article)) return null;
+  const articleSlug = useMemo(() => articleUrlName(article.title), [article.title, articleUrlName]);
+  const articleUrl = useMemo(() => `${baseUrl}/${articleSlug}`, [baseUrl, articleSlug]);
 
-  const articleSlug = articleUrlName(article.title);
-  const articleUrl = `${baseUrl}/${articleSlug}`;
-
-  const truncateTitle = (title: string): string => {
+  const truncateTitle = useCallback((title: string): string => {
     const sanitized = sanitizeTitle(title);
     return sanitized.length > MAX_TITLE_LENGTH
       ? sanitized.slice(0, MAX_TITLE_LENGTH) + '...'
       : sanitized;
-  };
+  }, []);
 
-  const formatAuthor = (author: string | undefined): string => {
+  const formatAuthor = useCallback((author: string | undefined): string => {
     if (!author || author.trim() === '') return 'Unknown';
     return sanitizeTitle(author);
-  };
+  }, []);
+
+  const truncatedTitle = useMemo(() => truncateTitle(article.title), [article.title, truncateTitle]);
+  const formattedAuthor = useMemo(() => formatAuthor(article.author), [article.author, formatAuthor]);
+
+  if (!isValidArticle(article)) return null;
 
   // Show skeleton until visible
   if (!hasBeenVisible) {
@@ -85,25 +89,28 @@ export const LazyNewsItem = ({ article, index, articleUrlName, baseUrl }: LazyNe
         href={articleUrl}
         className="block hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md"
         aria-label={`Read article: ${article.title}`}
+        prefetch={index < 4}
       >
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 w-full">
             <Image
-              src={article.urlToImage || 'https://via.placeholder.com/300'}
+              src={article.urlToImage || getFallbackImageUrl(800, 600, 'News Image')}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               loading={index < 4 ? 'eager' : 'lazy'}
               priority={index < 2}
+              placeholder="blur"
+              blurDataURL={getShimmerBlurDataURL()}
             />
           </div>
         </div>
         <h3 className="text-base md:text-xl font-semibold line-clamp-2">
-          {truncateTitle(article.title)}
+          {truncatedTitle}
         </h3>
         <div className="flex items-center text-xs text-primary mt-2 gap-x-[8px]">
-          <span className="truncate">{formatAuthor(article.author)}</span>
+          <span className="truncate">{formattedAuthor}</span>
           <span aria-hidden="true">•</span>
           <time dateTime={article.publishedAt} className="flex-shrink-0">
             {formatDate(article.publishedAt)}
@@ -112,5 +119,6 @@ export const LazyNewsItem = ({ article, index, articleUrlName, baseUrl }: LazyNe
       </Link>
     </article>
   );
-};
+});
 
+LazyNewsItem.displayName = 'LazyNewsItem';

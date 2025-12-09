@@ -1,16 +1,13 @@
 'use client';
 
 import { useRef, useEffect, useMemo } from 'react';
-import { VscCircleFilled } from 'react-icons/vsc';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { useLatestNews } from '@/lib/hooks/useNews';
-import { slugify } from '@/lib/utils/string';
 import { isValidNewsDataArticle } from '@/lib/utils/validation';
-import type { NewsDataArticle } from '@/types/news';
-import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
+import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface LiveArticleProps {
@@ -19,7 +16,7 @@ interface LiveArticleProps {
 
 export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error, isFetching } = useLatestNews('worldnews');
+  const { data, isLoading, error } = useLatestNews('worldnews');
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -27,7 +24,7 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          // Data will be fetched automatically by React Query
+          // Data will be fetched automatically
         }
       },
       { threshold: 0.1 }
@@ -42,16 +39,42 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
     return article && isValidNewsDataArticle(article) ? article : null;
   }, [data?.results]);
 
-  const loading = isLoading || isFetching;
 
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div
         ref={containerRef}
         className="live-article-container mx-auto max-w-screen-xl relative mb-[100px] px-4 md:px-0"
       >
-        <FeaturedArticleSkeleton />
+        <div className="animate-pulse" aria-hidden="true" role="presentation">
+          {/* Image Skeleton */}
+          <div className="relative mb-6 overflow-hidden rounded-sm">
+            <div className="h-[400px] md:h-[580px] w-full skeleton-shimmer relative">
+              {/* Live Badge Skeleton */}
+              <div className="absolute top-[18px] left-[18px] bg-white rounded-sm px-3 py-3 flex items-center gap-2">
+                <div className="w-2 h-2 skeleton-dark rounded-full"></div>
+                <div className="h-3 skeleton-dark rounded w-20"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Date Skeleton */}
+          <div className="flex justify-end mb-3">
+            <div className="h-3 skeleton-shimmer rounded w-32"></div>
+          </div>
+
+          {/* Title and Link Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="col-span-3 space-y-3">
+              <div className="h-8 skeleton-shimmer rounded w-full"></div>
+              <div className="h-8 skeleton-shimmer rounded w-3/4"></div>
+            </div>
+            <div className="flex items-start justify-end">
+              <div className="h-5 skeleton-shimmer rounded w-24"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -85,12 +108,14 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
         <div className="image-container mb-[24px] overflow-hidden relative rounded-sm">
           <div className="relative h-[400px] md:h-[580px] w-full">
             <Image
-              src={latestNews.image_url || 'https://via.placeholder.com/1200x580'}
+              src={latestNews.image_url || getFallbackImageUrl(1200, 580, 'Latest News')}
               alt={latestNews.title || 'Latest news article'}
               fill
               className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
               sizes="(max-width: 768px) 100vw, 1200px"
               priority
+              placeholder="blur"
+              blurDataURL={getShimmerBlurDataURL()}
             />
           </div>
           <span

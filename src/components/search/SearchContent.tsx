@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 import { useEverything } from '@/lib/hooks/useNews';
 import { NewsList } from '@/components/news/NewsList';
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { ArticleSkeleton } from '@/components/ui/ArticleSkeleton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 export function SearchContent() {
@@ -76,7 +75,22 @@ export function SearchContent() {
         Search Results for &quot;{query}&quot;
       </h1>
       {isLoading ? (
-        <ArticleSkeleton count={6} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          {Array(6).fill(0).map((_, i) => (
+            <div key={`skeleton-${i}`} className="rounded-md overflow-hidden bg-white" aria-hidden="true" role="presentation">
+              <div className="h-48 md:h-64 w-full skeleton-shimmer rounded-sm mb-3"></div>
+              <div className="space-y-2 mb-3">
+                <div className="h-5 skeleton-shimmer rounded w-full"></div>
+                <div className="h-5 skeleton-shimmer rounded w-4/5"></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 skeleton-shimmer rounded w-20"></div>
+                <div className="h-3 skeleton-shimmer rounded w-1"></div>
+                <div className="h-3 skeleton-shimmer rounded w-24"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : errorMessage ? (
         <ErrorMessage message={errorMessage} />
       ) : (
@@ -93,4 +107,3 @@ export function SearchContent() {
     </section>
   );
 }
-

@@ -14,4 +14,3 @@ export function NewsDetailsWithSearch({ category, title }: NewsDetailsWithSearch
   
   return <NewsDetails category={category} title={title} searchQuery={searchQuery} />;
 }
-

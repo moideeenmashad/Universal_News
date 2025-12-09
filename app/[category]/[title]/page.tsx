@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { NewsDetailsContent } from './NewsDetailsContent';
+import { NewsDetailsContent } from '@/components/news/NewsDetailsContent';
 
 interface PageProps {
   params: Promise<{ category: string; title: string }>;

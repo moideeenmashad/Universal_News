@@ -22,12 +22,9 @@ export const SmoothScroll = ({ children }: SmoothScrollProps) => {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 0.9, // Increased from 0.7 for more responsive scrolling
-      smoothTouch: false, // Keep disabled for mobile performance
       touchMultiplier: 1.5,
       infinite: false,
       syncTouch: false,
-      touchInertiaMultiplier: 35,
-      touchInertiaDelta: 0.5,
     });
 
     lenisRef.current = lenis;

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { SearchContent } from './SearchContent';
+import { SearchContent } from '@/components/search/SearchContent';
 
 export default function SearchPage() {
   return (

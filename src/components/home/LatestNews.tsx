@@ -1,9 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, memo } from 'react';
 import { useEverything } from '@/lib/hooks/useNews';
 import { isValidArticle } from '@/lib/utils/validation';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { LazyNewsItem } from './LazyNewsItem';
 
@@ -12,9 +11,7 @@ interface LatestNewsProps {
   articleUrlName: (text: string) => string;
 }
 
-const MAX_TITLE_LENGTH = 60;
-
-export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
+export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, error } = useEverything('keyword');
 
@@ -22,10 +19,8 @@ export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
     if (!containerRef.current) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          // Data will be fetched automatically by React Query
-        }
+      () => {
+        // Data will be fetched automatically
       },
       { threshold: 0.1 }
     );
@@ -50,7 +45,22 @@ export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
       </div>
 
       {isLoading ? (
-        <ArticleSkeleton count={8} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {Array(8).fill(0).map((_, i) => (
+            <div key={`skeleton-${i}`} className="rounded-md overflow-hidden bg-white" aria-hidden="true" role="presentation">
+              <div className="h-48 md:h-64 w-full skeleton-shimmer rounded-sm mb-3"></div>
+              <div className="space-y-2 mb-3">
+                <div className="h-5 skeleton-shimmer rounded w-full"></div>
+                <div className="h-5 skeleton-shimmer rounded w-4/5"></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 skeleton-shimmer rounded w-20"></div>
+                <div className="h-3 skeleton-shimmer rounded w-1"></div>
+                <div className="h-3 skeleton-shimmer rounded w-24"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : error ? (
         <ErrorMessage
           message={error instanceof Error ? error.message : 'Failed to load news.'}
@@ -74,4 +84,6 @@ export const LatestNews = ({ title, articleUrlName }: LatestNewsProps) => {
       )}
     </section>
   );
-};
+});
+
+LatestNews.displayName = 'LatestNews';

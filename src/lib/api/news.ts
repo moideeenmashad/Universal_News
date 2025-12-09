@@ -1,4 +1,3 @@
-import axios, { AxiosError } from 'axios';
 import {
   NEWS_API_BASE_URL,
   NEWS_DATA_API_BASE_URL,
@@ -8,6 +7,8 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PAGE_SIZE,
   DEFAULT_QUERY,
+  CACHE_REVALIDATE_SHORT,
+  CACHE_REVALIDATE_MEDIUM,
 } from '@/constants/config';
 import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/types/news';
 import { ApiError } from '../errors/ApiError';
@@ -17,17 +18,19 @@ class NewsService {
   private newsDataUrl = NEWS_DATA_API_BASE_URL;
 
   /**
-   * Fetches top headlines from NewsAPI
+   * Fetches top headlines from NewsAPI with Next.js caching
    * @param category - News category (optional)
    * @param country - Country code (default: 'us')
    * @param pageSize - Number of articles to fetch (default: 20)
+   * @param revalidate - Revalidation time in seconds (default: 60)
    * @returns Promise with news articles
    * @throws ApiError if request fails
    */
   async getTopHeadlines(
     category?: string,
     country: string = DEFAULT_COUNTRY,
-    pageSize: number = DEFAULT_PAGE_SIZE
+    pageSize: number = DEFAULT_PAGE_SIZE,
+    revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
     try {
       if (!NEWS_API_KEY) {
@@ -38,35 +41,46 @@ class NewsService {
         ? `${this.baseUrl}/top-headlines?category=${category}&country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`
         : `${this.baseUrl}/top-headlines?country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
 
-      const response = await axios.get<NewsApiResponse>(url, {
-        timeout: 10000, // 10 second timeout
+      const response = await fetch(url, {
+        next: { revalidate }, // Next.js caching with revalidation
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.data.status === 'error') {
-        throw new ApiError(response.data.message || 'Failed to fetch headlines', 400);
+      if (!response.ok) {
+        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
       }
 
-      return response.data;
+      const data: NewsApiResponse = await response.json();
+
+      if (data.status === 'error') {
+        throw new ApiError(data.message || 'Failed to fetch headlines', 400);
+      }
+
+      return data;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw ApiError.fromAxiosError(error);
+      throw ApiError.fromFetchError(error);
     }
   }
 
   /**
-   * Fetches all articles matching a query from NewsAPI
+   * Fetches all articles matching a query from NewsAPI with Next.js caching
    * @param query - Search query
    * @param pageSize - Number of articles to fetch (default: 20)
    * @param language - Language code (default: 'en' for English)
+   * @param revalidate - Revalidation time in seconds (default: 60)
    * @returns Promise with news articles
    * @throws ApiError if request fails
    */
   async getEverything(
     query: string,
     pageSize: number = DEFAULT_PAGE_SIZE,
-    language: string = DEFAULT_LANGUAGE
+    language: string = DEFAULT_LANGUAGE,
+    revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
     try {
       if (!NEWS_API_KEY) {
@@ -78,20 +92,30 @@ class NewsService {
       }
 
       const url = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
-      const response = await axios.get<NewsApiResponse>(url, {
-        timeout: 10000,
+      
+      const response = await fetch(url, {
+        next: { revalidate }, // Next.js caching with revalidation
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.data.status === 'error') {
-        throw new ApiError(response.data.message || 'Failed to fetch articles', 400);
+      if (!response.ok) {
+        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
       }
 
-      return response.data;
+      const data: NewsApiResponse = await response.json();
+
+      if (data.status === 'error') {
+        throw new ApiError(data.message || 'Failed to fetch articles', 400);
+      }
+
+      return data;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw ApiError.fromAxiosError(error);
+      throw ApiError.fromFetchError(error);
     }
   }
 
@@ -108,7 +132,8 @@ class NewsService {
         return [];
       }
 
-      const response = await this.getEverything(query.trim(), limit, DEFAULT_LANGUAGE);
+      // Shorter cache for suggestions (30 seconds)
+      const response = await this.getEverything(query.trim(), limit, DEFAULT_LANGUAGE, 30);
       return response.articles || [];
     } catch (error) {
       // Don't throw error for suggestions, just return empty array
@@ -121,15 +146,17 @@ class NewsService {
   }
 
   /**
-   * Fetches latest news from NewsData.io API
+   * Fetches latest news from NewsData.io API with Next.js caching
    * @param query - Search query (default: 'worldnews')
    * @param language - Language code (default: 'en' for English)
+   * @param revalidate - Revalidation time in seconds (default: 60)
    * @returns Promise with latest news articles
    * @throws ApiError if request fails
    */
   async getLatestNews(
     query: string = DEFAULT_QUERY,
-    language: string = DEFAULT_LANGUAGE
+    language: string = DEFAULT_LANGUAGE,
+    revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsDataResponse> {
     try {
       if (!NEWS_DATA_API_KEY) {
@@ -137,20 +164,30 @@ class NewsService {
       }
 
       const url = `${this.newsDataUrl}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(query)}&language=${language}`;
-      const response = await axios.get<NewsDataResponse>(url, {
-        timeout: 10000,
+      
+      const response = await fetch(url, {
+        next: { revalidate }, // Next.js caching with revalidation
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.data.status === 'error') {
+      if (!response.ok) {
+        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+      }
+
+      const data: NewsDataResponse = await response.json();
+
+      if (data.status === 'error') {
         throw new ApiError('Failed to fetch latest news', 400);
       }
 
-      return response.data;
+      return data;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw ApiError.fromAxiosError(error);
+      throw ApiError.fromFetchError(error);
     }
   }
 
@@ -158,16 +195,21 @@ class NewsService {
    * Finds an article by its slugified title in a specific category
    * @param category - News category
    * @param title - Slugified article title
+   * @param revalidate - Revalidation time in seconds (default: 300 for article details)
    * @returns Promise with matching article or null
    * @throws ApiError if request fails
    */
-  async getArticleByTitle(category: string, title: string): Promise<NewsArticle | null> {
+  async getArticleByTitle(
+    category: string,
+    title: string,
+    revalidate: number = CACHE_REVALIDATE_MEDIUM
+  ): Promise<NewsArticle | null> {
     try {
       if (!category || !title) {
         return null;
       }
 
-      const response = await this.getTopHeadlines(category);
+      const response = await this.getTopHeadlines(category, 'us', 20, revalidate);
       const { slugify } = await import('@/lib/utils/string');
 
       const matchedArticle = response.articles.find((article: NewsArticle) => {
@@ -180,7 +222,7 @@ class NewsService {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw ApiError.fromAxiosError(error);
+      throw ApiError.fromFetchError(error);
     }
   }
 
@@ -189,10 +231,15 @@ class NewsService {
    * This is used for articles from search results that might not be in category headlines
    * @param title - Slugified article title
    * @param searchQuery - Optional search query to narrow down results
+   * @param revalidate - Revalidation time in seconds (default: 300 for article details)
    * @returns Promise with matching article or null
    * @throws ApiError if request fails
    */
-  async getArticleByTitleUniversal(title: string, searchQuery?: string): Promise<NewsArticle | null> {
+  async getArticleByTitleUniversal(
+    title: string,
+    searchQuery?: string,
+    revalidate: number = CACHE_REVALIDATE_MEDIUM
+  ): Promise<NewsArticle | null> {
     try {
       if (!title) {
         return null;
@@ -203,7 +250,7 @@ class NewsService {
       // First, try to find in search results if query provided
       if (searchQuery && searchQuery.trim().length > 0) {
         try {
-          const searchResponse = await this.getEverything(searchQuery.trim(), 50, DEFAULT_LANGUAGE);
+          const searchResponse = await this.getEverything(searchQuery.trim(), 50, DEFAULT_LANGUAGE, revalidate);
           const matchedArticle = searchResponse.articles.find((article: NewsArticle) => {
             const apiTitleSlug = slugify(article.title);
             return apiTitleSlug === title;
@@ -223,7 +270,7 @@ class NewsService {
       
       for (const category of categories) {
         try {
-          const response = await this.getTopHeadlines(category, 'us', 20);
+          const response = await this.getTopHeadlines(category, 'us', 20, revalidate);
           const matchedArticle = response.articles.find((article: NewsArticle) => {
             const apiTitleSlug = slugify(article.title);
             return apiTitleSlug === title;

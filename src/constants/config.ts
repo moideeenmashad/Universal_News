@@ -9,5 +9,7 @@ export const DEFAULT_LANGUAGE = 'en'; // English only
 export const DEFAULT_PAGE_SIZE = 20;
 export const DEFAULT_QUERY = 'worldnews';
 
-export const QUERY_STALE_TIME = 60 * 1000; // 1 minute
-export const QUERY_GC_TIME = 5 * 60 * 1000; // 5 minutes
+// Next.js cache revalidation times (in seconds)
+export const CACHE_REVALIDATE_SHORT = 60; // 1 minute for frequently changing data
+export const CACHE_REVALIDATE_MEDIUM = 300; // 5 minutes for article details
+export const CACHE_REVALIDATE_LONG = 3600; // 1 hour for static content

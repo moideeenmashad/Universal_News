@@ -1,35 +1,32 @@
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public originalError?: unknown
-  ) {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number = 500) {
     super(message);
     this.name = 'ApiError';
+    this.statusCode = statusCode;
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 
-  static fromAxiosError(error: unknown): ApiError {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { status?: number; data?: unknown } };
-      const statusCode = axiosError.response?.status;
-      const message =
-        statusCode === 401
-          ? 'API key is invalid or expired'
-          : statusCode === 429
-          ? 'Too many requests. Please try again later'
-          : statusCode === 500
-          ? 'Server error. Please try again later'
-          : 'Failed to fetch news. Please check your connection';
-
-      return new ApiError(message, statusCode, error);
+  /**
+   * Creates an ApiError from a fetch error
+   */
+  static fromFetchError(error: unknown): ApiError {
+    if (error instanceof ApiError) {
+      return error;
     }
-
+    
     if (error instanceof Error) {
-      return new ApiError(error.message, undefined, error);
+      return new ApiError(error.message, 500);
     }
+    
+    return new ApiError('An unknown error occurred', 500);
+  }
 
-    return new ApiError('An unexpected error occurred', undefined, error);
+  /**
+   * Legacy method for axios errors (kept for compatibility)
+   */
+  static fromAxiosError(error: unknown): ApiError {
+    return this.fromFetchError(error);
   }
 }
-

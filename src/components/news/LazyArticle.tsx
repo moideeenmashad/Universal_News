@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { formatDate } from '@/lib/utils/date';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsDashLg } from 'react-icons/bs';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
+import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyArticleProps {
@@ -18,8 +19,7 @@ interface LazyArticleProps {
 
 const MAX_TITLE_LENGTH = 60;
 
-export const LazyArticle = ({ article, index, category, onVisible }: LazyArticleProps) => {
-  const [isVisible, setIsVisible] = useState(false);
+export const LazyArticle = memo(({ article, index, category, onVisible }: LazyArticleProps) => {
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
 
@@ -29,14 +29,9 @@ export const LazyArticle = ({ article, index, category, onVisible }: LazyArticle
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            if (!hasBeenVisible) {
-              setHasBeenVisible(true);
-              onVisible?.();
-            }
-          } else {
-            setIsVisible(false);
+          if (entry.isIntersecting && !hasBeenVisible) {
+            setHasBeenVisible(true);
+            onVisible?.();
           }
         });
       },
@@ -55,22 +50,25 @@ export const LazyArticle = ({ article, index, category, onVisible }: LazyArticle
     };
   }, [article, hasBeenVisible, onVisible]);
 
-  if (!isValidArticle(article)) return null;
+  const articleSlug = useMemo(() => slugify(article.title), [article.title]);
+  const articleUrl = useMemo(() => `/${category}/${articleSlug}`, [category, articleSlug]);
 
-  const articleSlug = slugify(article.title);
-  const articleUrl = `/${category}/${articleSlug}`;
-
-  const truncateTitle = (title: string): string => {
+  const truncateTitle = useCallback((title: string): string => {
     const sanitized = sanitizeTitle(title);
     return sanitized.length > MAX_TITLE_LENGTH
       ? sanitized.slice(0, MAX_TITLE_LENGTH) + '...'
       : sanitized;
-  };
+  }, []);
 
-  const formatAuthor = (author: string | undefined): string => {
+  const formatAuthor = useCallback((author: string | undefined): string => {
     if (!author || author.trim() === '') return 'Unknown';
     return sanitizeTitle(author);
-  };
+  }, []);
+
+  const truncatedTitle = useMemo(() => truncateTitle(article.title), [article.title, truncateTitle]);
+  const formattedAuthor = useMemo(() => formatAuthor(article.author), [article.author, formatAuthor]);
+
+  if (!isValidArticle(article)) return null;
 
   // Only render content when visible or has been visible
   if (!hasBeenVisible) {
@@ -97,25 +95,28 @@ export const LazyArticle = ({ article, index, category, onVisible }: LazyArticle
         href={articleUrl}
         className="block hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md"
         aria-label={`Read article: ${article.title}`}
+        prefetch={index < 6}
       >
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 md:h-64 w-full">
             <Image
-              src={article.urlToImage || 'https://via.placeholder.com/300'}
+              src={article.urlToImage || getFallbackImageUrl(800, 600, 'News Image')}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               loading={index < 6 ? 'eager' : 'lazy'}
               priority={index < 3}
+              placeholder="blur"
+              blurDataURL={getShimmerBlurDataURL()}
             />
           </div>
         </div>
         <h3 className="text-lg md:text-xl font-semibold line-clamp-2 mb-2">
-          {truncateTitle(article.title)}
+          {truncatedTitle}
         </h3>
         <div className="flex items-center text-xs text-primary mt-2 gap-x-[8px]">
-          <span className="truncate">{formatAuthor(article.author)}</span>
+          <span className="truncate">{formattedAuthor}</span>
           <BsDashLg className="flex-shrink-0" aria-hidden="true" />
           <time dateTime={article.publishedAt} className="flex-shrink-0">
             {formatDate(article.publishedAt)}
@@ -124,5 +125,6 @@ export const LazyArticle = ({ article, index, category, onVisible }: LazyArticle
       </Link>
     </article>
   );
-};
+});
 
+LazyArticle.displayName = 'LazyArticle';

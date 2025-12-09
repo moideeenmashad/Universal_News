@@ -1,23 +1,27 @@
 /**
- * Creates a debounced function that delays invoking func until after wait milliseconds
- * have elapsed since the last time the debounced function was invoked.
+ * Debounce function to delay execution
  */
-export function debounce<T extends (...args: unknown[]) => unknown>(
+export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => void {
+): T & { cancel: () => void } {
   let timeout: NodeJS.Timeout | null = null;
 
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-
+  const debounced = ((...args: Parameters<T>) => {
     if (timeout) {
       clearTimeout(timeout);
     }
-    timeout = setTimeout(later, wait);
-  };
-}
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
+  }) as T & { cancel: () => void };
 
+  debounced.cancel = () => {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  return debounced;
+}

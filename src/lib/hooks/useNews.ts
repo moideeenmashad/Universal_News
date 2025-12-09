@@ -1,119 +1,276 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { newsService } from '../api/news';
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/types/news';
-import { QUERY_STALE_TIME } from '@/constants/config';
 import { ApiError } from '../errors/ApiError';
+import {
+  getTopHeadlines as getTopHeadlinesAction,
+  getEverything as getEverythingAction,
+  getLatestNews as getLatestNewsAction,
+  getArticleByTitle as getArticleByTitleAction,
+  getArticleByTitleUniversal as getArticleByTitleUniversalAction,
+} from '../actions/news';
+
+interface UseDataResult<T> {
+  data: T | null;
+  isLoading: boolean;
+  error: Error | null;
+}
 
 /**
- * Hook to fetch top headlines
- * @param category - News category (optional)
- * @param country - Country code (default: 'us')
- * @param pageSize - Number of articles (default: 20)
+ * Hook to fetch top headlines using Next.js server actions
  */
 export const useTopHeadlines = (
   category?: string,
   country: string = 'us',
   pageSize: number = 20
-): UseQueryResult<NewsApiResponse, ApiError> => {
-  return useQuery<NewsApiResponse, ApiError>({
-    queryKey: ['topHeadlines', category, country, pageSize],
-    queryFn: () => newsService.getTopHeadlines(category, country, pageSize),
-    staleTime: QUERY_STALE_TIME,
-    retry: (failureCount, error) => {
-      // Don't retry on 401 (unauthorized) or 400 (bad request)
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
-        return false;
+): UseDataResult<NewsApiResponse> => {
+  const [data, setData] = useState<NewsApiResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await getTopHeadlinesAction(category, country, pageSize);
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled && !(err instanceof Error && err.name === 'AbortError')) {
+          const apiError = err instanceof ApiError ? err : new ApiError('Failed to fetch headlines', 500);
+          setError(apiError);
+          setIsLoading(false);
+        }
       }
-      return failureCount < 2;
-    },
-  });
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [category, country, pageSize]);
+
+  return { data, isLoading, error };
 };
 
 /**
- * Hook to fetch articles by query
- * @param query - Search query
- * @param pageSize - Number of articles (default: 20)
+ * Hook to fetch articles by query using Next.js server actions
  */
-export const useEverything = (
-  query: string,
-  pageSize: number = 20
-): UseQueryResult<NewsApiResponse, ApiError> => {
-  return useQuery<NewsApiResponse, ApiError>({
-    queryKey: ['everything', query, pageSize],
-    queryFn: () => newsService.getEverything(query, pageSize),
-    staleTime: QUERY_STALE_TIME,
-    enabled: !!query && query.trim().length > 0,
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
-        return false;
+export const useEverything = (query: string, pageSize: number = 20): UseDataResult<NewsApiResponse> => {
+  const [data, setData] = useState<NewsApiResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!query || query.trim().length === 0) {
+      setData(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await getEverythingAction(query, pageSize);
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled && !(err instanceof Error && err.name === 'AbortError')) {
+          const apiError = err instanceof ApiError ? err : new ApiError('Failed to fetch articles', 500);
+          setError(apiError);
+          setIsLoading(false);
+        }
       }
-      return failureCount < 2;
-    },
-  });
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query, pageSize]);
+
+  return { data, isLoading, error };
 };
 
 /**
- * Hook to fetch latest news from NewsData.io
- * @param query - Search query (default: 'worldnews')
+ * Hook to fetch latest news using Next.js server actions
  */
-export const useLatestNews = (
-  query: string = 'worldnews'
-): UseQueryResult<NewsDataResponse, ApiError> => {
-  return useQuery<NewsDataResponse, ApiError>({
-    queryKey: ['latestNews', query],
-    queryFn: () => newsService.getLatestNews(query),
-    staleTime: QUERY_STALE_TIME,
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
-        return false;
+export const useLatestNews = (query: string = 'worldnews'): UseDataResult<NewsDataResponse> => {
+  const [data, setData] = useState<NewsDataResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await getLatestNewsAction(query);
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled && !(err instanceof Error && err.name === 'AbortError')) {
+          const apiError = err instanceof ApiError ? err : new ApiError('Failed to fetch latest news', 500);
+          setError(apiError);
+          setIsLoading(false);
+        }
       }
-      return failureCount < 2;
-    },
-  });
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
+
+  return { data, isLoading, error };
 };
 
 /**
- * Hook to fetch article by title slug in specific category
- * @param category - News category
- * @param title - Slugified article title
+ * Hook to fetch article by title using Next.js server actions
  */
 export const useArticleByTitle = (
   category: string,
   title: string
-): UseQueryResult<NewsArticle | null, ApiError> => {
-  return useQuery<NewsArticle | null, ApiError>({
-    queryKey: ['article', category, title],
-    queryFn: () => newsService.getArticleByTitle(category, title),
-    enabled: !!category && !!title,
-    staleTime: 5 * 60 * 1000, // 5 minutes for article details
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
-        return false;
+): UseDataResult<NewsArticle | null> => {
+  const [data, setData] = useState<NewsArticle | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!category || !title) {
+      setData(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await getArticleByTitleAction(category, title);
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled && !(err instanceof Error && err.name === 'AbortError')) {
+          const apiError = err instanceof ApiError ? err : new ApiError('Failed to fetch article', 500);
+          setError(apiError);
+          setIsLoading(false);
+        }
       }
-      return failureCount < 1;
-    },
-  });
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [category, title]);
+
+  return { data, isLoading, error };
 };
 
 /**
- * Hook to fetch article by title slug across all sources (universal search)
- * @param title - Slugified article title
- * @param searchQuery - Optional search query to narrow down results
+ * Hook to fetch article by title (universal search) using Next.js server actions
  */
 export const useArticleByTitleUniversal = (
   title: string,
   searchQuery?: string
-): UseQueryResult<NewsArticle | null, ApiError> => {
-  return useQuery<NewsArticle | null, ApiError>({
-    queryKey: ['articleUniversal', title, searchQuery],
-    queryFn: () => newsService.getArticleByTitleUniversal(title, searchQuery),
-    enabled: !!title,
-    staleTime: 5 * 60 * 1000, // 5 minutes for article details
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
-        return false;
+): UseDataResult<NewsArticle | null> => {
+  const [data, setData] = useState<NewsArticle | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!title) {
+      setData(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await getArticleByTitleUniversalAction(title, searchQuery);
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled && !(err instanceof Error && err.name === 'AbortError')) {
+          const apiError = err instanceof ApiError ? err : new ApiError('Failed to fetch article', 500);
+          setError(apiError);
+          setIsLoading(false);
+        }
       }
-      return failureCount < 1;
-    },
-  });
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [title, searchQuery]);
+
+  return { data, isLoading, error };
 };

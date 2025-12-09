@@ -4,6 +4,7 @@ import { memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
+import { getShimmerBlurDataURL } from '@/lib/utils/image';
 
 interface FeaturedItem {
   id: number;
@@ -68,6 +69,8 @@ export const Featured = memo(() => {
               className="rounded-sm object-cover"
               sizes="80px"
               loading="lazy"
+              placeholder="blur"
+              blurDataURL={getShimmerBlurDataURL()}
             />
           </div>
           <div className="min-w-0 flex-1">
