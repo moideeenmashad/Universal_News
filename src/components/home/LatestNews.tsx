@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useMemo, memo } from 'react';
-import { useEverything } from '@/lib/hooks/useNews';
+import { useSearchArticlesGraphQL } from '@/lib/hooks/useGraphQLNews';
 import { isValidArticle } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { LazyNewsItem } from './LazyNewsItem';
@@ -13,7 +13,8 @@ interface LatestNewsProps {
 
 export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error } = useEverything('keyword');
+  // Using GraphQL for better performance - only fetches needed fields
+  const { data, isLoading, error } = useSearchArticlesGraphQL('latest news', 20);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -30,9 +31,9 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
   }, []);
 
   const articles = useMemo(() => {
-    const allArticles = data?.articles?.slice(1, 8) || [];
+    const allArticles = data?.slice(1, 8) || [];
     return allArticles.filter(isValidArticle);
-  }, [data?.articles]);
+  }, [data]);
 
   return (
     <section

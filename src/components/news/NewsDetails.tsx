@@ -3,7 +3,7 @@
 import { PiCalendarLight } from 'react-icons/pi';
 import { formatDate } from '@/lib/utils/date';
 import Image from 'next/image';
-import { useArticleByTitle, useArticleByTitleUniversal } from '@/lib/hooks/useNews';
+import { useArticleByTitleGraphQL, useArticleByTitleUniversalGraphQL } from '@/lib/hooks/useGraphQLNews';
 import { isValidArticle } from '@/lib/utils/validation';
 import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
 import { getSafeImageUrl } from '@/lib/utils/imageConfig';
@@ -17,9 +17,9 @@ interface NewsDetailsProps {
 }
 
 export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) => {
-  // Try category-specific first, then universal search
-  const { data: categoryArticle, isLoading: isLoadingCategory, error: categoryError } = useArticleByTitle(category, title);
-  const { data: universalArticle, isLoading: isLoadingUniversal } = useArticleByTitleUniversal(
+  // Using GraphQL for better performance
+  const { data: categoryArticle, isLoading: isLoadingCategory, error: categoryError } = useArticleByTitleGraphQL(category, title);
+  const { data: universalArticle, isLoading: isLoadingUniversal } = useArticleByTitleUniversalGraphQL(
     title,
     searchQuery
   );
