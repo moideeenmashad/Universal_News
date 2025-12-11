@@ -17,6 +17,13 @@ export function SearchContent() {
   const { data, isLoading, error } = useEverything(query, 20);
   const articles = useMemo(() => data?.articles || [], [data?.articles]);
 
+  // Reset visible count when query changes (using key pattern instead of effect)
+  const prevQueryRef = useRef(query);
+  if (prevQueryRef.current !== query) {
+    prevQueryRef.current = query;
+    setVisibleCount(10);
+  }
+
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       if (entries[0].isIntersecting && visibleCount < articles.length) {
@@ -46,10 +53,6 @@ export function SearchContent() {
       }
     };
   }, [handleIntersection]);
-
-  useEffect(() => {
-    setVisibleCount(10);
-  }, [query]);
 
   const visibleArticles = useMemo(() => articles.slice(0, visibleCount), [articles, visibleCount]);
 

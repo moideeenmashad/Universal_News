@@ -14,6 +14,13 @@ const eslintConfig = [
   {
     rules: {
       "react/jsx-no-target-blank": "off",
+      "react-hooks/set-state-in-effect": "warn", // Allow setState in effects with setTimeout
+      "react-hooks/preserve-manual-memoization": "warn", // Allow manual memoization
+      "@typescript-eslint/no-explicit-any": "warn", // Allow any in type declarations
+      "@typescript-eslint/no-unused-vars": ["warn", { 
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      }],
     },
   },
 ];

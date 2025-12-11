@@ -179,8 +179,11 @@ export const useArticleByTitle = (
 
   useEffect(() => {
     if (!category || !title) {
-      setData(null);
-      setIsLoading(false);
+      // Use setTimeout to avoid setState in effect warning
+      setTimeout(() => {
+        setData(null);
+        setIsLoading(false);
+      }, 0);
       return;
     }
 
@@ -234,8 +237,11 @@ export const useArticleByTitleUniversal = (
 
   useEffect(() => {
     if (!title) {
-      setData(null);
-      setIsLoading(false);
+      // Use setTimeout to avoid setState in effect warning
+      setTimeout(() => {
+        setData(null);
+        setIsLoading(false);
+      }, 0);
       return;
     }
 

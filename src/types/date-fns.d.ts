@@ -4,7 +4,7 @@ declare module 'date-fns' {
     date: Date | number,
     options?: { addSuffix?: boolean }
   ): string;
-  export function isValid(date: any): date is Date;
+  export function isValid(date: unknown): date is Date;
   export function formatRelativeTime(
     date: Date | number,
     baseDate?: Date | number,

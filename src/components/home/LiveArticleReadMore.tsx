@@ -21,7 +21,7 @@ export const LiveArticleReadMore = ({ title }: LiveArticleReadMoreProps) => {
   const article = useMemo(() => {
     if (!data?.results) return null;
     return data.results.find((item) => slugify(item.title) === title) || null;
-  }, [data?.results, title]);
+  }, [data.results, title]);
 
   const isValidArticle = article && isValidNewsDataArticle(article);
 

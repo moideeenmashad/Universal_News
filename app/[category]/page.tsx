@@ -13,7 +13,7 @@ export default async function CategoryPage(props: Props) {
   const { category } = params;
 
   // Check if category is valid (including world-news)
-  if (!VALID_CATEGORIES.includes(category as any)) {
+  if (!VALID_CATEGORIES.includes(category as (typeof VALID_CATEGORIES)[number])) {
     notFound();
   }
 

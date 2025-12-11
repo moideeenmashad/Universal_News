@@ -42,19 +42,7 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
     if (firstValid) return firstValid;
     const fallback = data.articles.find((article) => article?.title);
     return fallback || null;
-  }, [data?.articles]);
-
-  const primaryCategory = useMemo(() => {
-    const sourceName = latestNews?.source?.name;
-    if (!sourceName) return 'General';
-    return sanitizeTitle(sourceName);
-  }, [latestNews?.source?.name]);
-
-  const authorName = useMemo(() => {
-    const author = latestNews?.author;
-    if (!author) return 'Unknown';
-    return sanitizeTitle(author);
-  }, [latestNews?.author]);
+  }, [data.articles]);
 
   if (isLoading) {
     return (
