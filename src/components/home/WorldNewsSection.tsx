@@ -1,12 +1,13 @@
 'use client';
 
 import { useRef, useEffect, useMemo, memo } from 'react';
+import Link from 'next/link';
+import { BsArrowRightCircle } from 'react-icons/bs';
 import { useEverything } from '@/lib/hooks/useNews';
 import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
 import { formatDate } from '@/lib/utils/date';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
-import { LazyNewsItem } from './LazyNewsItem';
+import { ROUTES } from '@/constants/routes';
 
 interface WorldNewsSectionProps {
   title: string;
@@ -32,108 +33,139 @@ export const WorldNewsSection = memo(({ title, articleUrlName }: WorldNewsSectio
   }, []);
 
   const articles = useMemo(() => {
-    const allArticles = data?.articles?.slice(1, 8) || [];
+    const allArticles = data?.articles || [];
     return allArticles.filter(isValidArticle);
   }, [data?.articles]);
 
-  const feature = articles[0];
-  const sideStack = articles.slice(1, 4);
-
-  const buildArticleUrl = (title: string) => `/world-news/${articleUrlName(title)}`;
+  // Main hero uses the second item when available, otherwise the first
+  const feature = articles[1] || articles[0];
+  const sideStack = articles.filter((a) => a !== feature).slice(0, 3);
 
   return (
-    <section
-      className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0"
-      ref={containerRef}
-      aria-label={title}
-    >
-      <div className="flex items-center justify-between border-b border-primary pb-3 mb-10">
-        <h2 className="text-2xl md:text-4xl font-medium text-primary uppercase">{title}</h2>
+    <div className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0" ref={containerRef}>
+      {/* Section Header */}
+      <div className="mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
+        <h2 className="text-4xl font-medium text-primary uppercase">{title}</h2>
+        <div className="flex items-start justify-end">
+          <Link className="flex items-center text-sm link" href={ROUTES.WORLD_NEWS}>
+            View All
+            <BsArrowRightCircle className="ml-[5px] h-[20px] w-[20px]" />
+          </Link>
+        </div>
       </div>
 
       {isLoading ? (
-        <ArticleSkeleton count={6} />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 justify-evenly">
+            {/* Main hero skeleton */}
+            <div className="md:row-span-3 md:col-span-2">
+              <div className="overflow-hidden rounded-sm relative">
+                <div className="w-full h-[520px] rounded-sm bg-gray-200 animate-pulse"></div>
+                <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-gray-300/70">
+                  <div className="space-y-3">
+                    <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-6 w-3/4 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+                  <div className="h-4 w-32 bg-gray-200 animate-pulse rounded"></div>
+                </div>
+              </div>
+            </div>
+            {/* Side list skeletons */}
+            {[0, 1, 2].map((i) => (
+              <div key={`skeleton-${i}`} className="grid items-center gap-4 [grid-template-columns:40%_60%]">
+                <div className="w-full aspect-square bg-gray-200 animate-pulse rounded-sm"></div>
+                <div className="space-y-2">
+                  <div className="h-3 w-24 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-4 w-2/3 bg-gray-200 animate-pulse rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : error ? (
-        <ErrorMessage
-          message={error instanceof Error ? error.message : 'Failed to load news.'}
-        />
+        <ErrorMessage message={error instanceof Error ? error.message : 'Failed to load news.'} />
       ) : articles.length === 0 || !feature ? (
         <div className="text-center py-12" role="status">
           <p className="text-gray-600 text-lg">No articles found.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-stretch">
-            {/* Feature large card */}
-            <div className="relative group overflow-hidden rounded-sm h-full min-h-[360px]">
-              <a
-                href={buildArticleUrl(feature.title)}
-                className="block h-full w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                aria-label={`Read article: ${feature.title}`}
-              >
-                <div className="relative h-full min-h-[360px] w-full">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 justify-evenly">
+          {/* Main Grid Item with Image and Overlay */}
+          <div className="md:row-span-3 md:col-span-2">
+            <div className="overflow-hidden rounded-sm relative block">
+              <div className="overflow-hidden rounded-sm relative">
+                {feature?.urlToImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={feature.urlToImage || 'https://via.placeholder.com/800'}
-                    alt={feature.title || 'World news image'}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    src={feature.urlToImage}
+                    alt={feature.title || 'news thumbnail'}
+                    className="w-full h-[520px] object-cover hover:scale-105 ease-in-out transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
-                  <div className="absolute inset-0 flex flex-col justify-between p-4 text-white">
-                    <div>
-                      <span className="inline-block bg-white/90 text-gray-900 text-[11px] font-semibold px-3 py-1 rounded-sm mb-3">
-                        {formatDate(feature.publishedAt, 'MMM d, yyyy')}
-                      </span>
-                      <h3 className="text-xl md:text-2xl font-semibold leading-tight line-clamp-3">
-                        {feature.title}
-                      </h3>
-                    </div>
-                    <p className="text-xs opacity-90">
-                      By {sanitizeTitle(feature.author || 'Staff Writer')}
+                ) : (
+                  <div className="h-[520px] w-full rounded-sm bg-gray-200 animate-pulse"></div>
+                )}
+                {/* Overlay Card */}
+                <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-primary">
+                  <div>
+                    <p className="text-xs px-5 py-2 bg-white text-primary w-fit rounded-lg mb-[12px]">
+                      {feature?.publishedAt ? formatDate(feature.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}
+                    </p>
+                    <p className="text-primary text-[26px] font-semibold leading-snug">
+                      {feature?.title || 'Untitled'}
+                    </p>
+                  </div>
+                  <p className="text-sm text-primary">
+                    <span>By.</span>
+                    <span> {sanitizeTitle(feature?.author || 'Unknown Author')} / </span>
+                    <span>Publisher</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right column cards */}
+          {sideStack.length > 0
+            ? sideStack.slice(0, 3).map((article, index) => (
+                <div
+                  key={article.url || `world-${index}`}
+                  className="grid items-center gap-4 [grid-template-columns:40%_60%]"
+                >
+                  <div className="image-container mr-[8px] overflow-hidden rounded-sm relative">
+                    {article?.urlToImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={article.urlToImage}
+                        alt={article.title}
+                        className="w-full h-auto aspect-square object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full aspect-square bg-gray-300 animate-pulse rounded-sm"></div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-primary flex items-center">
+                      <span>{sanitizeTitle(article?.author || 'Unknown Author')}</span>
+                      <span className="mx-1">—</span>
+                      <span>{article?.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
+                    </p>
+                    <p className="font-semibold text-[18px] mt-1 leading-snug">
+                      {article?.title
+                        ? article.title.length > 60
+                          ? `${article.title.slice(0, 60)}...`
+                          : article.title
+                        : 'Untitled'}
                     </p>
                   </div>
                 </div>
-              </a>
-            </div>
-
-            {/* Right stacked cards */}
-            <div className="grid grid-rows-3 gap-5 h-full">
-              {sideStack.map((article, idx) => (
-                <a
-                  key={article.url || `world-side-${idx}`}
-                  href={buildArticleUrl(article.title)}
-                  className="flex items-start gap-4 rounded-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 h-full"
-                  aria-label={`Read article: ${article.title}`}
-                >
-                  <div className="relative w-28 h-full max-h-28 flex-shrink-0 overflow-hidden rounded-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={article.urlToImage || 'https://via.placeholder.com/200'}
-                      alt={article.title || 'News image'}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <p className="text-[12px] text-gray-600 mb-1">
-                      {sanitizeTitle(article.source?.name || 'World News')}
-                      <span className="mx-2 text-gray-400" aria-hidden="true">
-                        —
-                      </span>
-                      <span>{formatDate(article.publishedAt, 'MMM d, yyyy')}</span>
-                    </p>
-                    <h4 className="text-sm md:text-base font-semibold text-primary leading-snug line-clamp-3">
-                      {article.title}
-                    </h4>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
+              ))
+            : null}
         </div>
       )}
-    </section>
+    </div>
   );
 });
 

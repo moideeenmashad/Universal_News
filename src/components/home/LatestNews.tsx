@@ -37,7 +37,9 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
     return allArticles.filter(isValidArticle);
   }, [data?.articles]);
 
-  const buildArticleUrl = (title: string) => `/${'general'}/${articleUrlName(title)}`;
+  const feature = articles[1] || articles[0];
+  const sideStack = articles.filter((a) => a !== feature).slice(0, 2);
+  const bottomRow = articles.filter((a) => a !== feature && !sideStack.includes(a)).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0" ref={containerRef}>
@@ -112,18 +114,14 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
           {/* Top Row */}
           <div className="grid grid-cols-1 gap-x-16 md:grid-cols-2 rounded">
             {/* 1) Large Featured Article (using articles[1]) */}
-            <Link
-              href={articles[1] ? buildArticleUrl(articles[1].title) : '#'}
-              className="rounded-sm bg-white relative block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              aria-label={articles[1] ? `Read article: ${articles[1].title}` : 'Article link'}
-            >
+            <div className="rounded-sm bg-white relative block">
               <div className="overflow-hidden relative rounded-sm">
                 {/* Overlay for darkening the image */}
                 <div className="absolute inset-0 bg-black opacity-30 z-10"></div>
-                {articles[1]?.urlToImage ? (
+                {feature?.urlToImage ? (
                   <img
-                    src={articles[1].urlToImage}
-                    alt={articles[1].title || 'news thumbnail'}
+                    src={feature.urlToImage}
+                    alt={feature.title || 'news thumbnail'}
                     className="h-[490px] rounded-sm w-full object-cover transition-transform ease-in-out duration-300 hover:scale-105 filter brightness-75"
                     loading="lazy"
                   />
@@ -133,38 +131,36 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
               </div>
               <div className="absolute bottom-[40px] left-[26px] p-[20px] z-20">
                 <h3 className="mb-2 text-[22px] font-bold text-white underline">
-                  {articles[1]?.title ? (
-                    articles[1].title
+                  {feature?.title ? (
+                    feature.title
                   ) : (
                     <span className="block h-2 w-1/2 rounded-sm bg-gray-400 animate-pulse"></span>
                   )}
                 </h3>
                 <p className="text-white">
-                  {articles[1]?.publishedAt ? (
-                    formatDate(articles[1].publishedAt, 'MMM d, yyyy')
+                  {feature?.publishedAt ? (
+                    formatDate(feature.publishedAt, 'MMM d, yyyy')
                   ) : (
                     <span className="block h-2 w-1/2 rounded-sm bg-gray-400 animate-pulse"></span>
                   )}
                 </p>
               </div>
-            </Link>
+            </div>
 
             {/* 2 & 3) Two Stacked Articles on the Right */}
             <div>
-              {[2, 3].map((i) => (
-                <Link
-                  key={i}
-                  href={articles[i] ? buildArticleUrl(articles[i].title) : '#'}
-                  className="grid grid-cols-2 md:grid-cols-2 mb-[30px] bg-white rounded-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                  aria-label={articles[i] ? `Read article: ${articles[i].title}` : 'Article link'}
+              {sideStack.map((article, idx) => (
+                <div
+                  key={article.url || `side-${idx}`}
+                  className="grid grid-cols-2 md:grid-cols-2 mb-[30px] bg-white rounded-sm"
                 >
                   <div className="flex items-center">
                     <div className="grid gap-y-[12px]">
-                      {articles[i]?.title ? (
+                      {article?.title ? (
                         <h3 className="mb-1 text-[18px] font-semibold text-gray-800">
-                          {articles[i].title.length > 50
-                            ? articles[i].title.slice(0, 51) + '...'
-                            : articles[i].title}
+                          {article.title.length > 50
+                            ? article.title.slice(0, 51) + '...'
+                            : article.title}
                         </h3>
                       ) : (
                         <div className="skeleton">
@@ -172,20 +168,20 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
                           <div className="block h-[20px] w-[200px] rounded-sm bg-gray-200 animate-pulse mt-[6px]"></div>
                         </div>
                       )}
-                      {articles[i]?.publishedAt ? (
+                      {article?.publishedAt ? (
                         <p className="text-xs font-normal">
-                          {formatDate(articles[i].publishedAt, 'MMM d, yyyy')}
+                          {formatDate(article.publishedAt, 'MMM d, yyyy')}
                         </p>
                       ) : (
                         <div className="block h-[20px] w-[100px] rounded-sm bg-gray-200 animate-pulse"></div>
                       )}
                     </div>
                   </div>
-                  {articles[i]?.urlToImage ? (
+                  {article?.urlToImage ? (
                     <div className="image-container overflow-hidden relative rounded-sm">
                       <img
-                        src={articles[i].urlToImage}
-                        alt={articles[i].title || 'news thumbnail'}
+                        src={article.urlToImage}
+                        alt={article.title || 'news thumbnail'}
                         className="h-[230px] w-full rounded-sm object-cover transition-transform ease-in-out duration-300 hover:scale-105"
                         loading="lazy"
                       />
@@ -193,25 +189,23 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
                   ) : (
                     <div className="block h-[230px] w-full rounded-sm bg-gray-200 animate-pulse"></div>
                   )}
-                </Link>
+                </div>
               ))}
             </div>
           </div>
 
           {/* Bottom Row (Articles #4, #5, #6) */}
           <div className="mt-[14px] gap-x-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3">
-            {[4, 5, 6].map((i) => (
-              <Link
-                key={i}
-                href={articles[i] ? buildArticleUrl(articles[i].title) : '#'}
-                className="overflow-hidden rounded-sm bg-white hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                aria-label={articles[i] ? `Read article: ${articles[i].title}` : 'Article link'}
+            {bottomRow.map((article, index) => (
+              <div
+                key={article.url || `bottom-${index}`}
+                className="overflow-hidden rounded-sm bg-white"
               >
-                {articles[i]?.urlToImage ? (
+                {article?.urlToImage ? (
                   <div className="image-container overflow-hidden relative rounded-sm">
                     <img
-                      src={articles[i].urlToImage}
-                      alt={articles[i].title || 'news thumbnail'}
+                      src={article.urlToImage}
+                      alt={article.title || 'news thumbnail'}
                       className="h-[230px] w-full rounded-sm object-cover transition-transform ease-in-out duration-300 hover:scale-105"
                       loading="lazy"
                     />
@@ -220,25 +214,25 @@ export const LatestNews = memo(({ title, articleUrlName }: LatestNewsProps) => {
                   <div className="block h-[230px] w-full rounded-sm bg-gray-200 animate-pulse"></div>
                 )}
                 <div className="mt-[8px]">
-                  {articles[i]?.title ? (
+                  {article?.title ? (
                     <h3 className="mb-1 text-[18px] font-semibold text-gray-800">
-                      {articles[i].title.length > 80
-                        ? articles[i].title.slice(0, 80) + '...'
-                        : articles[i].title}
+                      {article.title.length > 80
+                        ? article.title.slice(0, 80) + '...'
+                        : article.title}
                     </h3>
                   ) : (
                     <div className="block h-[20px] w-full rounded-sm bg-gray-200 animate-pulse mt-[6px]"></div>
                   )}
 
-                  {articles[i]?.publishedAt ? (
+                  {article?.publishedAt ? (
                     <p className="text-xs font-normal mt-[8px]">
-                      {formatDate(articles[i].publishedAt, 'MMM d, yyyy')}
+                      {formatDate(article.publishedAt, 'MMM d, yyyy')}
                     </p>
                   ) : (
                     <div className="block h-[12px] w-full rounded-sm bg-gray-200 animate-pulse mt-[6px]"></div>
                   )}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </>
