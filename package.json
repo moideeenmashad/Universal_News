@@ -30,6 +30,7 @@
     "vercel": "^49.2.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.39.1",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.0",
