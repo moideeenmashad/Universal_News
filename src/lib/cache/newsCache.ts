@@ -1,26 +1,15 @@
 import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
 
-// Only import fs on server-side
-let fs: typeof import('fs').promises | null = null;
-let path: typeof import('path') | null = null;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-// Lazy load Node.js modules only on server
-async function getNodeModules() {
-  if (typeof window !== 'undefined') {
-    // Client-side - return null
-    return { fs: null, path: null };
-  }
-  
-  if (!fs || !path) {
-    // Lazy load on server
-    fs = (await import('fs')).promises;
-    path = await import('path');
-  }
-  
-  return { fs, path };
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
 }
 
-// Use /tmp on Vercel (writable), or .cache locally
+/**
+ * Get cache directory path (server-only)
+ */
 function getCacheDir(): string {
   if (typeof window !== 'undefined') {
     return ''; // Client-side - no cache directory
@@ -33,43 +22,23 @@ function getCacheDir(): string {
   return '.cache/news';
 }
 
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-}
-
-/**
- * Ensure cache directory exists (server-only)
- */
-async function ensureCacheDir(): Promise<void> {
-  if (typeof window !== 'undefined') return; // Client-side - skip
-  
-  try {
-    const { fs: fsModule, path: pathModule } = await getNodeModules();
-    if (!fsModule || !pathModule) return;
-    
-    const cacheDir = getCacheDir();
-    await fsModule.mkdir(cacheDir, { recursive: true });
-  } catch (error) {
-    // Directory might already exist or not writable
-  }
-}
-
 /**
  * Get cache file path for a given key (server-only)
  */
-async function getCacheFilePath(key: string): Promise<string | null> {
+function getCacheFilePath(key: string): string | null {
   if (typeof window !== 'undefined') return null; // Client-side - no file path
   
-  const { path: pathModule } = await getNodeModules();
-  if (!pathModule) return null;
-  
-  const cacheDir = getCacheDir();
-  // Sanitize key to be filesystem-safe
-  const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
-  return pathModule.join(cacheDir, `${safeKey}.json`);
+  // Use dynamic require that webpack won't try to resolve
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const path = require('path');
+    const cacheDir = getCacheDir();
+    // Sanitize key to be filesystem-safe
+    const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
+    return path.join(cacheDir, `${safeKey}.json`);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -79,18 +48,24 @@ export async function saveToCache<T>(key: string, data: T): Promise<void> {
   if (typeof window !== 'undefined') return; // Client-side - skip caching
   
   try {
-    await ensureCacheDir();
-    const { fs: fsModule, path: pathModule } = await getNodeModules();
-    if (!fsModule || !pathModule) return;
+    // Use dynamic require that webpack won't try to resolve
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs').promises;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const path = require('path');
+    
+    const cacheDir = getCacheDir();
+    await fs.mkdir(cacheDir, { recursive: true });
     
     const cacheEntry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
     };
-    const filePath = await getCacheFilePath(key);
+    
+    const filePath = getCacheFilePath(key);
     if (!filePath) return;
     
-    await fsModule.writeFile(filePath, JSON.stringify(cacheEntry, null, 2), 'utf-8');
+    await fs.writeFile(filePath, JSON.stringify(cacheEntry, null, 2), 'utf-8');
   } catch (error) {
     // Silently fail - caching is optional and may not work in all environments
     if (process.env.NODE_ENV === 'development') {
@@ -106,13 +81,14 @@ export async function loadFromCache<T>(key: string): Promise<T | null> {
   if (typeof window !== 'undefined') return null; // Client-side - no cache access
   
   try {
-    const { fs: fsModule } = await getNodeModules();
-    if (!fsModule) return null;
+    // Use dynamic require that webpack won't try to resolve
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs').promises;
     
-    const filePath = await getCacheFilePath(key);
+    const filePath = getCacheFilePath(key);
     if (!filePath) return null;
     
-    const fileContent = await fsModule.readFile(filePath, 'utf-8');
+    const fileContent = await fs.readFile(filePath, 'utf-8');
     const cacheEntry: CacheEntry<T> = JSON.parse(fileContent);
 
     // Check if cache is still valid

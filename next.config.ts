@@ -70,6 +70,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // Webpack configuration to handle Node.js modules
+  webpack: (config, { isServer }) => {
+    // Don't try to resolve 'fs' and 'path' on client-side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
