@@ -16,7 +16,6 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
     "@radix-ui/react-select": "^2.2.6",
-    "@studio-freight/react-lenis": "^0.0.47",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.13",
     "graphql": "^16.12.0",
