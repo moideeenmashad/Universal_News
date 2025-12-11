@@ -1,7 +1,11 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  
+  // Fix warning about multiple lockfiles
+  outputFileTracingRoot: path.join(__dirname),
   
   // Image optimization
   images: {

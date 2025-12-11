@@ -13,8 +13,10 @@ export interface NewsArticle {
 
 export interface NewsApiResponse {
   status: string;
-  totalResults: number;
+  totalResults?: number;
   articles: NewsArticle[];
+  message?: string; // Error message when status is 'error'
+  code?: string; // Error code when status is 'error'
 }
 
 export interface NewsDataArticle {
