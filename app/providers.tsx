@@ -1,8 +1,8 @@
 'use client';
 
-import { Navbar } from '@/components/layouts/Navbar/Navbar';
-import { Footer } from '@/components/layouts/Footer/Footer';
-import { SmoothScroll } from '@/components/providers/SmoothScroll';
+import { Navbar } from '@/components/layout/Navbar/Navbar';
+import { Footer } from '@/components/layout/Footer/Footer';
+import { SmoothScroll } from '@/components/layout/providers/SmoothScroll';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

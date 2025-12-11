@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEverything } from '@/lib/hooks/useNews';
-import { NewsList } from '@/components/news/NewsList';
+import { NewsList } from '@/components/news-list/NewsList';
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 

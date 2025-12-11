@@ -1,16 +1,19 @@
-import { News } from '@/components/news/News';
+import { News } from '@/components/news-list/News';
 import { notFound } from 'next/navigation';
-import { isValidCategory } from '@/lib/utils/validation';
+import { CATEGORIES } from '@/constants/routes';
 
 type Props = {
   params: Promise<{ category: string }>;
 };
 
+const VALID_CATEGORIES = Object.values(CATEGORIES);
+
 export default async function CategoryPage(props: Props) {
   const params = await props.params;
   const { category } = params;
 
-  if (!isValidCategory(category)) {
+  // Check if category is valid (including world-news)
+  if (!VALID_CATEGORIES.includes(category as any)) {
     notFound();
   }
 

@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
-import '@/assets/styles/font.scss';
+import '@/styles/font.scss';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
@@ -11,8 +11,6 @@ export const metadata: Metadata = {
   description: 'Stay updated with the latest news from business, technology, sports, entertainment, health, science, and more.',
   keywords: ['news', 'latest news', 'world news', 'breaking news', 'current events'],
   authors: [{ name: 'Universal News' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
-  themeColor: '#000000',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -31,6 +29,13 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#000000',
 };
 
 export default function RootLayout({

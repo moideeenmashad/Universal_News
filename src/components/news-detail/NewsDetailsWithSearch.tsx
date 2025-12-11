@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { NewsDetails } from '@/components/news/NewsDetails';
+import { NewsDetails } from '@/components/news-detail/NewsDetails';
 
 interface NewsDetailsWithSearchProps {
   category: string;
