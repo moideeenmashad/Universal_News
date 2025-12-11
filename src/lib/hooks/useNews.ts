@@ -78,9 +78,12 @@ export const useEverything = (query: string, pageSize: number = 20): UseDataResu
 
   useEffect(() => {
     if (!query || query.trim().length === 0) {
-      setData(null);
-      setIsLoading(false);
-      return;
+      // Use setTimeout to avoid setState in effect warning
+      const timer = setTimeout(() => {
+        setData(null);
+        setIsLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     // Cancel previous request if still pending
@@ -180,11 +183,11 @@ export const useArticleByTitle = (
   useEffect(() => {
     if (!category || !title) {
       // Use setTimeout to avoid setState in effect warning
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setData(null);
         setIsLoading(false);
       }, 0);
-      return;
+      return () => clearTimeout(timer);
     }
 
     // Cancel previous request if still pending
@@ -238,11 +241,11 @@ export const useArticleByTitleUniversal = (
   useEffect(() => {
     if (!title) {
       // Use setTimeout to avoid setState in effect warning
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setData(null);
         setIsLoading(false);
       }, 0);
-      return;
+      return () => clearTimeout(timer);
     }
 
     // Cancel previous request if still pending

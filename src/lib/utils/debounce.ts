@@ -1,7 +1,7 @@
 /**
  * Debounce function to delay execution
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): T & { cancel: () => void } {

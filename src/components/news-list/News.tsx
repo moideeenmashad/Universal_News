@@ -59,11 +59,9 @@ export const News = ({ category, title }: NewsProps) => {
   }, [handleIntersection]);
 
   // Reset visible count when category changes
-  const prevCategoryRef = useRef(category);
-  if (prevCategoryRef.current !== category) {
-    prevCategoryRef.current = category;
+  useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }
+  }, [category]);
 
   const visibleArticles = useMemo(
     () => articles.slice(0, visibleCount),
