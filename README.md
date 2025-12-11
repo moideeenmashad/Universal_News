@@ -74,9 +74,36 @@ A modern news application built with Next.js 15, React 19, TypeScript, and Tailw
 - `/technology` - Technology news
 - `/[category]/[title]` - Article pages
 
+## 🚀 Deployment
+
+### Deploy to Vercel (Free Forever)
+
+**One command deploy:**
+```bash
+npx vercel
+```
+
+**Or via web interface:**
+1. Go to [vercel.com](https://vercel.com)
+2. Sign up with GitHub
+3. Import your repository
+4. Add environment variables:
+   - `NEXT_PUBLIC_NEWS_API_KEY`
+   - `NEXT_PUBLIC_NEWS_DATA_API_KEY`
+5. Deploy! 🎉
+
+**Free tier includes:**
+- ✅ Unlimited deployments
+- ✅ 100 GB bandwidth/month
+- ✅ Automatic HTTPS & CDN
+- ✅ Custom domains
+- ✅ Preview deployments
+
+📖 **See [docs/DEPLOY.md](./docs/DEPLOY.md) for detailed deployment guide**
+
 ## 🔧 Technologies
 
 - Next.js 15, React 19, TypeScript
 - Tailwind CSS
-- React Query
-- Axios
+- Lenis (Smooth Scrolling)
+- Date-fns

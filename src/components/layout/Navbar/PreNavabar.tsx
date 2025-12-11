@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { SlGlobe } from 'react-icons/sl';
 import { GoSearch, GoChevronRight } from 'react-icons/go';
 import { SearchModal } from '@/components/search/SearchModal';
-import './Navbar.css';
+
 
 export const PreNavabar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
