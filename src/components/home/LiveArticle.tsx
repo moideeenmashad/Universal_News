@@ -35,14 +35,15 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
     return () => observer.disconnect();
   }, []);
 
+  const articles = data?.articles ?? [];
   const latestNews = useMemo(() => {
-    if (!data?.articles?.length) return null;
+    if (!articles.length) return null;
     // Prefer valid article, otherwise take the first available with a title
-    const firstValid = data.articles.find((article) => isValidArticle(article));
+    const firstValid = articles.find((article) => isValidArticle(article));
     if (firstValid) return firstValid;
-    const fallback = data.articles.find((article) => article?.title);
+    const fallback = articles.find((article) => article?.title);
     return fallback || null;
-  }, [data.articles]);
+  }, [articles]);
 
   if (isLoading) {
     return (
