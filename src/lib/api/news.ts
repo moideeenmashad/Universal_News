@@ -12,30 +12,25 @@ import {
 } from '@/constants/config';
 import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/types/news';
 import { ApiError } from '../errors/ApiError';
+import {
+  saveToCache,
+  loadFromCache,
+  getHeadlinesCacheKey,
+  getEverythingCacheKey,
+  getLatestNewsCacheKey,
+} from '../cache/newsCache';
 
 class NewsService {
   private baseUrl = NEWS_API_BASE_URL;
   private newsDataUrl = NEWS_DATA_API_BASE_URL;
 
   /**
-   * Get the base URL for API routes (works in both server and client)
+   * Check if we're running on the server (server actions) or client
+   * Server actions can call external APIs directly (no CORS)
+   * Client-side must use API route proxy
    */
-  private getApiBaseUrl(): string {
-    // In server-side (server actions), use environment variable or construct from Vercel URL
-    if (typeof window === 'undefined') {
-      // Check for Vercel URL first (automatically set by Vercel)
-      if (process.env.VERCEL_URL) {
-        return `https://${process.env.VERCEL_URL}`;
-      }
-      // Check for custom site URL
-      if (process.env.NEXT_PUBLIC_SITE_URL) {
-        return process.env.NEXT_PUBLIC_SITE_URL;
-      }
-      // Fallback to localhost for local development
-      return 'http://localhost:3000';
-    }
-    // In client-side, use current origin
-    return window.location.origin;
+  private isServerSide(): boolean {
+    return typeof window === 'undefined';
   }
 
   async getTopHeadlines(
@@ -44,17 +39,35 @@ class NewsService {
     pageSize: number = DEFAULT_PAGE_SIZE,
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
+    const cacheKey = getHeadlinesCacheKey(category, country, pageSize);
+    
     try {
-      // Use Next.js API route to proxy requests (solves CORS/production issues)
-      const baseUrl = this.getApiBaseUrl();
-      const params = new URLSearchParams({
-        type: 'headlines',
-        country,
-        pageSize: String(pageSize),
-      });
-      if (category) params.set('category', category);
-
-      const url = `${baseUrl}/api/news?${params.toString()}`;
+      let url: string;
+      
+      // Server-side (server actions): call external API directly (no CORS issues)
+      if (this.isServerSide()) {
+        if (!NEWS_API_KEY) {
+          // Try to load from cache if API key is missing
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Using cached data (API key missing)');
+            return cachedData;
+          }
+          throw new ApiError('News API key is not configured', 401);
+        }
+        url = category
+          ? `${this.baseUrl}/top-headlines?category=${category}&country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`
+          : `${this.baseUrl}/top-headlines?country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      } else {
+        // Client-side: use API route proxy
+        const params = new URLSearchParams({
+          type: 'headlines',
+          country,
+          pageSize: String(pageSize),
+        });
+        if (category) params.set('category', category);
+        url = `/api/news?${params.toString()}`;
+      }
 
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -64,6 +77,12 @@ class NewsService {
       });
 
       if (!response.ok) {
+        // Try to load from cache on error
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API failed, using cached data');
+          return cachedData;
+        }
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
@@ -71,11 +90,29 @@ class NewsService {
       const data: NewsApiResponse = await response.json();
 
       if (data.status === 'error') {
+        // Try to load from cache on API error
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API returned error, using cached data');
+          return cachedData;
+        }
         throw new ApiError(data.message || 'Failed to fetch headlines', 400);
+      }
+
+      // Save successful response to cache
+      if (this.isServerSide()) {
+        await saveToCache(cacheKey, data);
       }
 
       return data;
     } catch (error) {
+      // Try to load from cache on any error
+      const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+      if (cachedData) {
+        console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+        return cachedData;
+      }
+      
       if (error instanceof ApiError) {
         throw error;
       }
@@ -98,21 +135,37 @@ class NewsService {
     language: string = DEFAULT_LANGUAGE,
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
+    if (!query || query.trim().length === 0) {
+      throw new ApiError('Search query cannot be empty', 400);
+    }
+
+    const cacheKey = getEverythingCacheKey(query.trim(), pageSize);
+    
     try {
-      if (!query || query.trim().length === 0) {
-        throw new ApiError('Search query cannot be empty', 400);
+      let url: string;
+      
+      // Server-side (server actions): call external API directly (no CORS issues)
+      if (this.isServerSide()) {
+        if (!NEWS_API_KEY) {
+          // Try to load from cache if API key is missing
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Using cached data (API key missing)');
+            return cachedData;
+          }
+          throw new ApiError('News API key is not configured', 401);
+        }
+        url = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      } else {
+        // Client-side: use API route proxy
+        const params = new URLSearchParams({
+          type: 'everything',
+          query: query.trim(),
+          language,
+          pageSize: String(pageSize),
+        });
+        url = `/api/news?${params.toString()}`;
       }
-
-      // Use Next.js API route to proxy requests (solves CORS/production issues)
-      const baseUrl = this.getApiBaseUrl();
-      const params = new URLSearchParams({
-        type: 'everything',
-        query: query.trim(),
-        language,
-        pageSize: String(pageSize),
-      });
-
-      const url = `${baseUrl}/api/news?${params.toString()}`;
       
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -122,6 +175,12 @@ class NewsService {
       });
 
       if (!response.ok) {
+        // Try to load from cache on error
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API failed, using cached data');
+          return cachedData;
+        }
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
@@ -129,11 +188,29 @@ class NewsService {
       const data: NewsApiResponse = await response.json();
 
       if (data.status === 'error') {
+        // Try to load from cache on API error
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API returned error, using cached data');
+          return cachedData;
+        }
         throw new ApiError(data.message || 'Failed to fetch articles', 400);
+      }
+
+      // Save successful response to cache
+      if (this.isServerSide()) {
+        await saveToCache(cacheKey, data);
       }
 
       return data;
     } catch (error) {
+      // Try to load from cache on any error
+      const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+      if (cachedData) {
+        console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+        return cachedData;
+      }
+      
       if (error instanceof ApiError) {
         throw error;
       }
@@ -180,16 +257,32 @@ class NewsService {
     language: string = DEFAULT_LANGUAGE,
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsDataResponse> {
+    const cacheKey = getLatestNewsCacheKey(query);
+    
     try {
-      // Use Next.js API route to proxy requests (solves CORS/production issues)
-      const baseUrl = this.getApiBaseUrl();
-      const params = new URLSearchParams({
-        type: 'latest',
-        query,
-        language,
-      });
-
-      const url = `${baseUrl}/api/news?${params.toString()}`;
+      let url: string;
+      
+      // Server-side (server actions): call external API directly (no CORS issues)
+      if (this.isServerSide()) {
+        if (!NEWS_DATA_API_KEY) {
+          // Try to load from cache if API key is missing
+          const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Using cached data (API key missing)');
+            return cachedData;
+          }
+          throw new ApiError('NewsData API key is not configured', 401);
+        }
+        url = `${this.newsDataUrl}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(query)}&language=${language}`;
+      } else {
+        // Client-side: use API route proxy
+        const params = new URLSearchParams({
+          type: 'latest',
+          query,
+          language,
+        });
+        url = `/api/news?${params.toString()}`;
+      }
       
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -199,6 +292,12 @@ class NewsService {
       });
 
       if (!response.ok) {
+        // Try to load from cache on error
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API failed, using cached data');
+          return cachedData;
+        }
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
@@ -206,11 +305,29 @@ class NewsService {
       const data: NewsDataResponse = await response.json();
 
       if (data.status === 'error') {
+        // Try to load from cache on API error
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API returned error, using cached data');
+          return cachedData;
+        }
         throw new ApiError('Failed to fetch latest news', 400);
+      }
+
+      // Save successful response to cache
+      if (this.isServerSide()) {
+        await saveToCache(cacheKey, data);
       }
 
       return data;
     } catch (error) {
+      // Try to load from cache on any error
+      const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+      if (cachedData) {
+        console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+        return cachedData;
+      }
+      
       if (error instanceof ApiError) {
         throw error;
       }

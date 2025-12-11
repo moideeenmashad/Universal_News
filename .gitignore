@@ -17,6 +17,7 @@ dist-ssr
 .next/
 out/
 build/
+.cache/
 .vercel
 
 # Editor directories and files

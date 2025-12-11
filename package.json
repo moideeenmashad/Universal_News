@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepopulate-cache": "node --loader ts-node/esm scripts/prepopulate-cache.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
