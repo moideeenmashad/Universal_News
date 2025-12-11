@@ -17,7 +17,7 @@ const eslintConfig = [
       "react-hooks/set-state-in-effect": "off", // Allow setState in effects (needed for reset logic)
       "react-hooks/preserve-manual-memoization": "warn", // Allow manual memoization
       "react-hooks/refs": "off", // Allow ref access in render (we use useEffect instead)
-      "@typescript-eslint/no-explicit-any": "warn", // Allow any in type declarations
+      "@typescript-eslint/no-explicit-any": "off", // Allow any in utility functions like debounce
       "@typescript-eslint/no-unused-vars": ["warn", { 
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",

@@ -29,7 +29,7 @@ export const useSearchSuggestions = (query: string): UseSearchSuggestionsResult 
 
     setIsDebouncing(true);
 
-    const debouncedSearch = debounce(async (searchQuery: string) => {
+    const debouncedSearch = debounce(async (searchQuery: string): Promise<void> => {
       setIsDebouncing(false);
       setIsLoading(true);
 
