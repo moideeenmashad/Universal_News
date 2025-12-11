@@ -1,11 +1,38 @@
-import { promises as fs } from 'fs';
-import path from 'path';
 import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
 
+// Only import fs on server-side
+let fs: typeof import('fs').promises | null = null;
+let path: typeof import('path') | null = null;
+
+// Lazy load Node.js modules only on server
+async function getNodeModules() {
+  if (typeof window !== 'undefined') {
+    // Client-side - return null
+    return { fs: null, path: null };
+  }
+  
+  if (!fs || !path) {
+    // Lazy load on server
+    fs = (await import('fs')).promises;
+    path = await import('path');
+  }
+  
+  return { fs, path };
+}
+
 // Use /tmp on Vercel (writable), or .cache locally
-const CACHE_DIR = process.env.VERCEL 
-  ? path.join('/tmp', 'news-cache')
-  : path.join(process.cwd(), '.cache', 'news');
+function getCacheDir(): string {
+  if (typeof window !== 'undefined') {
+    return ''; // Client-side - no cache directory
+  }
+  
+  // Server-side only
+  if (process.env.VERCEL) {
+    return '/tmp/news-cache';
+  }
+  return '.cache/news';
+}
+
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 interface CacheEntry<T> {
@@ -14,40 +41,58 @@ interface CacheEntry<T> {
 }
 
 /**
- * Ensure cache directory exists
+ * Ensure cache directory exists (server-only)
  */
 async function ensureCacheDir(): Promise<void> {
+  if (typeof window !== 'undefined') return; // Client-side - skip
+  
   try {
-    await fs.mkdir(CACHE_DIR, { recursive: true });
+    const { fs: fsModule, path: pathModule } = await getNodeModules();
+    if (!fsModule || !pathModule) return;
+    
+    const cacheDir = getCacheDir();
+    await fsModule.mkdir(cacheDir, { recursive: true });
   } catch (error) {
-    // Directory might already exist
+    // Directory might already exist or not writable
   }
 }
 
 /**
- * Get cache file path for a given key
+ * Get cache file path for a given key (server-only)
  */
-function getCacheFilePath(key: string): string {
+async function getCacheFilePath(key: string): Promise<string | null> {
+  if (typeof window !== 'undefined') return null; // Client-side - no file path
+  
+  const { path: pathModule } = await getNodeModules();
+  if (!pathModule) return null;
+  
+  const cacheDir = getCacheDir();
   // Sanitize key to be filesystem-safe
   const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
-  return path.join(CACHE_DIR, `${safeKey}.json`);
+  return pathModule.join(cacheDir, `${safeKey}.json`);
 }
 
 /**
- * Save data to cache
+ * Save data to cache (server-only, fails silently on client)
  */
 export async function saveToCache<T>(key: string, data: T): Promise<void> {
+  if (typeof window !== 'undefined') return; // Client-side - skip caching
+  
   try {
     await ensureCacheDir();
+    const { fs: fsModule, path: pathModule } = await getNodeModules();
+    if (!fsModule || !pathModule) return;
+    
     const cacheEntry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
     };
-    const filePath = getCacheFilePath(key);
-    await fs.writeFile(filePath, JSON.stringify(cacheEntry, null, 2), 'utf-8');
+    const filePath = await getCacheFilePath(key);
+    if (!filePath) return;
+    
+    await fsModule.writeFile(filePath, JSON.stringify(cacheEntry, null, 2), 'utf-8');
   } catch (error) {
     // Silently fail - caching is optional and may not work in all environments
-    // (e.g., read-only filesystems)
     if (process.env.NODE_ENV === 'development') {
       console.warn(`Cache save failed for ${key} (this is OK):`, error);
     }
@@ -55,12 +100,19 @@ export async function saveToCache<T>(key: string, data: T): Promise<void> {
 }
 
 /**
- * Load data from cache
+ * Load data from cache (server-only, returns null on client)
  */
 export async function loadFromCache<T>(key: string): Promise<T | null> {
+  if (typeof window !== 'undefined') return null; // Client-side - no cache access
+  
   try {
-    const filePath = getCacheFilePath(key);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
+    const { fs: fsModule } = await getNodeModules();
+    if (!fsModule) return null;
+    
+    const filePath = await getCacheFilePath(key);
+    if (!filePath) return null;
+    
+    const fileContent = await fsModule.readFile(filePath, 'utf-8');
     const cacheEntry: CacheEntry<T> = JSON.parse(fileContent);
 
     // Check if cache is still valid
@@ -97,4 +149,3 @@ export function getEverythingCacheKey(query: string, pageSize?: number): string 
 export function getLatestNewsCacheKey(query?: string): string {
   return `latest_${query || 'worldnews'}`;
 }
-
