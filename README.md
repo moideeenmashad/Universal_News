@@ -46,9 +46,16 @@ A modern news application built with Next.js 15, React 19, TypeScript, and Tailw
 
 2. **Create `.env.local`:**
    ```env
-   NEXT_PUBLIC_NEWS_API_KEY=your_key
-   NEXT_PUBLIC_NEWS_DATA_API_KEY=your_key
+   NEXT_PUBLIC_NEWS_API_KEY=your_newsapi_org_key
+   NEXT_PUBLIC_NEWS_DATA_API_KEY=your_newsdata_io_key
    ```
+
+   **⚠️ IMPORTANT for Vercel Deployment:**
+   - You MUST add these environment variables in Vercel Dashboard
+   - Go to: Project Settings → Environment Variables
+   - Add both variables for Production, Preview, and Development
+   - **Redeploy** after adding variables
+   - See [docs/VERCEL_SETUP.md](./docs/VERCEL_SETUP.md) for detailed instructions
 
 3. **Run development:**
    ```bash

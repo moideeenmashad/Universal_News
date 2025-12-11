@@ -18,14 +18,26 @@ class NewsService {
   private newsDataUrl = NEWS_DATA_API_BASE_URL;
 
   /**
-   * Fetches top headlines from NewsAPI with Next.js caching
-   * @param category - News category (optional)
-   * @param country - Country code (default: 'us')
-   * @param pageSize - Number of articles to fetch (default: 20)
-   * @param revalidate - Revalidation time in seconds (default: 60)
-   * @returns Promise with news articles
-   * @throws ApiError if request fails
+   * Get the base URL for API routes (works in both server and client)
    */
+  private getApiBaseUrl(): string {
+    // In server-side (server actions), use environment variable or construct from Vercel URL
+    if (typeof window === 'undefined') {
+      // Check for Vercel URL first (automatically set by Vercel)
+      if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`;
+      }
+      // Check for custom site URL
+      if (process.env.NEXT_PUBLIC_SITE_URL) {
+        return process.env.NEXT_PUBLIC_SITE_URL;
+      }
+      // Fallback to localhost for local development
+      return 'http://localhost:3000';
+    }
+    // In client-side, use current origin
+    return window.location.origin;
+  }
+
   async getTopHeadlines(
     category?: string,
     country: string = DEFAULT_COUNTRY,
@@ -33,13 +45,16 @@ class NewsService {
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
     try {
-      if (!NEWS_API_KEY) {
-        throw new ApiError('News API key is not configured', 401);
-      }
+      // Use Next.js API route to proxy requests (solves CORS/production issues)
+      const baseUrl = this.getApiBaseUrl();
+      const params = new URLSearchParams({
+        type: 'headlines',
+        country,
+        pageSize: String(pageSize),
+      });
+      if (category) params.set('category', category);
 
-      const url = category
-        ? `${this.baseUrl}/top-headlines?category=${category}&country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`
-        : `${this.baseUrl}/top-headlines?country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      const url = `${baseUrl}/api/news?${params.toString()}`;
 
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -49,7 +64,8 @@ class NewsService {
       });
 
       if (!response.ok) {
-        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
 
       const data: NewsApiResponse = await response.json();
@@ -83,15 +99,20 @@ class NewsService {
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
     try {
-      if (!NEWS_API_KEY) {
-        throw new ApiError('News API key is not configured', 401);
-      }
-
       if (!query || query.trim().length === 0) {
         throw new ApiError('Search query cannot be empty', 400);
       }
 
-      const url = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      // Use Next.js API route to proxy requests (solves CORS/production issues)
+      const baseUrl = this.getApiBaseUrl();
+      const params = new URLSearchParams({
+        type: 'everything',
+        query: query.trim(),
+        language,
+        pageSize: String(pageSize),
+      });
+
+      const url = `${baseUrl}/api/news?${params.toString()}`;
       
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -101,7 +122,8 @@ class NewsService {
       });
 
       if (!response.ok) {
-        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
 
       const data: NewsApiResponse = await response.json();
@@ -159,11 +181,15 @@ class NewsService {
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsDataResponse> {
     try {
-      if (!NEWS_DATA_API_KEY) {
-        throw new ApiError('NewsData API key is not configured', 401);
-      }
+      // Use Next.js API route to proxy requests (solves CORS/production issues)
+      const baseUrl = this.getApiBaseUrl();
+      const params = new URLSearchParams({
+        type: 'latest',
+        query,
+        language,
+      });
 
-      const url = `${this.newsDataUrl}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(query)}&language=${language}`;
+      const url = `${baseUrl}/api/news?${params.toString()}`;
       
       const response = await fetch(url, {
         next: { revalidate }, // Next.js caching with revalidation
@@ -173,7 +199,8 @@ class NewsService {
       });
 
       if (!response.ok) {
-        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
 
       const data: NewsDataResponse = await response.json();
