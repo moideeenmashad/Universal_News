@@ -18,10 +18,11 @@ interface LiveArticleReadMoreProps {
 export const LiveArticleReadMore = ({ title }: LiveArticleReadMoreProps) => {
   const { data, isLoading, error } = useLatestNews('worldnews');
 
+  const results = data?.results ?? [];
   const article = useMemo(() => {
-    if (!data?.results) return null;
-    return data.results.find((item) => slugify(item.title) === title) || null;
-  }, [data.results, title]);
+    if (!results.length) return null;
+    return results.find((item) => slugify(item.title) === title) || null;
+  }, [results, title]);
 
   const isValidArticle = article && isValidNewsDataArticle(article);
 
