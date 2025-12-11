@@ -58,9 +58,12 @@ export const News = ({ category, title }: NewsProps) => {
     };
   }, [handleIntersection]);
 
-  // Reset visible count when category changes
+  // Reset visible count when category changes using setTimeout to avoid setState in effect
   useEffect(() => {
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
+    const timer = setTimeout(() => {
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [category]);
 
   const visibleArticles = useMemo(

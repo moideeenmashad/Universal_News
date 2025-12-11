@@ -46,8 +46,12 @@ export function SearchContent() {
     };
   }, [handleIntersection]);
 
+  // Reset visible count when query changes using setTimeout to avoid setState in effect
   useEffect(() => {
-    setVisibleCount(10);
+    const timer = setTimeout(() => {
+      setVisibleCount(10);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const visibleArticles = useMemo(() => articles.slice(0, visibleCount), [articles, visibleCount]);

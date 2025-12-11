@@ -17,9 +17,12 @@ export function SearchContent() {
   const { data, isLoading, error } = useEverything(query, 20);
   const articles = useMemo(() => data?.articles || [], [data?.articles]);
 
-  // Reset visible count when query changes
+  // Reset visible count when query changes using setTimeout to avoid setState in effect
   useEffect(() => {
-    setVisibleCount(10);
+    const timer = setTimeout(() => {
+      setVisibleCount(10);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const handleIntersection = useCallback(
