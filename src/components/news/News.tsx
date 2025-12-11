@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { NewsList } from './NewsList';
-import { useTopHeadlinesGraphQL } from '@/lib/hooks/useGraphQLNews';
+import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { isValidCategory } from '@/lib/utils/validation';
 
 interface NewsProps {
@@ -24,9 +24,8 @@ export const News = ({ category, title }: NewsProps) => {
     return isValidCategory(category) ? category : undefined;
   }, [category]);
 
-  // Using GraphQL for better performance
-  const { data, isLoading, error } = useTopHeadlinesGraphQL(actualCategory, 'us', 20);
-  const articles = useMemo(() => data || [], [data]);
+  const { data, isLoading, error } = useTopHeadlines(actualCategory, 'us', 20);
+  const articles = useMemo(() => data?.articles || [], [data?.articles]);
 
   // Handle intersection observer for infinite scroll
   const handleIntersection = useCallback(

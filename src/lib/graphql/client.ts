@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, HttpLink, gql } from '@apollo/client';
 
 // GraphQL endpoint - using a public news GraphQL API
 // We'll use NewsAPI.org's REST API but wrap it with GraphQL-like queries
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'https://newsapi.org/v2';
+const GRAPHQL_ENDPOINT ='https://newsapi.org/v2';
 
 export const apolloClient = new ApolloClient({
   link: new HttpLink({

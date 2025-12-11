@@ -24,7 +24,7 @@ A modern news application built with Next.js 15, React 19, TypeScript, and Tailw
 │   ├── types/             # TypeScript types
 │   ├── constants/         # App constants
 │   ├── styles/            # Global styles
-
+│   └── assets/            # Static assets (fonts, images)
 │
 └── public/                # Public files
 ```

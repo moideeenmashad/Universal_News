@@ -1,0 +1,89 @@
+// Font Face Mixin
+@mixin font-face($name, $file, $weight) {
+  @font-face {
+    font-family: $name;
+    src: url("/fonts/#{$file}.ttf") format("truetype");
+    font-weight: $weight;
+    font-style: normal;
+    font-display: swap;
+  }
+}
+
+// Define Font Variations
+@include font-face("BricolageGrotesque", "BricolageGrotesque-Bold", bold);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-ExtraBold", 800);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-ExtraLight", 200);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-Light", 300);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-Medium", 500);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-Regular", 400);
+@include font-face("BricolageGrotesque", "BricolageGrotesque-SemiBold", 600);
+
+// Global Font Family - Applied to body, not all elements
+body {
+  font-family: "BricolageGrotesque", sans-serif;
+}
+
+// Font Weights
+@each $weight in 200, 300, 400, 500, 600, 700, 800, 900 {
+  .fw-#{$weight} {
+    font-weight: $weight;
+  }
+}
+
+// Spacings
+$spacer: 6.25rem;
+.spacer {
+  row-gap: $spacer;
+  display: grid;
+}
+
+// Theme Colors
+$primary-color: #202124;
+$secondary-color: #ffffff;
+$hover-color: #e63946;
+$active-color: #e63946;
+
+.text-light {
+  color: $secondary-color;
+}
+
+.text-primary {
+  color: $primary-color !important;
+  &:not(:hover) {
+    transition: 600ms;
+  }
+  &.active {
+    color: $active-color !important;
+  }
+}
+
+ul > a.text-primary {
+  &:hover,
+  &:active {
+    color: $hover-color !important;
+    transition: 600ms;
+  }
+}
+
+.link:hover {
+  color: $active-color !important;
+}
+
+.border-primary {
+  border-color: $primary-color !important;
+}
+
+@media only screen and (max-width: 600px) {
+  body {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+}
+
+.bg-primary {
+  background-color: $secondary-color !important;
+}
+
+.bg-teritory {
+  background-color: $primary-color !important;
+}

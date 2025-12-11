@@ -4,10 +4,10 @@ import { useRef, useEffect, useMemo } from 'react';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import Link from 'next/link';
 import Image from 'next/image';
-import { formatRelativeTime } from '@/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import { useLatestNews } from '@/lib/hooks/useNews';
-import { isValidNewsDataArticle } from '@/lib/utils/validation';
-import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
+import { isValidNewsDataArticle, sanitizeTitle } from '@/lib/utils/validation';
+import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface LiveArticleProps {
@@ -35,11 +35,29 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
   }, []);
 
   const latestNews = useMemo(() => {
-    const article = data?.results?.[1];
-    return article && isValidNewsDataArticle(article) ? article : null;
+    if (!data?.results?.length) return null;
+    const firstValid = data.results.find((article) => isValidNewsDataArticle(article));
+    return firstValid || null;
   }, [data?.results]);
 
+  const readingTime = useMemo(() => {
+    const text = `${latestNews?.content || ''} ${latestNews?.description || ''} ${latestNews?.title || ''}`;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.round(words / 200));
+    return `${minutes} Minute${minutes > 1 ? 's' : ''}`;
+  }, [latestNews?.content, latestNews?.description, latestNews?.title]);
 
+  const primaryCategory = useMemo(() => {
+    const category = latestNews?.category?.[0];
+    if (!category) return 'World News';
+    return sanitizeTitle(category);
+  }, [latestNews?.category]);
+
+  const authorName = useMemo(() => {
+    const author = latestNews?.creator?.[0];
+    if (!author) return 'Unknown';
+    return sanitizeTitle(author);
+  }, [latestNews?.creator]);
 
   if (isLoading) {
     return (
@@ -47,34 +65,7 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
         ref={containerRef}
         className="live-article-container mx-auto max-w-screen-xl relative mb-[100px] px-4 md:px-0"
       >
-        <div className="animate-pulse" aria-hidden="true" role="presentation">
-          {/* Image Skeleton */}
-          <div className="relative mb-6 overflow-hidden rounded-sm">
-            <div className="h-[400px] md:h-[580px] w-full skeleton-shimmer relative">
-              {/* Live Badge Skeleton */}
-              <div className="absolute top-[18px] left-[18px] bg-white rounded-sm px-3 py-3 flex items-center gap-2">
-                <div className="w-2 h-2 skeleton-dark rounded-full"></div>
-                <div className="h-3 skeleton-dark rounded w-20"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Date Skeleton */}
-          <div className="flex justify-end mb-3">
-            <div className="h-3 skeleton-shimmer rounded w-32"></div>
-          </div>
-
-          {/* Title and Link Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="col-span-3 space-y-3">
-              <div className="h-8 skeleton-shimmer rounded w-full"></div>
-              <div className="h-8 skeleton-shimmer rounded w-3/4"></div>
-            </div>
-            <div className="flex items-start justify-end">
-              <div className="h-5 skeleton-shimmer rounded w-24"></div>
-            </div>
-          </div>
-        </div>
+        <FeaturedArticleSkeleton />
       </div>
     );
   }
@@ -98,6 +89,7 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
 
   const articleSlug = articleUrlName(latestNews.title);
   const articleUrl = `/world-news/${articleSlug}`;
+  const publishedDate = formatDate(latestNews.pubDate, 'MMM d, yyyy');
 
   return (
     <div
@@ -106,20 +98,18 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
     >
       <article className="article-container mb-[24px]">
         <div className="image-container mb-[24px] overflow-hidden relative rounded-sm">
-          <div className="relative h-[400px] md:h-[580px] w-full">
+          <div className="relative h-[420px] md:h-[560px] w-full">
             <Image
-              src={latestNews.image_url || getFallbackImageUrl(1200, 580, 'Latest News')}
+              src={latestNews.image_url || 'https://via.placeholder.com/1200x580'}
               alt={latestNews.title || 'Latest news article'}
               fill
               className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
               sizes="(max-width: 768px) 100vw, 1200px"
               priority
-              placeholder="blur"
-              blurDataURL={getShimmerBlurDataURL()}
             />
           </div>
           <span
-            className="absolute top-[18px] left-[18px] bg-white text-xs font-medium px-[12px] py-[12px] rounded-sm flex items-center"
+            className="absolute top-[18px] left-[18px] bg-white text-xs font-medium px-[12px] py-[12px] rounded-sm flex items-center shadow-sm"
             aria-label="Live updates"
           >
             <span className="relative flex items-center justify-center mr-[8px]">
@@ -132,23 +122,36 @@ export const LiveArticle = ({ articleUrlName }: LiveArticleProps) => {
             Live Updates
           </span>
         </div>
-        <div className="flex justify-end mb-[12px] text-xs text-gray-600">
-          <time dateTime={latestNews.pubDate}>{formatRelativeTime(latestNews.pubDate)}</time>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="col-span-3">
-            <h1 className="font-semibold text-2xl md:text-[36px] leading-tight md:leading-[49px]">
+
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 text-[11px] uppercase tracking-wide font-semibold bg-gray-100 text-gray-800 rounded-sm">
+                {primaryCategory}
+              </span>
+              <span className="px-3 py-1 text-[11px] uppercase tracking-wide font-semibold bg-gray-100 text-gray-800 rounded-sm">
+                {authorName}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-gray-600">
+              <time dateTime={latestNews.pubDate}>{publishedDate}</time>
+              <span aria-hidden="true">•</span>
+              <span>{readingTime}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <h1 className="font-semibold text-[26px] md:text-[34px] leading-tight md:leading-[46px] text-primary max-w-4xl">
               {latestNews.title}
             </h1>
-          </div>
-          <div className="flex items-start justify-end md:justify-end">
             <Link
-              className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="flex items-center text-sm font-medium text-primary hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
               href={articleUrl}
               aria-label={`Read article: ${latestNews.title}`}
             >
               Read Article
-              <BsArrowRightCircle className="ml-[5px] h-[20px] w-[20px]" aria-hidden="true" />
+              <BsArrowRightCircle className="ml-[8px] h-[18px] w-[18px]" aria-hidden="true" />
             </Link>
           </div>
         </div>

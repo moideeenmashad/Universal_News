@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSearchSuggestionsGraphQL } from '../actions/graphqlNews';
+import { getSearchSuggestions } from '../actions/news';
 import { debounce } from '../utils/debounce';
 import type { NewsArticle } from '@/types/news';
 
@@ -34,8 +34,7 @@ export const useSearchSuggestions = (query: string): UseSearchSuggestionsResult 
       setIsLoading(true);
 
       try {
-        // Using GraphQL for minimal data transfer (only needed fields)
-        const results = await getSearchSuggestionsGraphQL(searchQuery, 5);
+        const results = await getSearchSuggestions(searchQuery, 5);
         setSuggestions(results);
       } catch (error) {
         console.error('Error fetching search suggestions:', error);

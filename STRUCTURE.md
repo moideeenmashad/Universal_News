@@ -16,7 +16,8 @@ src/
 │
 ├── types/             # TypeScript types
 ├── constants/         # App constants (config, routes)
-└── styles/            # Global CSS
+├── styles/            # Global CSS
+└── assets/            # Static files (fonts, images)
 ```
 
 ## 🎯 Simple Rules
@@ -31,20 +32,20 @@ src/
 
 ```typescript
 // Components
-import { Hero } from '@/components/home/Hero';
-import { News } from '@/components/news/News';
+import { Hero } from '@/src/components/home/Hero';
+import { News } from '@/src/components/news/News';
 
 // Hooks
-import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { useTopHeadlines } from '@/src/lib/hooks/useNews';
 
 // Utils
-import { slugify } from '@/lib/utils/string';
+import { slugify } from '@/src/lib/utils/string';
 
 // Types
-import type { NewsArticle } from '@/types/news';
+import type { NewsArticle } from '@/src/types/news';
 
 // Constants
-import { ROUTES } from '@/constants/routes';
+import { ROUTES } from '@/src/constants/routes';
 ```
 
 ## ✅ Benefits

@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
+import { ArticleSkeleton } from '../ui/ArticleSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { LazyArticle } from './LazyArticle';
 
@@ -45,22 +46,7 @@ export const NewsList = ({
         {error && <ErrorMessage message={error} className="mb-5" />}
 
         {isInitialLoad ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {Array(6).fill(0).map((_, i) => (
-              <div key={`skeleton-${i}`} className="rounded-md overflow-hidden bg-white" aria-hidden="true" role="presentation">
-                <div className="h-48 md:h-64 w-full skeleton-shimmer rounded-sm mb-3"></div>
-                <div className="space-y-2 mb-3">
-                  <div className="h-5 skeleton-shimmer rounded w-full"></div>
-                  <div className="h-5 skeleton-shimmer rounded w-4/5"></div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 skeleton-shimmer rounded w-20"></div>
-                  <div className="h-3 skeleton-shimmer rounded w-1"></div>
-                  <div className="h-3 skeleton-shimmer rounded w-24"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ArticleSkeleton count={6} />
         ) : visibleArticles.length === 0 && !loading ? (
           <div className="text-center py-12" role="status">
             <p className="text-gray-600 text-lg">No articles found.</p>
@@ -87,22 +73,7 @@ export const NewsList = ({
 
         {articles.length > 0 && loading && hasMore && (
           <div className="mt-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-5">
-              {Array(3).fill(0).map((_, i) => (
-                <div key={`skeleton-${i}`} className="rounded-md overflow-hidden bg-white" aria-hidden="true" role="presentation">
-                  <div className="h-48 md:h-64 w-full skeleton-shimmer rounded-sm mb-3"></div>
-                  <div className="space-y-2 mb-3">
-                    <div className="h-5 skeleton-shimmer rounded w-full"></div>
-                    <div className="h-5 skeleton-shimmer rounded w-4/5"></div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 skeleton-shimmer rounded w-20"></div>
-                    <div className="h-3 skeleton-shimmer rounded w-1"></div>
-                    <div className="h-3 skeleton-shimmer rounded w-24"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ArticleSkeleton count={3} variant="list" />
           </div>
         )}
       </div>

@@ -6,8 +6,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
-import { getShimmerBlurDataURL, getFallbackImageUrl } from '@/lib/utils/image';
-import { getSafeImageUrl } from '@/lib/utils/imageConfig';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyNewsItemProps {
@@ -21,7 +19,6 @@ const MAX_TITLE_LENGTH = 60;
 
 export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: LazyNewsItemProps) => {
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const articleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,19 +65,6 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
   const truncatedTitle = useMemo(() => truncateTitle(article.title), [article.title, truncateTitle]);
   const formattedAuthor = useMemo(() => formatAuthor(article.author), [article.author, formatAuthor]);
 
-  const handleImageError = useCallback(() => {
-    setImageError(true);
-  }, []);
-
-  const imageSrc = useMemo(() => {
-    if (imageError) {
-      return getFallbackImageUrl(800, 600, 'News Image');
-    }
-    // Use getSafeImageUrl to validate against Next.js config
-    const fallback = getFallbackImageUrl(800, 600, 'News Image');
-    return getSafeImageUrl(article.urlToImage, fallback);
-  }, [imageError, article.urlToImage]);
-
   if (!isValidArticle(article)) return null;
 
   // Show skeleton until visible
@@ -109,16 +93,13 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 w-full">
             <Image
-              src={imageSrc}
+              src={article.urlToImage || 'https://via.placeholder.com/300'}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               loading={index < 4 ? 'eager' : 'lazy'}
               priority={index < 2}
-              placeholder="blur"
-              blurDataURL={getShimmerBlurDataURL()}
-              onError={handleImageError}
             />
           </div>
         </div>
