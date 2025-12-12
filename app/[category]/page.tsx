@@ -18,10 +18,13 @@ export default async function CategoryPage(props: Props) {
   }
 
   // Capitalize title for display
-  const title = category
+  const titleParts = category
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ') + (category === 'podcasts' ? '' : ' News');
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
+  
+  // Check if title already ends with "News" to avoid duplication
+  const lastWord = titleParts[titleParts.length - 1]?.toLowerCase();
+  const title = titleParts.join(' ') + (category === 'podcasts' || lastWord === 'news' ? '' : ' News');
 
   return <News category={category} title={title} />;
 }

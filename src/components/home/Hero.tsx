@@ -9,7 +9,7 @@ import { TechnologyNewsSection } from './TechnologyNewsSection';
 import { PodcastsSection } from './PodcastsSection';
 import { slugify } from '@/lib/utils/string';
 
-const SECTION_TITLES = ['Latest News', 'World News'] as const;
+const SECTION_TITLES = ['Latest News', 'World News','Technology News'] as const;
 
 /**
  * Hero component - Main landing page section
@@ -17,12 +17,12 @@ const SECTION_TITLES = ['Latest News', 'World News'] as const;
  */
 export const Hero = memo(() => {
   return (
-    <div className="pt-[100px]" aria-label="Main content">
+    <div aria-label="Main content">
       <Featured />
       <LiveUpdatesSection articleUrlName={slugify} />
       <LatestNewsSection title={SECTION_TITLES[0]} />
       <WorldNewsSection title={SECTION_TITLES[1]} />
-      <TechnologyNewsSection title="Technology News" />
+      <TechnologyNewsSection title={SECTION_TITLES[2]} />
       <PodcastsSection />
     </div>
   );

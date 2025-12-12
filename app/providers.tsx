@@ -8,7 +8,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SmoothScroll>
       <Navbar />
-      <main role="main">{children}</main>
+      <main role="main">
+        {children}
+      </main>
       <Footer />
     </SmoothScroll>
   );
