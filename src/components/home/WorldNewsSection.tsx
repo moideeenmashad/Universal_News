@@ -3,18 +3,18 @@
 import { useRef, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
 import { BsArrowRightCircle } from 'react-icons/bs';
-import { useEverything } from '@/lib/hooks/useNews';
-import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
-import { formatDate } from '@/lib/utils/date';
-import { ErrorMessage } from '../ui/ErrorMessage';
 import { ROUTES } from '@/constants/routes';
+import { useEverything } from '@/lib/hooks/useNews';
+import { formatDate } from '@/lib/utils/date';
+import { slugify } from '@/lib/utils/string';
+import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
+import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface WorldNewsSectionProps {
   title: string;
-  articleUrlName: (text: string) => string;
 }
 
-export const WorldNewsSection = memo(({ title, articleUrlName }: WorldNewsSectionProps) => {
+export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, error } = useEverything('keyword');
 
@@ -84,7 +84,9 @@ export const WorldNewsSection = memo(({ title, articleUrlName }: WorldNewsSectio
           </div>
         </>
       ) : error ? (
-        <ErrorMessage message={error instanceof Error ? error.message : 'Failed to load news.'} />
+        <div className="pt-8">
+          <ErrorMessage message={error instanceof Error ? error.message : 'Failed to load news.'} />
+        </div>
       ) : articles.length === 0 || !feature ? (
         <div className="text-center py-12" role="status">
           <p className="text-gray-600 text-lg">No articles found.</p>
@@ -92,8 +94,11 @@ export const WorldNewsSection = memo(({ title, articleUrlName }: WorldNewsSectio
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 justify-evenly">
           {/* Main Grid Item with Image and Overlay */}
-          <div className="md:row-span-3 md:col-span-2">
-            <div className="overflow-hidden rounded-sm relative block">
+          {feature && (
+            <Link
+              href={`/world-news/${slugify(feature.title)}`}
+              className="md:row-span-3 md:col-span-2 overflow-hidden rounded-sm relative block hover:opacity-90 transition-opacity"
+            >
               <div className="overflow-hidden rounded-sm relative">
                 {feature?.urlToImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -123,45 +128,51 @@ export const WorldNewsSection = memo(({ title, articleUrlName }: WorldNewsSectio
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
+            </Link>
+          )}
 
           {/* Right column cards */}
           {sideStack.length > 0
-            ? sideStack.slice(0, 3).map((article, index) => (
-                <div
-                  key={article.url || `world-${index}`}
-                  className="grid items-center gap-4 [grid-template-columns:40%_60%]"
-                >
-                  <div className="image-container mr-[8px] overflow-hidden rounded-sm relative">
-                    {article?.urlToImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={article.urlToImage}
-                        alt={article.title}
-                        className="w-full h-auto aspect-square object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full aspect-square bg-gray-300 animate-pulse rounded-sm"></div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-primary flex items-center">
-                      <span>{sanitizeTitle(article?.author || 'Unknown Author')}</span>
-                      <span className="mx-1">—</span>
-                      <span>{article?.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
-                    </p>
-                    <p className="font-semibold text-[18px] mt-1 leading-snug">
-                      {article?.title
-                        ? article.title.length > 60
-                          ? `${article.title.slice(0, 60)}...`
-                          : article.title
-                        : 'Untitled'}
-                    </p>
-                  </div>
-                </div>
-              ))
+            ? sideStack.slice(0, 3).map((article, index) => {
+                const articleSlug = slugify(article.title);
+                const articleUrl = `/world-news/${articleSlug}`;
+                
+                return (
+                  <Link
+                    key={article.url || `world-${index}`}
+                    href={articleUrl}
+                    className="grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity"
+                  >
+                    <div className="image-container mr-[8px] overflow-hidden rounded-sm relative">
+                      {article?.urlToImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={article.urlToImage}
+                          alt={article.title}
+                          className="w-full h-auto aspect-square object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square bg-gray-300 animate-pulse rounded-sm"></div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs text-primary flex items-center">
+                        <span>{sanitizeTitle(article?.author || 'Unknown Author')}</span>
+                        <span className="mx-1">—</span>
+                        <span>{article?.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
+                      </p>
+                      <p className="font-semibold text-[18px] mt-1 leading-snug">
+                        {article?.title
+                          ? article.title.length > 60
+                            ? `${article.title.slice(0, 60)}...`
+                            : article.title
+                          : 'Untitled'}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })
             : null}
         </div>
       )}

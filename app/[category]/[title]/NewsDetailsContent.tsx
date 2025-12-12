@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
-import { NewsDetailsWithSearch } from './NewsDetailsWithSearch';
+import { useSearchParams } from 'next/navigation';
+import { ContentDetails } from '@/components/content-detail/ContentDetails';
 
 interface NewsDetailsContentProps {
   category: string;
@@ -9,9 +9,9 @@ interface NewsDetailsContentProps {
 }
 
 export function NewsDetailsContent({ category, title }: NewsDetailsContentProps) {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-screen-xl px-4 py-8">Loading...</div>}>
-      <NewsDetailsWithSearch category={category} title={title} />
-    </Suspense>
-  );
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q') || undefined;
+  
+  // ContentDetails will auto-detect type from category
+  return <ContentDetails category={category} title={title} searchQuery={searchQuery} />;
 }

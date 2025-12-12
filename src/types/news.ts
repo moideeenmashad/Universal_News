@@ -31,6 +31,7 @@ export interface NewsDataArticle {
   pubDate: string;
   image_url?: string;
   source_id?: string;
+  source_name?: string;
   source_priority?: number;
   source_url?: string;
   source_icon?: string;

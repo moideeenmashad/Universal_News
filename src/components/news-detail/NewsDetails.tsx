@@ -1,9 +1,10 @@
 'use client';
 
-import { PiCalendarLight } from 'react-icons/pi';
-import { formatDate } from '@/lib/utils/date';
 import Image from 'next/image';
+import { PiCalendarLight } from 'react-icons/pi';
 import { useArticleByTitle, useArticleByTitleUniversal } from '@/lib/hooks/useNews';
+import { formatDate } from '@/lib/utils/date';
+import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { isValidArticle } from '@/lib/utils/validation';
 import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
@@ -38,7 +39,7 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
     const errorMessage =
       error instanceof Error ? error.message : 'Failed to load article. Please try again.';
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 pt-24">
         <ErrorMessage message={errorMessage} />
       </section>
     );
@@ -47,7 +48,11 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
   if (!article || !isValidArticle(article)) {
     return (
       <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
-        <ErrorMessage message="Article not found." />
+        <ErrorMessage 
+          message="The article you are looking for could not be found. It may have been removed or the link is incorrect." 
+          variant="not-found"
+          showHomeLink
+        />
       </section>
     );
   }
@@ -60,7 +65,7 @@ export const NewsDetails = ({ category, title, searchQuery }: NewsDetailsProps) 
         <div className="col-span-3">
           <div className="relative w-full h-[300px] md:h-[400px] mb-6 rounded-lg overflow-hidden">
             <Image
-              src={article.urlToImage || 'https://via.placeholder.com/800x400'}
+              src={article.urlToImage || getPlaceholderImage(800, 400)}
               alt={article.title || 'Article image'}
               fill
               className="object-cover"

@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 6, navItem: 'Science', LinkTo: ROUTES.SCIENCE },
   { id: 7, navItem: 'Sports', LinkTo: ROUTES.SPORTS },
   { id: 8, navItem: 'Technology', LinkTo: ROUTES.TECHNOLOGY },
+  { id: 9, navItem: 'Podcasts', LinkTo: ROUTES.PODCASTS },
 ];
 
 export const PrimaryNavbar = () => {

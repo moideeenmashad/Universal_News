@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { BsDashLg } from 'react-icons/bs';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
+import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyArticleProps {
@@ -99,7 +100,7 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 md:h-64 w-full">
             <Image
-              src={article.urlToImage || 'https://via.placeholder.com/300'}
+              src={article.urlToImage || getPlaceholderImage(300, 300)}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"

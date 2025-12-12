@@ -21,7 +21,7 @@ export default async function CategoryPage(props: Props) {
   const title = category
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ') + ' News';
+    .join(' ') + (category === 'podcasts' ? '' : ' News');
 
   return <News category={category} title={title} />;
 }
@@ -37,5 +37,6 @@ export function generateStaticParams() {
     { category: 'science' },
     { category: 'sports' },
     { category: 'technology' },
+    { category: 'podcasts' },
    ];
 }

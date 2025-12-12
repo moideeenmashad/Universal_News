@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { slugify } from '@/lib/utils/string';
 import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
+import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import type { NewsArticle } from '@/types/news';
 
 interface LazyNewsItemProps {
@@ -93,7 +94,7 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
         <div className="image-container overflow-hidden relative rounded-sm mb-3">
           <div className="relative h-48 w-full">
             <Image
-              src={article.urlToImage || 'https://via.placeholder.com/300'}
+              src={article.urlToImage || getPlaceholderImage(300, 300)}
               alt={article.title || 'News article image'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"

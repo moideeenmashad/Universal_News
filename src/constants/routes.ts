@@ -8,6 +8,7 @@ export const ROUTES = {
   SCIENCE: '/science',
   SPORTS: '/sports',
   TECHNOLOGY: '/technology',
+  PODCASTS: '/podcasts',
   SEARCH: '/search',
 } as const;
 
@@ -20,6 +21,7 @@ export const CATEGORIES = {
   SCIENCE: 'science',
   SPORTS: 'sports',
   TECHNOLOGY: 'technology',
+  PODCASTS: 'podcasts',
 } as const;
 
 export type Category = (typeof CATEGORIES)[keyof typeof CATEGORIES];

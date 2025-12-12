@@ -7,6 +7,7 @@
 
 import { saveToCache, getHeadlinesCacheKey, getEverythingCacheKey, getLatestNewsCacheKey } from '../src/lib/cache/newsCache';
 import type { NewsApiResponse, NewsDataResponse } from '../src/types/news';
+import { getPlaceholderImage } from '../src/lib/utils/placeholder';
 
 // Sample data structure matching API responses
 const sampleHeadlines: NewsApiResponse = {
@@ -19,7 +20,7 @@ const sampleHeadlines: NewsApiResponse = {
       title: 'Sample News Article Title',
       description: 'This is a sample news article description for testing purposes.',
       url: 'https://example.com/article1',
-      urlToImage: 'https://via.placeholder.com/800x400?text=News+Image',
+      urlToImage: getPlaceholderImage(800, 400),
       publishedAt: new Date().toISOString(),
       content: 'This is sample content for the news article.',
     },
@@ -29,7 +30,7 @@ const sampleHeadlines: NewsApiResponse = {
       title: 'Another Sample News Article',
       description: 'Another sample description for testing.',
       url: 'https://example.com/article2',
-      urlToImage: 'https://via.placeholder.com/800x400?text=News+Image+2',
+      urlToImage: getPlaceholderImage(800, 400),
       publishedAt: new Date().toISOString(),
       content: 'More sample content here.',
     },
@@ -49,7 +50,7 @@ const sampleLatest: NewsDataResponse = {
       description: 'Sample latest news description',
       content: 'Sample content for latest news',
       pubDate: new Date().toISOString(),
-      image_url: 'https://via.placeholder.com/800x400?text=Latest+News',
+      image_url: getPlaceholderImage(800, 400),
       source_id: 'sample',
       source_priority: 1,
       source_url: 'https://example.com',
