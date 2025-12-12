@@ -21,24 +21,26 @@ import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
  * This solves the CORS issue with NewsAPI.org free tier
  */
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const type = searchParams.get('type'); // 'headlines', 'everything', 'latest'
-    const category = searchParams.get('category');
-    const query = searchParams.get('query');
-    const country = searchParams.get('country') || DEFAULT_COUNTRY;
-    const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
-    const language = searchParams.get('language') || DEFAULT_LANGUAGE;
+  // Declare variables outside try block so they're accessible in catch
+  const searchParams = request.nextUrl.searchParams;
+  const type = searchParams.get('type'); // 'headlines', 'everything', 'latest'
+  const category = searchParams.get('category');
+  const query = searchParams.get('query');
+  const country = searchParams.get('country') || DEFAULT_COUNTRY;
+  const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
+  const language = searchParams.get('language') || DEFAULT_LANGUAGE;
 
-    // Generate cache key based on type
-    let cacheKey = '';
-    if (type === 'headlines') {
-      cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
-    } else if (type === 'everything') {
-      cacheKey = getEverythingCacheKey(query || '', Number(pageSize));
-    } else if (type === 'latest') {
-      cacheKey = getLatestNewsCacheKey(query || 'worldnews');
-    }
+  // Generate cache key based on type
+  let cacheKey = '';
+  if (type === 'headlines') {
+    cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
+  } else if (type === 'everything') {
+    cacheKey = getEverythingCacheKey(query || '', Number(pageSize));
+  } else if (type === 'latest') {
+    cacheKey = getLatestNewsCacheKey(query || 'worldnews');
+  }
+
+  try {
 
     // If API keys are missing, try to load from cache first
     if (!NEWS_API_KEY && (type === 'headlines' || type === 'everything')) {
