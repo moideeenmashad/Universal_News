@@ -122,9 +122,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = type === 'latest' 
-      ? (await response.json() as NewsDataResponse)
-      : (await response.json() as NewsApiResponse);
+    let data: NewsApiResponse | NewsDataResponse;
+    
+    if (type === 'latest') {
+      data = await response.json() as NewsDataResponse;
+    } else {
+      data = await response.json() as NewsApiResponse;
+    }
 
     if (data.status === 'error') {
       // Try to load from cache on API error response
@@ -142,8 +146,13 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      // Handle error message - NewsApiResponse has message, NewsDataResponse doesn't
+      const errorMessage = type === 'latest' 
+        ? 'API returned an error'
+        : (data as NewsApiResponse).message || 'API returned an error';
+      
       return NextResponse.json(
-        { error: data.message || 'API returned an error' },
+        { error: errorMessage },
         { status: 400 }
       );
     }
