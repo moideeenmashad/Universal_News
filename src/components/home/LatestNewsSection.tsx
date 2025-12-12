@@ -55,7 +55,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
       .filter(isValidArticle);
     
     return transformed;
-  }, [data?.results]);
+  }, [data]);
 
   // Layout: 0 (feature), 1-2 (side stack), 3-5 (bottom row)
   const feature = articles[0];

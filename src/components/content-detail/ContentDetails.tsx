@@ -8,7 +8,8 @@ import { formatDate } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle } from '@/lib/utils/validation';
-import type { NewsArticle, NewsDataArticle } from '@/types/news';
+import type { NewsArticle } from '@/types/news';
+import type { NewsDataArticle } from '@/types/news';
 import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
@@ -32,7 +33,7 @@ type UnifiedContent = {
   type: 'news' | 'podcast';
 };
 
-const isValidPodcast = (podcast: any): boolean => {
+const isValidPodcast = (podcast: NewsDataArticle | null | undefined): boolean => {
   return !!(podcast?.title && podcast?.image_url);
 };
 

@@ -41,7 +41,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
     return data.results
       .filter((podcast) => podcast?.title && podcast?.image_url)
       .slice(0, 6);
-  }, [data?.results]);
+  }, [data]);
 
   // Generate a random duration between 5-15 minutes for demo purposes
   const getRandomDuration = (index: number) => {

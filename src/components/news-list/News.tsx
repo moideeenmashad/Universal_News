@@ -52,7 +52,7 @@ export const News = ({ category, title }: NewsProps) => {
         }));
     }
     return newsData?.articles || [];
-  }, [isPodcastCategory, newsData?.articles, podcastData?.results]);
+  }, [isPodcastCategory, newsData?.articles, podcastData]);
 
   const isLoading = isPodcastCategory ? isLoadingPodcast : isLoadingNews;
   const error = isPodcastCategory ? podcastError : newsError;
