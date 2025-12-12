@@ -150,7 +150,7 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   const categoryTitle = getCategoryTitle();
 
   return (
-    <article className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-24">
+    <article className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
       {/* Page Heading - Same style as category pages */}
       {categoryTitle && (
         <div className="flex items-center justify-between border-b border-primary pb-3 mb-10">

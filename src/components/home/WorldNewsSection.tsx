@@ -96,7 +96,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
           {/* Main Grid Item with Image and Overlay */}
           {feature && (
             <Link
-              href={`/world-news/${slugify(feature.title)}`}
+              href={`/${slugify(feature.title)}`}
               className="md:row-span-3 md:col-span-2 overflow-hidden rounded-sm relative block hover:opacity-90 transition-opacity"
             >
               <div className="overflow-hidden rounded-sm relative">
@@ -135,7 +135,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
           {sideStack.length > 0
             ? sideStack.slice(0, 3).map((article, index) => {
                 const articleSlug = slugify(article.title);
-                const articleUrl = `/world-news/${articleSlug}`;
+                const articleUrl = `/${articleSlug}`;
                 
                 return (
                   <Link
