@@ -8,6 +8,13 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PAGE_SIZE,
 } from '@/constants/config';
+import {
+  loadFromCache,
+  getHeadlinesCacheKey,
+  getEverythingCacheKey,
+  getLatestNewsCacheKey,
+} from '@/lib/cache/newsCache';
+import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
 
 /**
  * API Route to proxy news API requests
@@ -23,16 +30,37 @@ export async function GET(request: NextRequest) {
     const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
     const language = searchParams.get('language') || DEFAULT_LANGUAGE;
 
+    // Generate cache key based on type
+    let cacheKey = '';
+    if (type === 'headlines') {
+      cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
+    } else if (type === 'everything') {
+      cacheKey = getEverythingCacheKey(query || '', Number(pageSize));
+    } else if (type === 'latest') {
+      cacheKey = getLatestNewsCacheKey(query || 'worldnews');
+    }
+
+    // If API keys are missing, try to load from cache first
     if (!NEWS_API_KEY && (type === 'headlines' || type === 'everything')) {
+      const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+      if (cachedData) {
+        console.log('API key missing, using cached data');
+        return NextResponse.json(cachedData);
+      }
       return NextResponse.json(
-        { error: 'News API key is not configured' },
+        { error: 'News API key is not configured and no cached data available' },
         { status: 500 }
       );
     }
 
     if (!NEWS_DATA_API_KEY && type === 'latest') {
+      const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+      if (cachedData) {
+        console.log('API key missing, using cached data');
+        return NextResponse.json(cachedData);
+      }
       return NextResponse.json(
-        { error: 'NewsData API key is not configured' },
+        { error: 'NewsData API key is not configured and no cached data available' },
         { status: 500 }
       );
     }
@@ -71,6 +99,21 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      // Try to load from cache on API error
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API failed, using cached data');
+          return NextResponse.json(cachedData);
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API failed, using cached data');
+          return NextResponse.json(cachedData);
+        }
+      }
+      
       const errorText = await response.text();
       console.error('API Error:', response.status, errorText);
       return NextResponse.json(
@@ -79,9 +122,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
+    const data = type === 'latest' 
+      ? (await response.json() as NewsDataResponse)
+      : (await response.json() as NewsApiResponse);
 
     if (data.status === 'error') {
+      // Try to load from cache on API error response
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API returned error, using cached data');
+          return NextResponse.json(cachedData);
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API returned error, using cached data');
+          return NextResponse.json(cachedData);
+        }
+      }
+      
       return NextResponse.json(
         { error: data.message || 'API returned an error' },
         { status: 400 }
@@ -91,6 +151,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Proxy error:', error);
+    
+    // Try to load from cache on any error
+    if (cacheKey) {
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+          return NextResponse.json(cachedData);
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+          return NextResponse.json(cachedData);
+        }
+      }
+    }
+    
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
