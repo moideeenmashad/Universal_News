@@ -139,7 +139,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
             {/* 1) Large Featured Article (using articles[0]) */}
             {feature && (
               <Link
-                href={`/${slugify(feature.title)}`}
+                href={`/article/${slugify(feature.title)}`}
                 className="rounded-sm bg-white relative block hover:opacity-90 transition-opacity"
               >
                 <div className="overflow-hidden relative rounded-sm">
@@ -179,7 +179,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
             <div>
               {sideStack.map((article, idx) => {
                 const articleSlug = slugify(article.title);
-                            const articleUrl = `/${articleSlug}`;
+                            const articleUrl = `/article/${articleSlug}`;
                 
                 return (
                   <Link
@@ -232,7 +232,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
           <div className="mt-[14px] gap-x-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3">
             {bottomRow.map((article, index) => {
               const articleSlug = slugify(article.title);
-                            const articleUrl = `/${articleSlug}`;
+                            const articleUrl = `/article/${articleSlug}`;
               
               return (
                 <Link

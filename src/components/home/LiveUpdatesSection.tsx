@@ -75,7 +75,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
   }
 
   const articleSlug = articleUrlName(latestNews.title);
-  const articleUrl = `/${articleSlug}`;
+  const articleUrl = `/article/${articleSlug}`;
   const publishedRelative = formatRelativeTime(latestNews.publishedAt);
 
   return (

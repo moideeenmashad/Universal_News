@@ -390,14 +390,31 @@ class NewsService {
       }
 
       const { slugify } = await import('@/lib/utils/string');
+      const titleSlug = slugify(title);
 
-      // First, try to find in search results if query provided
+      // First, try general headlines (no category) - this catches most hero section articles
+      // This should be first since hero sections use useTopHeadlines(undefined, 'us', 20)
+      try {
+        const generalResponse = await this.getTopHeadlines(undefined, 'us', 100, revalidate);
+        const matchedArticle = generalResponse.articles.find((article: NewsArticle) => {
+          const apiTitleSlug = slugify(article.title);
+          return apiTitleSlug === titleSlug;
+        });
+
+        if (matchedArticle) {
+          return matchedArticle;
+        }
+      } catch (error) {
+        console.warn('General headlines search failed');
+      }
+
+      // Try search query if provided
       if (searchQuery && searchQuery.trim().length > 0) {
         try {
-          const searchResponse = await this.getEverything(searchQuery.trim(), 50, DEFAULT_LANGUAGE, revalidate);
+          const searchResponse = await this.getEverything(searchQuery.trim(), 100, DEFAULT_LANGUAGE, revalidate);
           const matchedArticle = searchResponse.articles.find((article: NewsArticle) => {
             const apiTitleSlug = slugify(article.title);
-            return apiTitleSlug === title;
+            return apiTitleSlug === titleSlug;
           });
 
           if (matchedArticle) {
@@ -409,15 +426,16 @@ class NewsService {
         }
       }
 
-      // Try all categories
+
+      // Try all categories with more articles
       const categories = ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'];
       
       for (const category of categories) {
         try {
-          const response = await this.getTopHeadlines(category, 'us', 20, revalidate);
+          const response = await this.getTopHeadlines(category, 'us', 100, revalidate);
           const matchedArticle = response.articles.find((article: NewsArticle) => {
             const apiTitleSlug = slugify(article.title);
-            return apiTitleSlug === title;
+            return apiTitleSlug === titleSlug;
           });
 
           if (matchedArticle) {

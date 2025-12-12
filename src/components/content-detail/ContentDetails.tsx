@@ -137,27 +137,8 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   const sourceUrl = content.url || content.link;
   const sourceLabel = 'Read full article'; // Unified label for all content types
 
-  // Generate category title for heading
-  const getCategoryTitle = () => {
-    if (!category) return '';
-    const titleParts = category
-      .split('-')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-    const lastWord = titleParts[titleParts.length - 1]?.toLowerCase();
-    return titleParts.join(' ') + (category === 'podcasts' || lastWord === 'news' ? '' : ' News');
-  };
-
-  const categoryTitle = getCategoryTitle();
-
   return (
     <article className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
-      {/* Page Heading - Same style as category pages */}
-      {categoryTitle && (
-        <div className="flex items-center justify-between border-b border-primary pb-3 mb-10">
-          <h2 className="text-2xl md:text-4xl font-medium text-primary uppercase">{categoryTitle}</h2>
-        </div>
-      )}
-      
       <div className="grid grid-cols-1 lg:grid-cols-4 mb-[24px]">
         <div className="col-span-3">
           <div className="relative w-full h-[300px] md:h-[400px] mb-6 rounded-lg overflow-hidden">
