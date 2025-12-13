@@ -5,6 +5,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaInstagram, FaLinkedin, FaYoutube, FaTwitter, FaReddit } from 'react-icons/fa';
 import { ROUTES } from '@/constants/routes';
+import { IconType } from 'react-icons';
+
+interface SocialLink {
+  href: string;
+  label: string;
+  Icon: IconType;
+}
+
+const SOCIAL_LINKS: SocialLink[] = [
+  { href: 'https://instagram.com', label: 'Follow us on Instagram', Icon: FaInstagram },
+  { href: 'https://linkedin.com', label: 'Follow us on LinkedIn', Icon: FaLinkedin },
+  { href: 'https://youtube.com', label: 'Follow us on YouTube', Icon: FaYoutube },
+  { href: 'https://twitter.com', label: 'Follow us on Twitter', Icon: FaTwitter },
+  { href: 'https://reddit.com', label: 'Follow us on Reddit', Icon: FaReddit },
+];
 
 export const Footer = () => {
   const currentYear = useMemo(() => new Date().getFullYear(), []);
@@ -65,51 +80,18 @@ export const Footer = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            <Link
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:opacity-70 transition-opacity"
-              aria-label="Follow us on Instagram"
-            >
-              <FaInstagram className="w-5 h-5" />
-            </Link>
-            <Link
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:opacity-70 transition-opacity"
-              aria-label="Follow us on LinkedIn"
-            >
-              <FaLinkedin className="w-5 h-5" />
-            </Link>
-            <Link
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:opacity-70 transition-opacity"
-              aria-label="Follow us on YouTube"
-            >
-              <FaYoutube className="w-5 h-5" />
-            </Link>
-            <Link
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:opacity-70 transition-opacity"
-              aria-label="Follow us on Twitter"
-            >
-              <FaTwitter className="w-5 h-5" />
-            </Link>
-            <Link
-              href="https://reddit.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:opacity-70 transition-opacity"
-              aria-label="Follow us on Reddit"
-            >
-              <FaReddit className="w-5 h-5" />
-            </Link>
+            {SOCIAL_LINKS.map(({ href, label, Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:opacity-70 transition-opacity"
+                aria-label={label}
+              >
+                <Icon className="w-5 h-5" />
+              </Link>
+            ))}
           </div>
         </div>
         

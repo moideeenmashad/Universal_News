@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { PiCalendarLight } from 'react-icons/pi';
-import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews } from '@/lib/hooks/useNews';
+import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews, useTopHeadlines } from '@/lib/hooks/useNews';
 import { formatDate } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { slugify } from '@/lib/utils/string';
@@ -12,6 +12,7 @@ import type { NewsArticle } from '@/types/news';
 import type { NewsDataArticle } from '@/types/news';
 import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
+import { SimilarNews } from './SimilarNews';
 
 interface ContentDetailsProps {
   category?: string;
@@ -50,6 +51,16 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
 
   // Fetch podcast if type is podcast
   const { data: podcastData, isLoading: isLoadingPodcast, error: podcastError } = useLatestNews('podcast');
+
+  // Fetch similar news articles from the same category (only for news articles)
+  // Always call useTopHeadlines to maintain hook order consistency
+  // Pass empty string instead of undefined to ensure consistent hook behavior
+  const similarCategory = contentType === 'news' && category && category !== 'podcasts' ? category : '';
+  const { data: similarNewsData, isLoading: isLoadingSimilar } = useTopHeadlines(
+    similarCategory,
+    'us',
+    10 // Fetch more to ensure we have 3 after filtering
+  );
 
   const isLoading = contentType === 'news' ? isLoadingCategory || isLoadingUniversal : isLoadingPodcast;
   const error = contentType === 'news' ? categoryError : podcastError;
@@ -99,9 +110,23 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
     }
   }, [contentType, categoryArticle, universalArticle, podcastData, title]);
 
+  // Get similar articles (exclude current article) - Must be before early returns to follow Rules of Hooks
+  const similarArticles = useMemo(() => {
+    if (contentType !== 'news' || !similarNewsData?.articles) return [];
+    if (!content || !content.title) return [];
+    
+    const allArticles = similarNewsData.articles.filter(isValidArticle);
+    // Filter out current article by comparing titles (using slugified version for better matching)
+    const currentTitleSlug = slugify(content.title);
+    const filtered = allArticles.filter(
+      (article) => slugify(article.title) !== currentTitleSlug
+    );
+    return filtered.slice(0, 3); // Return only 3 articles
+  }, [similarNewsData, content, contentType]);
+
   if (isLoading) {
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-24" aria-label="Loading content">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8" aria-label="Loading content">
         <ArticleDetailSkeleton />
       </section>
     );
@@ -203,6 +228,11 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
           </div>
         </div>
       </div>
+
+      {/* Similar News Section - Only for news articles */}
+      {contentType === 'news' && (
+        <SimilarNews articles={similarArticles} category={category} isLoading={isLoadingSimilar} />
+      )}
     </article>
   );
 };

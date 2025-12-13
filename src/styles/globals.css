@@ -124,3 +124,22 @@ section {
 .wave-animation {
   animation: pulseWave 1.5s infinite ease-out;
 }
+
+/* Mobile menu slide-in animation */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Prevent body scroll when mobile menu is open */
+body.menu-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}

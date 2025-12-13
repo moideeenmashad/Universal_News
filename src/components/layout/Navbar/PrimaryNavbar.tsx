@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { GoSearch } from 'react-icons/go';
 import { ROUTES } from '@/constants/routes';
+import { SearchModal } from '@/components/search/SearchModal';
 
 interface NavItem {
   id: number;
@@ -25,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export const PrimaryNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -41,6 +44,18 @@ export const PrimaryNavbar = () => {
     setIsOpen(false);
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [isOpen]);
+
   const isActive = useCallback(
     (linkTo: string) => {
       return pathname === linkTo || pathname?.startsWith(`${linkTo}/`);
@@ -50,7 +65,19 @@ export const PrimaryNavbar = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-center py-2 px-4">
+      {/* Header with Logo and Mobile Menu Button */}
+      <div className="flex items-center justify-between py-3 px-4 md:justify-center md:py-2">
+        {/* Search Button - Left side on mobile, hidden on desktop */}
+        <button
+          onClick={() => setIsSearchOpen(true)}
+          type="button"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
+          aria-label="Open search"
+        >
+          <GoSearch className="w-6 h-6" />
+        </button>
+
+        {/* Logo - Centered on mobile, centered on desktop */}
         <svg
           width="344"
           height="42"
@@ -64,7 +91,7 @@ export const PrimaryNavbar = () => {
               gotoHome();
             }
           }}
-          className="cursor-pointer hover:opacity-80 transition-opacity max-w-full h-auto"
+          className="cursor-pointer hover:opacity-80 transition-opacity max-w-[200px] md:max-w-full h-auto mx-auto md:mx-0"
           role="button"
           tabIndex={0}
           aria-label="Go to home page"
@@ -81,51 +108,96 @@ export const PrimaryNavbar = () => {
             </clipPath>
           </defs>
         </svg>
-      </div>
-      <nav className="bg-white w-full z-20" aria-label="Main navigation">
-        <div className="max-w-screen-xl flex flex-wrap items-center justify-end lg:justify-center mx-auto my-2 border-primary border-y-2 py-2 md:py-0 px-4">
-          <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            <button
-              onClick={toggleNavbar}
-              type="button"
-              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-              aria-controls="navbar-sticky"
-              aria-expanded={isOpen}
-              aria-label={isOpen ? 'Close menu' : 'Open menu'}
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className="w-5 h-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 17 14"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M1 1h15M1 7h15M1 13h15"
-                />
-              </svg>
-            </button>
-          </div>
-          <div
-            className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${
-              isOpen ? '' : 'hidden'
-            }`}
-            id="navbar-sticky"
+
+        {/* Mobile Menu Button - Right side on mobile */}
+        <button
+          onClick={toggleNavbar}
+          type="button"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
+          aria-controls="navbar-sticky"
+          aria-expanded={isOpen}
+          aria-label={isOpen ? 'Close menu' : 'Open menu'}
+        >
+          <span className="sr-only">Open main menu</span>
+          <svg
+            className={`w-6 h-6 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <ul className="flex flex-col md:p-0 mt-4 md:flex-row md:mt-0 md:border-0">
-              {NAV_ITEMS.map((item) => {
+            {isOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {/* Desktop Navigation Bar */}
+      <nav className="hidden md:block bg-white w-full z-20" aria-label="Main navigation">
+        <div className="max-w-screen-xl flex items-center justify-center mx-auto my-2 border-primary border-y-2 py-2 px-4">
+          <ul className="flex flex-row items-center">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.LinkTo);
+              return (
+                <li key={item.id}>
+                  <Link
+                    href={item.LinkTo}
+                    className={`font-family-BG block py-2 px-5 text-primary rounded-sm hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                      active ? 'font-bold border-b-2 border-primary' : ''
+                    }`}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {item.navItem}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Menu - Slide in from right with overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 top-[73px] md:hidden z-30"
+          onClick={closeNavbar}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300" />
+        </div>
+      )}
+      
+      <div
+        className={`fixed top-[73px] right-0 bottom-0 w-[85%] max-w-sm md:hidden bg-white z-40 shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        id="navbar-sticky"
+      >
+        {/* Mobile Menu Content */}
+        <div className="h-full overflow-y-auto">
+          <nav className="px-4 py-6" aria-label="Mobile navigation">
+            <ul className="flex flex-col space-y-1">
+              {NAV_ITEMS.map((item, index) => {
                 const active = isActive(item.LinkTo);
                 return (
-                  <li key={item.id}>
+                  <li 
+                    key={item.id}
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      animation: isOpen ? 'slideInRight 0.3s ease-out forwards' : 'none'
+                    }}
+                    className="opacity-0"
+                  >
                     <Link
                       href={item.LinkTo}
-                      className={`font-family-BG block py-2 px-3 text-primary rounded-sm md:bg-transparent hover:text-primary px-[20px] transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                        active ? 'font-bold border-b-2 border-primary' : ''
+                      className={`font-family-BG block py-4 px-4 text-primary rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                        active
+                          ? 'font-bold bg-primary/10 text-primary border-l-4 border-primary'
+                          : 'hover:bg-gray-100 hover:text-primary active:bg-gray-200'
                       }`}
                       onClick={closeNavbar}
                       aria-current={active ? 'page' : undefined}
@@ -136,9 +208,12 @@ export const PrimaryNavbar = () => {
                 );
               })}
             </ul>
-          </div>
+          </nav>
         </div>
-      </nav>
+      </div>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
   );
 };

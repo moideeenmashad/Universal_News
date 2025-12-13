@@ -39,10 +39,10 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
   }, [data?.articles]);
 
   return (
-    <div className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0" ref={containerRef}>
+    <div className="mx-auto max-w-screen-xl mb-[60px] md:mb-[100px] px-4 md:px-0" ref={containerRef}>
       {/* Section Header */}
-      <div className="mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
-        <h2 className="text-4xl font-medium text-primary uppercase">{title}</h2>
+      <div className="mb-[20px] md:mb-[30px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-primary pb-[12px]">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
           <Link
             className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
@@ -76,38 +76,40 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
           <p className="text-gray-600 text-lg">No articles found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4">
           {articles.map((article, index) => {
             const articleSlug = slugify(article.title);
-                        const articleUrl = `/article/${articleSlug}`;
+            const articleUrl = `/article/${articleSlug}`;
 
             return (
               <Link
                 key={article.url || `tech-${index}`}
                 href={articleUrl}
-                className="flex flex-col hover:opacity-90 transition-opacity group"
+                className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1"
               >
-                <div className="relative w-full h-[200px] mb-3 overflow-hidden rounded-sm">
+                <div className="relative w-full h-[180px] sm:h-[200px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                   {article.urlToImage ? (
                     <Image
                       src={article.urlToImage}
                       alt={article.title || 'Technology news thumbnail'}
                       fill
-                      className="object-cover group-hover:scale-105 ease-in-out transition-transform duration-300"
+                      className="object-cover group-hover:scale-110 ease-in-out transition-transform duration-500"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200"></div>
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No Image</span>
+                    </div>
                   )}
                 </div>
-                <div className="flex flex-col">
-                  <p className="text-xs text-primary flex items-center mb-1">
-                    <span>{sanitizeTitle(article.author || 'Unknown Author')}</span>
-                    <span className="mx-1">—</span>
-                    <span>{article.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
+                <div className="flex flex-col px-1">
+                  <p className="text-xs text-primary/70 flex flex-wrap items-center mb-2 gap-1">
+                    <span className="truncate max-w-[120px] sm:max-w-none">{sanitizeTitle(article.author || 'Unknown Author')}</span>
+                    <span className="hidden sm:inline">—</span>
+                    <span className="whitespace-nowrap">{article.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
                   </p>
-                  <h3 className="font-semibold text-base leading-tight text-gray-900 line-clamp-2 group-hover:text-primary transition-colors">
+                  <h3 className="font-semibold text-sm sm:text-base leading-tight text-gray-900 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                     {article.title || 'Untitled'}
                   </h3>
                 </div>

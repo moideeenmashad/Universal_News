@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
-import type { LenisOptions } from 'lenis';
+
 
 interface SmoothScrollProps {
   children: React.ReactNode;
