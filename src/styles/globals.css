@@ -66,6 +66,25 @@
   a, button {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
+  
+  /* Remove focus outline on mouse clicks, keep for keyboard navigation */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  /* Remove default focus outline from clickable elements */
+  a:focus,
+  button:focus,
+  [role="button"]:focus,
+  svg:focus {
+    outline: none;
+  }
+  
+  /* Keep focus visible for keyboard navigation only */
+  *:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
 }
 
 /* Section spacing - accounts for fixed navbar */

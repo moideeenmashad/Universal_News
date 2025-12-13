@@ -93,7 +93,7 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
     >
       <Link
         href={articleUrl}
-        className="block hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md"
+        className="block hover:opacity-90 transition-opacity focus:outline-none rounded-md"
         aria-label={`Read article: ${article.title}`}
         prefetch={index < 6}
       >

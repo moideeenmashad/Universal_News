@@ -71,7 +71,7 @@ export const PrimaryNavbar = () => {
         <button
           onClick={() => setIsSearchOpen(true)}
           type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none transition-all"
           aria-label="Open search"
         >
           <GoSearch className="w-6 h-6" />
@@ -91,7 +91,7 @@ export const PrimaryNavbar = () => {
               gotoHome();
             }
           }}
-          className="cursor-pointer hover:opacity-80 transition-opacity max-w-[200px] md:max-w-full h-auto mx-auto md:mx-0"
+          className="cursor-pointer hover:opacity-80 transition-opacity max-w-[200px] md:max-w-full h-auto mx-auto md:mx-0 focus:outline-none"
           role="button"
           tabIndex={0}
           aria-label="Go to home page"
@@ -113,7 +113,7 @@ export const PrimaryNavbar = () => {
         <button
           onClick={toggleNavbar}
           type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-primary rounded-lg md:hidden hover:bg-gray-100 focus:outline-none transition-all"
           aria-controls="navbar-sticky"
           aria-expanded={isOpen}
           aria-label={isOpen ? 'Close menu' : 'Open menu'}
@@ -146,7 +146,7 @@ export const PrimaryNavbar = () => {
                 <li key={item.id}>
                   <Link
                     href={item.LinkTo}
-                    className={`font-family-BG block py-2 px-5 text-primary rounded-sm hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                    className={`font-family-BG block py-2 px-5 text-primary rounded-sm hover:text-primary transition-colors focus:outline-none ${
                       active ? 'font-bold border-b-2 border-primary' : ''
                     }`}
                     aria-current={active ? 'page' : undefined}
@@ -194,7 +194,7 @@ export const PrimaryNavbar = () => {
                   >
                     <Link
                       href={item.LinkTo}
-                      className={`font-family-BG block py-4 px-4 text-primary rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                      className={`font-family-BG block py-4 px-4 text-primary rounded-lg transition-all duration-200 focus:outline-none ${
                         active
                           ? 'font-bold bg-primary/10 text-primary border-l-4 border-primary'
                           : 'hover:bg-gray-100 hover:text-primary active:bg-gray-200'

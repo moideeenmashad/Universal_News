@@ -27,7 +27,7 @@ export const PreNavabar = () => {
           <GoChevronRight className="hidden md:block" />
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="cursor-pointer hover:opacity-70 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="cursor-pointer hover:opacity-70 transition-opacity focus:outline-none rounded"
             aria-label="Open search"
           >
             <GoSearch className="w-5 h-5" />
