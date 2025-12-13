@@ -9,6 +9,7 @@ export interface NewsArticle {
     name: string;
   };
   content?: string;
+  article_id?: string; // For NewsData.io deduplication
 }
 
 export interface NewsApiResponse {

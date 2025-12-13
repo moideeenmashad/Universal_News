@@ -72,63 +72,83 @@ function cleanupRateLimitStore() {
   }
 }
 
-// Cleanup every 5 minutes
-setInterval(cleanupRateLimitStore, 5 * 60 * 1000);
+// Cleanup every 5 minutes (only in Node.js environment, not in Edge runtime)
+if (typeof setInterval !== 'undefined' && typeof process !== 'undefined') {
+  setInterval(cleanupRateLimitStore, 5 * 60 * 1000);
+}
 
 export function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
-  const userAgent = request.headers.get('user-agent') || '';
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown';
+  try {
+    const { pathname, search } = request.nextUrl;
+    const userAgent = request.headers.get('user-agent') || '';
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown';
 
-  // Skip middleware for static files and Next.js internals
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') // Static files
-  ) {
+    // Skip middleware for static files and Next.js internals
+    if (
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/api') ||
+      pathname.includes('.') // Static files
+    ) {
+      return NextResponse.next();
+    }
+
+    // 1. Bot Detection
+    if (isBot(userAgent)) {
+      // Allow legitimate search engine bots
+      const legitimateBots = ['googlebot', 'bingbot', 'slurp', 'duckduckbot'];
+      const isLegitimate = legitimateBots.some(bot => 
+        userAgent.toLowerCase().includes(bot)
+      );
+
+      if (!isLegitimate) {
+        console.warn(`Blocked suspicious bot: ${userAgent} from ${ip}`);
+        return new NextResponse('Forbidden', { status: 403 });
+      }
+    }
+
+    // 2. Suspicious Pattern Detection
+    const fullUrl = pathname + search;
+    if (hasSuspiciousPattern(fullUrl)) {
+      console.warn(`Blocked suspicious request: ${fullUrl} from ${ip}`);
+      return new NextResponse('Bad Request', { status: 400 });
+    }
+
+    // 3. Rate Limiting
+    try {
+      if (!checkRateLimit(ip)) {
+        console.warn(`Rate limit exceeded for ${ip}`);
+        return new NextResponse('Too Many Requests', { 
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+          },
+        });
+      }
+    } catch (rateLimitError) {
+      // If rate limiting fails, continue (don't block the request)
+      console.warn('Rate limiting error:', rateLimitError);
+    }
+
+    // 4. Add security headers to response
+    const response = NextResponse.next();
+    
+    // Additional runtime security headers
+    try {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        response.headers.set('X-Request-ID', crypto.randomUUID());
+      }
+    } catch (error) {
+      // Silently fail if crypto is not available
+      // This is not critical, so we continue
+    }
+    
+    return response;
+  } catch (error) {
+    // If middleware fails, return a normal response to prevent 500 errors
+    console.error('Middleware error:', error);
     return NextResponse.next();
   }
-
-  // 1. Bot Detection
-  if (isBot(userAgent)) {
-    // Allow legitimate search engine bots
-    const legitimateBots = ['googlebot', 'bingbot', 'slurp', 'duckduckbot'];
-    const isLegitimate = legitimateBots.some(bot => 
-      userAgent.toLowerCase().includes(bot)
-    );
-
-    if (!isLegitimate) {
-      console.warn(`Blocked suspicious bot: ${userAgent} from ${ip}`);
-      return new NextResponse('Forbidden', { status: 403 });
-    }
-  }
-
-  // 2. Suspicious Pattern Detection
-  const fullUrl = pathname + search;
-  if (hasSuspiciousPattern(fullUrl)) {
-    console.warn(`Blocked suspicious request: ${fullUrl} from ${ip}`);
-    return new NextResponse('Bad Request', { status: 400 });
-  }
-
-  // 3. Rate Limiting
-  if (!checkRateLimit(ip)) {
-    console.warn(`Rate limit exceeded for ${ip}`);
-    return new NextResponse('Too Many Requests', { 
-      status: 429,
-      headers: {
-        'Retry-After': '60',
-      },
-    });
-  }
-
-  // 4. Add security headers to response
-  const response = NextResponse.next();
-  
-  // Additional runtime security headers
-  response.headers.set('X-Request-ID', crypto.randomUUID());
-  
-  return response;
 }
 
 // Configure which routes to run middleware on

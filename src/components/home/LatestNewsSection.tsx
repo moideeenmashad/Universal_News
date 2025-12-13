@@ -8,7 +8,7 @@ import { ROUTES } from '@/constants/routes';
 import { useLatestNews } from '@/lib/hooks/useNews';
 import { formatDate } from '@/lib/utils/date';
 import { slugify } from '@/lib/utils/string';
-import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
+import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
@@ -39,8 +39,10 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
   const articles = useMemo(() => {
     if (!data?.results) return [];
     
-    const transformed: NewsArticle[] = data.results
-      .slice(0, 6) // Get articles 0, 1, 2, 3, 4, 5
+    // Filter out duplicates from NewsData.io (where duplicate: true)
+    const uniqueResults = data.results.filter((item) => !item.duplicate);
+    
+    const transformed: NewsArticle[] = uniqueResults
       .map((item) => ({
         title: item.title,
         description: item.description,
@@ -52,10 +54,16 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
           name: item.source_name || 'Unknown',
         },
         content: item.content,
+        // Store article_id for deduplication
+        article_id: item.article_id,
       }))
       .filter(isValidArticle);
     
-    return transformed;
+    // Remove duplicates by article_id or title+url
+    const deduplicated = removeDuplicateArticles(transformed);
+    
+    // Get first 6 articles after deduplication
+    return deduplicated.slice(0, 6);
   }, [data]);
 
   // Layout: 0 (feature), 1-2 (side stack), 3-5 (bottom row)

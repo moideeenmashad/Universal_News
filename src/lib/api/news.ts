@@ -255,14 +255,14 @@ class NewsService {
 
   /**
    * Fetches latest news from NewsData.io API with Next.js caching
-   * @param query - Search query (default: 'worldnews')
+   * @param query - Search query (default: 'latest news')
    * @param language - Language code (default: 'en' for English)
    * @param revalidate - Revalidation time in seconds (default: 60)
    * @returns Promise with latest news articles
    * @throws ApiError if request fails
    */
   async getLatestNews(
-    query: string = DEFAULT_QUERY,
+    query: string = 'latest news',
     language: string = DEFAULT_LANGUAGE,
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsDataResponse> {
@@ -415,6 +415,39 @@ class NewsService {
         }
       } catch (error) {
         console.warn('General headlines search failed');
+      }
+
+      // Try NewsData.io latest news if available
+      if (NEWS_DATA_API_KEY) {
+        try {
+          const latestNewsResponse = await this.getLatestNews('latest news', DEFAULT_LANGUAGE, revalidate);
+          if (latestNewsResponse?.results) {
+            // Transform NewsDataArticle to NewsArticle format
+            const matchedArticle = latestNewsResponse.results.find((item) => {
+              const apiTitleSlug = slugify(item.title);
+              return apiTitleSlug === titleSlug;
+            });
+
+            if (matchedArticle) {
+              // Convert NewsDataArticle to NewsArticle format
+              return {
+                title: matchedArticle.title,
+                description: matchedArticle.description,
+                url: matchedArticle.link || '#',
+                urlToImage: matchedArticle.image_url,
+                publishedAt: matchedArticle.pubDate,
+                author: matchedArticle.creator?.[0] || matchedArticle.source_name,
+                source: {
+                  name: matchedArticle.source_name || 'Unknown',
+                },
+                content: matchedArticle.content,
+              };
+            }
+          }
+        } catch (error) {
+          // If NewsData.io search fails, continue to other searches
+          console.warn('NewsData.io latest news search failed, trying other sources');
+        }
       }
 
       // Try search query if provided

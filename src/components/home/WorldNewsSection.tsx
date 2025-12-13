@@ -5,10 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { ROUTES } from '@/constants/routes';
-import { useEverything } from '@/lib/hooks/useNews';
+import { useLatestNews } from '@/lib/hooks/useNews';
 import { formatDate } from '@/lib/utils/date';
 import { slugify } from '@/lib/utils/string';
-import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
+import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
+import type { NewsArticle } from '@/types/news';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface WorldNewsSectionProps {
@@ -17,7 +18,8 @@ interface WorldNewsSectionProps {
 
 export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error } = useEverything('keyword');
+  // Fetch world news from NewsData.io API
+  const { data, isLoading, error } = useLatestNews('world news');
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -33,14 +35,40 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
     return () => observer.disconnect();
   }, []);
 
+  // Transform NewsDataArticle to NewsArticle format and get first 4 articles (0, 1, 2, 3)
   const articles = useMemo(() => {
-    const allArticles = data?.articles || [];
-    return allArticles.filter(isValidArticle);
-  }, [data?.articles]);
+    if (!data?.results) return [];
+    
+    // Filter out duplicates from NewsData.io (where duplicate: true)
+    const uniqueResults = data.results.filter((item) => !item.duplicate);
+    
+    const transformed: NewsArticle[] = uniqueResults
+      .map((item) => ({
+        title: item.title,
+        description: item.description,
+        url: item.link || '#',
+        urlToImage: item.image_url,
+        publishedAt: item.pubDate,
+        author: item.creator?.[0] || item.source_name,
+        source: {
+          name: item.source_name || 'Unknown',
+        },
+        content: item.content,
+        // Store article_id for deduplication
+        article_id: item.article_id,
+      }))
+      .filter(isValidArticle);
+    
+    // Remove duplicates by article_id or title+url
+    const deduplicated = removeDuplicateArticles(transformed);
+    
+    // Get first 4 articles after deduplication
+    return deduplicated.slice(0, 4);
+  }, [data]);
 
-  // Main hero uses the second item when available, otherwise the first
-  const feature = articles[1] || articles[0];
-  const sideStack = articles.filter((a) => a !== feature).slice(0, 3);
+  // Desktop layout: article 0 as featured, articles 1, 2, 3 as side stack
+  const feature = articles[0];
+  const sideStack = articles.slice(1, 4); // Articles 1, 2, 3
 
   return (
     <div className="mx-auto max-w-screen-xl mb-12 md:mb-[100px] px-4 md:px-0" ref={containerRef}>

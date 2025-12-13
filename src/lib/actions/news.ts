@@ -19,7 +19,13 @@ export async function getTopHeadlines(
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Failed to fetch headlines. Please check your API keys in Vercel environment variables.', 500);
+    // Return empty response instead of throwing to prevent 500 errors
+    return {
+      status: 'error',
+      totalResults: 0,
+      articles: [],
+      message: error instanceof Error ? error.message : 'Failed to fetch headlines',
+    };
   }
 }
 
@@ -35,25 +41,36 @@ export async function getEverything(
     return await newsService.getEverything(query, pageSize, undefined, domains);
   } catch (error) {
     console.error('Error in getEverything:', error);
-    if (error instanceof ApiError) {
+    if (error instanceof ApiError && error.statusCode !== 500) {
       throw error;
     }
-    throw new ApiError('Failed to fetch articles. Please check your API keys in Vercel environment variables.', 500);
+    // Return empty response instead of throwing to prevent 500 errors
+    return {
+      status: 'error',
+      totalResults: 0,
+      articles: [],
+      message: error instanceof Error ? error.message : 'Failed to fetch articles',
+    };
   }
 }
 
 /**
  * Server action to fetch latest news
  */
-export async function getLatestNews(query: string = 'worldnews'): Promise<NewsDataResponse> {
+export async function getLatestNews(query: string = 'latest news'): Promise<NewsDataResponse> {
   try {
     return await newsService.getLatestNews(query);
   } catch (error) {
     console.error('Error in getLatestNews:', error);
-    if (error instanceof ApiError) {
+    if (error instanceof ApiError && error.statusCode !== 500) {
       throw error;
     }
-    throw new ApiError('Failed to fetch latest news. Please check your API keys in Vercel environment variables.', 500);
+    // Return empty response instead of throwing to prevent 500 errors
+    return {
+      status: 'error',
+      totalResults: 0,
+      results: [],
+    };
   }
 }
 
@@ -64,7 +81,12 @@ export async function getArticleByTitle(
   category: string,
   title: string
 ): Promise<NewsArticle | null> {
-  return newsService.getArticleByTitle(category, title);
+  try {
+    return await newsService.getArticleByTitle(category, title);
+  } catch (error) {
+    console.error('Error in getArticleByTitle:', error);
+    return null;
+  }
 }
 
 /**
@@ -74,7 +96,12 @@ export async function getArticleByTitleUniversal(
   title: string,
   searchQuery?: string
 ): Promise<NewsArticle | null> {
-  return newsService.getArticleByTitleUniversal(title, searchQuery);
+  try {
+    return await newsService.getArticleByTitleUniversal(title, searchQuery);
+  } catch (error) {
+    console.error('Error in getArticleByTitleUniversal:', error);
+    return null;
+  }
 }
 
 /**

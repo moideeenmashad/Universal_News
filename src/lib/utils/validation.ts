@@ -42,3 +42,33 @@ export const isValidCategory = (category: string): boolean => {
   return validCategories.includes(category);
 };
 
+/**
+ * Removes duplicate articles based on article_id, title, or URL
+ */
+export const removeDuplicateArticles = <T extends { article_id?: string; title: string; url?: string; link?: string }>(
+  articles: T[]
+): T[] => {
+  const seen = new Set<string>();
+  return articles.filter((article) => {
+    // Use article_id if available (NewsData.io) - most reliable
+    if (article.article_id) {
+      if (seen.has(article.article_id)) {
+        return false;
+      }
+      seen.add(article.article_id);
+      return true;
+    }
+    
+    // Fallback to title + URL combination for NewsAPI articles
+    const url = (article.url || article.link || '').toLowerCase().trim();
+    const title = article.title.toLowerCase().trim();
+    const key = url ? `${title}_${url}` : title;
+    
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
+

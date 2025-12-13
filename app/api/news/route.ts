@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   } else if (type === 'everything') {
     cacheKey = getEverythingCacheKey(query || '', Number(pageSize), domains || undefined);
   } else if (type === 'latest') {
-    cacheKey = getLatestNewsCacheKey(query || 'worldnews');
+    cacheKey = getLatestNewsCacheKey(query || 'latest news');
   }
 
   try {
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       }
       url = everythingUrl;
     } else if (type === 'latest') {
-      const searchQuery = query || 'worldnews';
+      const searchQuery = query || 'latest news';
       url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(searchQuery)}&language=${language}`;
     } else {
       return NextResponse.json(
@@ -170,25 +170,40 @@ export async function GET(request: NextRequest) {
     
     // Try to load from cache on any error
     if (cacheKey) {
-      if (type === 'headlines' || type === 'everything') {
-        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
-        if (cachedData) {
-          console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
-          return NextResponse.json(cachedData);
+      try {
+        if (type === 'headlines' || type === 'everything') {
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+            return NextResponse.json(cachedData);
+          }
+        } else if (type === 'latest') {
+          const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
+            return NextResponse.json(cachedData);
+          }
         }
-      } else if (type === 'latest') {
-        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
-        if (cachedData) {
-          console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
-          return NextResponse.json(cachedData);
-        }
+      } catch (cacheError) {
+        console.error('Cache load error:', cacheError);
       }
     }
     
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
+    // Return empty response instead of 500 error to prevent breaking the app
+    if (type === 'latest') {
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        results: [],
+      }, { status: 200 });
+    }
+    
+    return NextResponse.json({
+      status: 'error',
+      totalResults: 0,
+      articles: [],
+      message: error instanceof Error ? error.message : 'Internal server error',
+    }, { status: 200 });
   }
 }
 

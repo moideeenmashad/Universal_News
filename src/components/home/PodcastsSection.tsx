@@ -37,8 +37,10 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
 
   const podcasts = useMemo(() => {
     if (!data?.results) return [];
+    // Filter out duplicates from NewsData.io (where duplicate: true)
+    const uniqueResults = data.results.filter((item) => !item.duplicate);
     // Filter out invalid podcasts and limit to 6
-    return data.results
+    return uniqueResults
       .filter((podcast) => podcast?.title && podcast?.image_url)
       .slice(0, 6);
   }, [data]);
