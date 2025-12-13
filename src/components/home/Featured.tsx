@@ -50,7 +50,7 @@ const FEATURED_LIST: FeaturedItem[] = [
 export const Featured = memo(() => {
   return (
     <nav
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mx-auto max-w-screen-xl gap-4 md:gap-8 mb-[30px] px-4 md:px-0"
+      className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mx-auto max-w-screen-xl gap-4 md:gap-8 mb-[30px] px-4 md:px-0"
       aria-label="Featured news categories"
     >
       {FEATURED_LIST.map((item) => (

@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { slugify } from '@/lib/utils/string';
 import { isValidArticle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 import { ArticleSkeleton } from '../ui/ArticleSkeleton';
