@@ -241,7 +241,7 @@ class NewsService {
       }
 
       // Shorter cache for suggestions (30 seconds)
-      const response = await this.getEverything(query.trim(), limit, DEFAULT_LANGUAGE, 30);
+      const response = await this.getEverything(query.trim(), limit, DEFAULT_LANGUAGE, undefined, 30);
       return response.articles || [];
     } catch (error) {
       // Don't throw error for suggestions, just return empty array
