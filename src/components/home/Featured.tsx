@@ -54,7 +54,7 @@ export const Featured = memo(() => {
     return data.articles
       .filter((article) => isValidArticle(article) && article.urlToImage)
       .slice(0, 4);
-  }, [data?.articles]);
+  }, [data]);
 
   return (
     <nav
