@@ -187,8 +187,8 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
               />
             </div>
             <div className="article-profile min-w-0">
-              <p className="text-base md:text-lg uppercase font-bold truncate">{authorName}</p>
-              <div className="flex items-center text-sm text-gray-600">
+              <p className="text-sm sm:text-base md:text-lg uppercase font-bold truncate">{authorName}</p>
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
                 <PiCalendarLight className="mr-[6px] flex-shrink-0" aria-hidden="true" />
                 <time dateTime={content.publishedAt}>
                   {formatDate(content.publishedAt, 'EEEE, MMMM d, yyyy')}
@@ -197,19 +197,19 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
             </div>
           </div>
           <div className="article-content-container">
-            <h1 className="text-2xl md:text-3xl font-bold mb-6">{content.title}</h1>
-            <hr className="border-b-1 border-primary mb-6" aria-hidden="true" />
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 leading-tight sm:leading-snug md:leading-normal">{content.title}</h1>
+            <hr className="border-b-1 border-primary mb-4 md:mb-6" aria-hidden="true" />
             <div className="prose max-w-none">
               {content.description && (
-                <p className="text-base md:text-lg leading-relaxed mb-4">{content.description}</p>
+                <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-3 md:mb-4">{content.description}</p>
               )}
               {content.content ? (
                 <div
-                  className="text-base md:text-lg leading-relaxed"
+                  className="text-sm sm:text-base md:text-lg leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: content.content }}
                 />
               ) : (
-                <p className="text-base md:text-lg leading-relaxed text-gray-600 italic">
+                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 italic">
                   Full content is available on the source website.
                 </p>
               )}

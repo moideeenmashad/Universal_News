@@ -104,10 +104,10 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
             />
           </div>
         </div>
-        <h3 className="text-base md:text-xl font-semibold line-clamp-2">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold line-clamp-2 leading-snug">
           {truncatedTitle}
         </h3>
-        <div className="flex items-center text-xs text-primary mt-2 gap-x-[8px]">
+        <div className="flex items-center text-[10px] sm:text-xs text-primary mt-2 gap-x-[8px]">
           <span className="truncate">{formattedAuthor}</span>
           <span aria-hidden="true">•</span>
           <time dateTime={article.publishedAt} className="flex-shrink-0">

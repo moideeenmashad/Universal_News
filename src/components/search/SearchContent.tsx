@@ -60,8 +60,8 @@ export function SearchContent() {
     return (
       <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
         <div className="text-center">
-          <h1 className="text-2xl md:text-4xl font-medium text-primary mb-4">Search News</h1>
-          <p className="text-gray-600">Enter a search query to find news articles.</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-4">Search News</h1>
+          <p className="text-sm sm:text-base text-gray-600">Enter a search query to find news articles.</p>
         </div>
       </section>
     );
@@ -75,7 +75,7 @@ export function SearchContent() {
 
   return (
     <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
-      <h1 className="text-2xl md:text-4xl font-medium text-primary mb-6">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-4 md:mb-6 leading-tight">
         Search Results for &quot;{query}&quot;
       </h1>
       {isLoading ? (

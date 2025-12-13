@@ -39,10 +39,10 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
   }, [data?.articles]);
 
   return (
-    <div className="mx-auto max-w-screen-xl mb-[60px] md:mb-[100px] px-4 md:px-0" ref={containerRef}>
+    <div className="mx-auto max-w-screen-xl mb-12 md:mb-[100px] px-4 md:px-0" ref={containerRef}>
       {/* Section Header */}
-      <div className="mb-[20px] md:mb-[30px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-primary pb-[12px]">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-primary uppercase">{title}</h2>
+      <div className="mb-6 md:mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
           <Link
             className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
@@ -56,7 +56,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={`skeleton-${i}`} className="flex flex-col">
               <div className="w-full h-[200px] bg-gray-200 animate-pulse rounded-sm mb-3"></div>
@@ -76,7 +76,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
           <p className="text-gray-600 text-lg">No articles found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4">
           {articles.map((article, index) => {
             const articleSlug = slugify(article.title);
             const articleUrl = `/article/${articleSlug}`;

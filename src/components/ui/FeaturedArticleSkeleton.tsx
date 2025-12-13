@@ -9,7 +9,7 @@ export const FeaturedArticleSkeleton = ({ className = '' }: FeaturedArticleSkele
     <div className={`animate-pulse ${className}`} aria-hidden="true" role="presentation">
       {/* Image Skeleton */}
       <div className="relative mb-6 overflow-hidden rounded-sm">
-        <div className="h-[420px] md:h-[560px] w-full skeleton-shimmer relative">
+        <div className="h-[280px] sm:h-[320px] md:h-[420px] lg:h-[560px] w-full skeleton-shimmer relative">
           <div className="absolute top-[18px] left-[18px] bg-white rounded-sm px-3 py-3 flex items-center gap-2 shadow-sm">
             <div className="w-2 h-2 skeleton-dark rounded-full"></div>
             <div className="h-3 skeleton-dark rounded w-20"></div>

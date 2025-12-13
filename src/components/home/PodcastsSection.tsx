@@ -58,10 +58,10 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
   };
 
   return (
-    <div className="mx-auto max-w-screen-xl mb-[100px] px-4 md:px-0" ref={containerRef}>
+    <div className="mx-auto max-w-screen-xl mb-12 md:mb-[100px] px-4 md:px-0" ref={containerRef}>
       {/* Section Header */}
-      <div className="mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
-        <h2 className="text-4xl font-medium text-primary uppercase">{title}</h2>
+      <div className="mb-6 md:mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
           <Link
             className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
@@ -129,14 +129,14 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
                 {/* Content */}
                 <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <h3 className="font-semibold text-lg leading-tight mb-2 text-gray-900 line-clamp-2">
+                    <h3 className="font-semibold text-sm sm:text-base md:text-lg leading-tight mb-2 text-gray-900 line-clamp-2">
                       {podcast.title || 'Untitled Podcast'}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 leading-relaxed">
                       {podcast.description || 'No description available.'}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-auto">
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-auto">
                     {duration} Minutes — {author}
                   </p>
                 </div>

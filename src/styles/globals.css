@@ -5,6 +5,23 @@
 @layer base {
   body {
     font-family: "BricolageGrotesque", sans-serif;
+    font-size: 16px; /* Base font size for better mobile readability */
+    line-height: 1.6; /* Improved line height for readability */
+  }
+  
+  /* Mobile-first typography improvements */
+  @media (max-width: 640px) {
+    body {
+      font-size: 15px; /* Slightly smaller base font on very small screens */
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      line-height: 1.3; /* Tighter line height for headings on mobile */
+    }
+    
+    p {
+      line-height: 1.6; /* Comfortable line height for paragraphs */
+    }
   }
   
   /* Lenis smooth scroll - Ultra Smooth Configuration */

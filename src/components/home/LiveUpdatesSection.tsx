@@ -50,7 +50,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
     return (
       <div
         ref={containerRef}
-        className="live-article-container mx-auto max-w-screen-xl relative mb-[100px] px-4 md:px-0"
+        className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0"
       >
         <FeaturedArticleSkeleton />
       </div>
@@ -89,8 +89,8 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
         aria-label={`Read article: ${latestNews.title}`}
       >
         <article>
-          <div className="image-container mb-[24px] overflow-hidden relative rounded-sm">
-            <div className="relative h-[420px] md:h-[560px] w-full">
+          <div className="image-container mb-4 md:mb-[24px] overflow-hidden relative rounded-sm">
+            <div className="relative h-[280px] sm:h-[320px] md:h-[420px] lg:h-[560px] w-full">
               <Image
                 src={latestNews.urlToImage || getPlaceholderImage(1200, 580)}
                 alt={latestNews.title || 'Latest news article'}
@@ -101,13 +101,13 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
               />
             </div>
             <span
-              className="absolute top-[18px] left-[18px] bg-white text-xs font-medium px-[12px] py-[12px] rounded-sm flex items-center shadow-sm"
+              className="absolute top-3 left-3 sm:top-[18px] sm:left-[18px] bg-white text-[10px] sm:text-xs font-medium px-2 py-1.5 sm:px-[12px] sm:py-[12px] rounded-sm flex items-center shadow-sm"
               aria-label="Live updates"
             >
-              <span className="relative flex items-center justify-center mr-[8px]">
-                <span className="w-[6px] h-[6px] bg-red-500 rounded-full blink-dot" aria-hidden="true"></span>
+              <span className="relative flex items-center justify-center mr-1.5 sm:mr-[8px]">
+                <span className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] bg-red-500 rounded-full blink-dot" aria-hidden="true"></span>
                 <span
-                  className="absolute w-[16px] h-[16px] border border-red-500 rounded-full wave-animation"
+                  className="absolute w-[12px] h-[12px] sm:w-[16px] sm:h-[16px] border border-red-500 rounded-full wave-animation"
                   aria-hidden="true"
                 ></span>
               </span>
@@ -115,13 +115,25 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
             </span>
           </div>
 
-          <div className="flex justify-end mb-[12px] text-xs text-gray-600">
+          <div className="flex justify-end mb-3 md:mb-[12px] text-[10px] sm:text-xs text-gray-600">
             <time dateTime={latestNews.publishedAt}>{publishedRelative}</time>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Mobile Layout - Stacked */}
+          <div className="md:hidden space-y-4">
+            <h1 className="font-semibold text-xl sm:text-2xl leading-tight">{latestNews.title}</h1>
+            <div className="flex items-center justify-start">
+              <div className="flex items-center text-sm sm:text-base link font-medium">
+                Read Article
+                <BsArrowRightCircle className="ml-2 h-5 w-5" aria-hidden="true" />
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout - Side by side */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="col-span-3">
-              <h1 className="font-semibold text-[36px] leading-[49px]">{latestNews.title}</h1>
+              <h1 className="font-semibold text-3xl lg:text-[36px] leading-snug md:leading-[49px]">{latestNews.title}</h1>
             </div>
             <div className="flex items-start justify-end">
               <div className="flex items-center text-sm link">

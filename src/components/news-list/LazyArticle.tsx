@@ -110,10 +110,10 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
             />
           </div>
         </div>
-        <h3 className="text-lg md:text-xl font-semibold line-clamp-2 mb-2">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold line-clamp-2 mb-2 leading-snug">
           {truncatedTitle}
         </h3>
-        <div className="flex items-center text-xs text-primary mt-2 gap-x-[8px]">
+        <div className="flex items-center text-[10px] sm:text-xs text-primary mt-2 gap-x-[8px]">
           <span className="truncate">{formattedAuthor}</span>
           <BsDashLg className="flex-shrink-0" aria-hidden="true" />
           <time dateTime={article.publishedAt} className="flex-shrink-0">
