@@ -70,7 +70,11 @@ export const useTopHeadlines = (
 /**
  * Hook to fetch articles by query using Next.js server actions
  */
-export const useEverything = (query: string, pageSize: number = 20): UseDataResult<NewsApiResponse> => {
+export const useEverything = (
+  query: string,
+  pageSize: number = 20,
+  domains?: string
+): UseDataResult<NewsApiResponse> => {
   const [data, setData] = useState<NewsApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -98,7 +102,7 @@ export const useEverything = (query: string, pageSize: number = 20): UseDataResu
       setError(null);
 
       try {
-        const result = await getEverythingAction(query, pageSize);
+        const result = await getEverythingAction(query, pageSize, domains);
         if (!cancelled) {
           setData(result);
           setIsLoading(false);
@@ -117,7 +121,7 @@ export const useEverything = (query: string, pageSize: number = 20): UseDataResu
     return () => {
       cancelled = true;
     };
-  }, [query, pageSize]);
+  }, [query, pageSize, domains]);
 
   return { data, isLoading, error };
 };

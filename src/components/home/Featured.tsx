@@ -1,13 +1,15 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
+import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { isValidArticle } from '@/lib/utils/validation';
+import { getPlaceholderImage } from '@/lib/utils/placeholder';
 
 interface FeaturedItem {
   id: number;
-  img: string;
   title: string;
   assert: string;
   linkTo: string;
@@ -16,28 +18,24 @@ interface FeaturedItem {
 const FEATURED_LIST: FeaturedItem[] = [
   {
     id: 1,
-    img: 'https://images.nationalgeographic.org/image/upload/t_edhub_resource_key_image/v1638892472/EducationHub/photos/new-york-protesters.jpg',
     title: 'World News',
     assert: 'Economic policies are shaping international markets',
     linkTo: ROUTES.WORLD_NEWS,
   },
   {
     id: 2,
-    img: 'https://www.artificialintelligence-news.com/wp-content/uploads/2025/02/grok-3-ai-model-xai-reasoning-artificial-intelligence-benchmarks-elon-musk-development-ethics.jpg',
     title: 'Technology',
     assert: 'The latest trends in AI and innovation',
     linkTo: ROUTES.TECHNOLOGY,
   },
   {
     id: 3,
-    img: 'https://www.aljazeera.com/wp-content/uploads/2024/08/2024-08-16T062607Z_498023022_RC213Z9IMEC1_RTRMADP_3_HEALTH-MPOX-PAKISTAN-1723793768.jpg?resize=770%2C513&quality=80',
     title: 'Health',
     assert: 'Analyzing the effects of global health policies',
     linkTo: ROUTES.HEALTH,
   },
   {
     id: 4,
-    img: 'https://th-i.thgim.com/public/sport/xa9qka/article69243783.ece/alternates/FREE_1200/Ugo%20Blanchet.JPG',
     title: 'Sports',
     assert: 'Effects of cutting-edge wearables in professional sports',
     linkTo: ROUTES.SPORTS,
@@ -45,37 +43,70 @@ const FEATURED_LIST: FeaturedItem[] = [
 ];
 
 /**
- * Featured component - Displays featured news categories
+ * Featured component - Displays featured news categories with latest news images
  */
 export const Featured = memo(() => {
+  const { data, isLoading } = useTopHeadlines(undefined, 'us', 20);
+
+  // Get valid articles with images
+  const articlesWithImages = useMemo(() => {
+    if (!data?.articles) return [];
+    return data.articles
+      .filter((article) => isValidArticle(article) && article.urlToImage)
+      .slice(0, 4);
+  }, [data?.articles]);
+
   return (
     <nav
       className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mx-auto max-w-screen-xl gap-4 md:gap-8 mb-[30px] px-4 md:px-0"
       aria-label="Featured news categories"
     >
-      {FEATURED_LIST.map((item) => (
-        <Link
-          href={item.linkTo}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-          key={item.id}
-          aria-label={`Browse ${item.title} news`}
-        >
-          <div className="relative w-20 h-20 flex-shrink-0">
-            <Image
-              src={item.img}
-              alt={`${item.title} category`}
-              fill
-              className="rounded-sm object-cover"
-              sizes="80px"
-              loading="lazy"
-            />
+      {isLoading ? (
+        // Skeleton loading
+        FEATURED_LIST.map((item) => (
+          <div
+            key={`skeleton-${item.id}`}
+            className="flex items-center gap-3"
+            aria-label="Loading featured category"
+          >
+            <div className="relative w-20 h-20 flex-shrink-0 skeleton-shimmer rounded-sm"></div>
+            <div className="min-w-0 flex-1">
+              <div className="h-4 w-20 skeleton-shimmer rounded mb-2"></div>
+              <div className="h-3 w-full skeleton-shimmer rounded"></div>
+              <div className="h-3 w-3/4 skeleton-shimmer rounded mt-1"></div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm uppercase">{item.title}</p>
-            <p className="font-medium text-xs leading-[21px] line-clamp-2">{item.assert}</p>
-          </div>
-        </Link>
-      ))}
+        ))
+      ) : (
+        FEATURED_LIST.map((item, index) => {
+          const article = articlesWithImages[index];
+          const imageUrl = article?.urlToImage || getPlaceholderImage(80, 80);
+
+          return (
+            <Link
+              href={item.linkTo}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              key={item.id}
+              aria-label={`Browse ${item.title} news`}
+            >
+              <div className="relative w-20 h-20 flex-shrink-0 bg-gray-200 rounded-sm">
+                <Image
+                  src={imageUrl}
+                  alt={`${item.title} category`}
+                  fill
+                  className="rounded-sm object-cover"
+                  sizes="80px"
+                  loading="lazy"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm uppercase">{item.title}</p>
+                <p className="font-medium text-xs leading-[21px] line-clamp-2">{item.assert}</p>
+              </div>
+            </Link>
+          );
+        })
+      )}
     </nav>
   );
 });

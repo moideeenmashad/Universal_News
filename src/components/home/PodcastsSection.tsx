@@ -78,7 +78,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <div key={`skeleton-${i}`} className="flex gap-4">
-              <div className="w-[120px] h-[120px] flex-shrink-0 bg-gray-200 animate-pulse rounded-sm"></div>
+              <div className="w-[120px] h-[120px] lg:w-[160px] lg:h-[160px] flex-shrink-0 bg-gray-200 animate-pulse rounded-sm"></div>
               <div className="flex-1 space-y-2">
                 <div className="h-5 w-3/4 bg-gray-200 animate-pulse rounded"></div>
                 <div className="h-4 w-full bg-gray-200 animate-pulse rounded"></div>
@@ -111,14 +111,14 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
                 className="flex gap-4 hover:opacity-90 transition-opacity"
               >
                 {/* Image */}
-                <div className="w-[120px] h-[120px] flex-shrink-0 relative overflow-hidden rounded-sm">
+                <div className="w-[120px] h-[120px] lg:w-[160px] lg:h-[160px] flex-shrink-0 relative overflow-hidden rounded-sm">
                   {podcast.image_url ? (
                     <Image
                       src={podcast.image_url}
                       alt={podcast.title || 'Podcast thumbnail'}
                       fill
                       className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
-                      sizes="120px"
+                      sizes="(max-width: 1024px) 120px, 160px"
                       loading="lazy"
                     />
                   ) : (

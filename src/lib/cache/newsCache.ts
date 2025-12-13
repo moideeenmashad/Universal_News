@@ -115,8 +115,9 @@ export function getHeadlinesCacheKey(category?: string, country?: string, pageSi
 /**
  * Generate cache key for everything/search request
  */
-export function getEverythingCacheKey(query: string, pageSize?: number): string {
-  return `everything_${query}_${pageSize || 20}`;
+export function getEverythingCacheKey(query: string, pageSize?: number, domains?: string): string {
+  const domainsPart = domains ? `_domains_${domains.replace(/[^a-zA-Z0-9,]/g, '_')}` : '';
+  return `everything_${query}_${pageSize || 20}${domainsPart}`;
 }
 
 /**

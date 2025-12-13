@@ -29,13 +29,14 @@ export async function GET(request: NextRequest) {
   const country = searchParams.get('country') || DEFAULT_COUNTRY;
   const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
   const language = searchParams.get('language') || DEFAULT_LANGUAGE;
+  const domains = searchParams.get('domains'); // Comma-separated list of domains
 
   // Generate cache key based on type
   let cacheKey = '';
   if (type === 'headlines') {
     cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
   } else if (type === 'everything') {
-    cacheKey = getEverythingCacheKey(query || '', Number(pageSize));
+    cacheKey = getEverythingCacheKey(query || '', Number(pageSize), domains || undefined);
   } else if (type === 'latest') {
     cacheKey = getLatestNewsCacheKey(query || 'worldnews');
   }
@@ -80,7 +81,11 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
       }
-      url = `${NEWS_API_BASE_URL}/everything?q=${encodeURIComponent(query)}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      let everythingUrl = `${NEWS_API_BASE_URL}/everything?q=${encodeURIComponent(query)}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      if (domains && domains.trim().length > 0) {
+        everythingUrl += `&domains=${encodeURIComponent(domains.trim())}`;
+      }
+      url = everythingUrl;
     } else if (type === 'latest') {
       const searchQuery = query || 'worldnews';
       url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(searchQuery)}&language=${language}`;

@@ -26,9 +26,13 @@ export async function getTopHeadlines(
 /**
  * Server action to fetch articles by query
  */
-export async function getEverything(query: string, pageSize: number = 20): Promise<NewsApiResponse> {
+export async function getEverything(
+  query: string,
+  pageSize: number = 20,
+  domains?: string
+): Promise<NewsApiResponse> {
   try {
-    return await newsService.getEverything(query, pageSize);
+    return await newsService.getEverything(query, pageSize, undefined, domains);
   } catch (error) {
     console.error('Error in getEverything:', error);
     if (error instanceof ApiError) {

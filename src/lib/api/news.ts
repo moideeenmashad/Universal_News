@@ -125,6 +125,7 @@ class NewsService {
    * @param query - Search query
    * @param pageSize - Number of articles to fetch (default: 20)
    * @param language - Language code (default: 'en' for English)
+   * @param domains - Comma-separated list of domains to filter by (optional)
    * @param revalidate - Revalidation time in seconds (default: 60)
    * @returns Promise with news articles
    * @throws ApiError if request fails
@@ -133,13 +134,14 @@ class NewsService {
     query: string,
     pageSize: number = DEFAULT_PAGE_SIZE,
     language: string = DEFAULT_LANGUAGE,
+    domains?: string,
     revalidate: number = CACHE_REVALIDATE_SHORT
   ): Promise<NewsApiResponse> {
     if (!query || query.trim().length === 0) {
       throw new ApiError('Search query cannot be empty', 400);
     }
 
-    const cacheKey = getEverythingCacheKey(query.trim(), pageSize);
+    const cacheKey = getEverythingCacheKey(query.trim(), pageSize, domains);
     
     try {
       let url: string;
@@ -155,7 +157,11 @@ class NewsService {
           }
           throw new ApiError('News API key is not configured', 401);
         }
-        url = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+        let baseUrl = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+        if (domains && domains.trim().length > 0) {
+          baseUrl += `&domains=${encodeURIComponent(domains.trim())}`;
+        }
+        url = baseUrl;
       } else {
         // Client-side: use API route proxy
         const params = new URLSearchParams({
@@ -164,6 +170,9 @@ class NewsService {
           language,
           pageSize: String(pageSize),
         });
+        if (domains && domains.trim().length > 0) {
+          params.set('domains', domains.trim());
+        }
         url = `/api/news?${params.toString()}`;
       }
       
@@ -411,7 +420,7 @@ class NewsService {
       // Try search query if provided
       if (searchQuery && searchQuery.trim().length > 0) {
         try {
-          const searchResponse = await this.getEverything(searchQuery.trim(), 100, DEFAULT_LANGUAGE, revalidate);
+          const searchResponse = await this.getEverything(searchQuery.trim(), 100, DEFAULT_LANGUAGE, undefined, revalidate);
           const matchedArticle = searchResponse.articles.find((article: NewsArticle) => {
             const apiTitleSlug = slugify(article.title);
             return apiTitleSlug === titleSlug;
