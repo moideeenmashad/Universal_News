@@ -36,7 +36,7 @@ export const NewsList = ({
   }, [validArticles]);
 
   return (
-    <section className="mx-auto max-w-screen-xl mb-12 md:mb-[100px] px-4 md:px-0" aria-label={title}>
+    <section className="mx-auto max-w-screen-xl px-4 md:px-0" aria-label={title}>
       <div className="news-list-container mx-auto max-w-screen-xl">
         <div className="flex items-center justify-between border-b border-primary pb-3 mb-6 md:mb-10">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>

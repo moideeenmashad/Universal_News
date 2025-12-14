@@ -8,7 +8,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SmoothScroll>
       <Navbar />
-      <main role="main">
+      <main role="main" className="py-12">
         {children}
       </main>
       <Footer />

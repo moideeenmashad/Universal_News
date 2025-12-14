@@ -62,7 +62,7 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
             <Link
               key={article.url || `similar-${index}`}
               href={articleUrl}
-              className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1"
+              className="flex flex-col group focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
             >
               <div className="relative w-full h-[180px] sm:h-[200px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                 {article.urlToImage ? (
@@ -86,7 +86,7 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
                   <span className="hidden sm:inline">—</span>
                   <span className="whitespace-nowrap">{article.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
                 </p>
-                <h3 className="font-semibold text-sm sm:text-base leading-tight text-gray-900 line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                <h3 className="font-semibold text-sm sm:text-base leading-tight text-gray-900 line-clamp-2">
                   {article.title || 'Untitled'}
                 </h3>
               </div>

@@ -126,7 +126,7 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
 
   if (isLoading) {
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8" aria-label="Loading content">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0" aria-label="Loading content">
         <ArticleDetailSkeleton />
       </section>
     );
@@ -163,7 +163,7 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   const sourceLabel = 'Read full article'; // Unified label for all content types
 
   return (
-    <article className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
+    <article className="mx-auto max-w-screen-xl px-4 md:px-0">
       <div className="grid grid-cols-1 lg:grid-cols-4 mb-[24px]">
         <div className="col-span-3">
           <div className="relative w-full h-[300px] md:h-[400px] mb-6 rounded-lg overflow-hidden">

@@ -85,7 +85,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
     >
       <Link
         href={articleUrl}
-        className="article-container mb-[24px] block hover:opacity-95 transition-opacity"
+        className="article-container mb-[24px] block hover:opacity-95 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
         aria-label={`Read article: ${latestNews.title}`}
       >
         <article>

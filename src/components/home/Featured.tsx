@@ -85,7 +85,7 @@ export const Featured = memo(() => {
           return (
             <Link
               href={item.linkTo}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded"
               key={item.id}
               aria-label={`Browse ${item.title} news`}
             >

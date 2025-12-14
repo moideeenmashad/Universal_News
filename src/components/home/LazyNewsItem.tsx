@@ -87,7 +87,7 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
     <article ref={articleRef} className="rounded-md cursor-pointer group">
       <Link
         href={articleUrl}
-        className="block hover:opacity-90 transition-opacity focus:outline-none rounded-md"
+        className="block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
         aria-label={`Read article: ${article.title}`}
         prefetch={index < 4}
       >

@@ -66,7 +66,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
           <Link
-            className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded"
             href={ROUTES.PODCASTS}
             aria-label="View all podcasts"
           >
@@ -110,7 +110,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
               <Link
                 key={podcast.article_id || `podcast-${index}`}
                 href={podcastUrl}
-                className="flex gap-4 hover:opacity-90 transition-opacity"
+                className="flex gap-4 hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
               >
                 {/* Image */}
                 <div className="w-[120px] h-[120px] lg:w-[160px] lg:h-[160px] flex-shrink-0 relative overflow-hidden rounded-sm">

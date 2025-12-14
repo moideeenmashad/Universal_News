@@ -179,3 +179,16 @@ body.menu-open {
   position: fixed;
   width: 100%;
 }
+
+/* Active color utility class */
+.text-active {
+  color: #e63946 !important;
+}
+
+.hover-text-active:hover {
+  color: #e63946 !important;
+}
+
+.border-active {
+  border-color: #e63946 !important;
+}

@@ -45,7 +45,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
           <Link
-            className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="flex items-center text-sm link hover:opacity-80 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded"
             href={ROUTES.TECHNOLOGY}
             aria-label="View all technology news"
           >
@@ -85,7 +85,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
               <Link
                 key={article.url || `tech-${index}`}
                 href={articleUrl}
-                className="flex flex-col"
+                className="flex flex-col focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
               >
                 <div className="relative w-full h-[180px] sm:h-[200px] mb-3 overflow-hidden rounded-sm shadow-sm transition-shadow duration-300 hover:shadow-md">
                   {article.urlToImage ? (

@@ -76,7 +76,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
       <div className="mb-6 md:mb-[30px] flex items-center justify-between border-b border-primary pb-[12px]">
         <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary uppercase">{title}</h2>
         <div className="flex items-start justify-end">
-          <Link className="flex items-center text-sm link" href={ROUTES.WORLD_NEWS}>
+          <Link className="flex items-center text-sm link focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded" href={ROUTES.WORLD_NEWS}>
             View All
             <BsArrowRightCircle className="ml-[5px] h-[20px] w-[20px]" />
           </Link>
@@ -145,7 +145,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                 <Link
                   key={article.url || `mobile-world-${index}`}
                   href={articleUrl}
-                  className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1"
+                  className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1 focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
                 >
                   <div className="relative w-full h-[180px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     {article.urlToImage ? (
@@ -184,7 +184,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             {feature && (
               <Link
                 href={`/article/${slugify(feature.title)}`}
-                className="md:row-span-3 md:col-span-2 overflow-hidden rounded-sm relative block hover:opacity-90 transition-opacity"
+                className="md:row-span-3 md:col-span-2 overflow-hidden rounded-sm relative block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
               >
                 <div className="overflow-hidden rounded-sm relative">
                   {feature?.urlToImage ? (
@@ -228,7 +228,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                     <Link
                       key={article.url || `world-${index}`}
                       href={articleUrl}
-                      className="grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity"
+                      className="grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
                     >
                       <div className="image-container mr-[8px] overflow-hidden rounded-sm relative">
                         {article?.urlToImage ? (

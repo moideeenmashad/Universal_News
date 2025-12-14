@@ -28,8 +28,13 @@ const NAV_ITEMS: NavItem[] = [
 export const PrimaryNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const gotoHome = useCallback(() => {
     router.push(ROUTES.HOME);
@@ -146,8 +151,8 @@ export const PrimaryNavbar = () => {
                 <li key={item.id}>
                   <Link
                     href={item.LinkTo}
-                    className={`font-family-BG block py-2 px-5 text-primary rounded-sm hover:text-primary transition-colors focus:outline-none ${
-                      active ? 'font-bold border-b-2 border-primary' : ''
+                    className={`font-family-BG block py-2 px-5 rounded-sm transition-colors focus:outline-none ${
+                      active ? 'text-active' : 'text-primary hover-text-active'
                     }`}
                     aria-current={active ? 'page' : undefined}
                   >
@@ -186,18 +191,18 @@ export const PrimaryNavbar = () => {
                 return (
                   <li 
                     key={item.id}
-                    style={{
+                    style={isMounted && isOpen ? {
                       animationDelay: `${index * 50}ms`,
-                      animation: isOpen ? 'slideInRight 0.3s ease-out forwards' : 'none'
-                    }}
-                    className="opacity-0"
+                      animation: 'slideInRight 0.3s ease-out forwards'
+                    } : undefined}
+                    className={isMounted && isOpen ? '' : 'opacity-0'}
                   >
                     <Link
                       href={item.LinkTo}
-                      className={`font-family-BG block py-4 px-4 text-primary rounded-lg transition-all duration-200 focus:outline-none ${
+                      className={`font-family-BG block py-4 px-4 rounded-lg transition-all duration-200 focus:outline-none ${
                         active
-                          ? 'font-bold bg-primary/10 text-primary border-l-4 border-primary'
-                          : 'hover:bg-gray-100 hover:text-primary active:bg-gray-200'
+                          ? 'bg-primary/10 text-active border-l-4 border-active'
+                          : 'text-primary hover:bg-gray-100 hover-text-active active:bg-gray-200'
                       }`}
                       onClick={closeNavbar}
                       aria-current={active ? 'page' : undefined}
