@@ -42,7 +42,9 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
     // Filter out duplicates from NewsData.io (where duplicate: true)
     const uniqueResults = data.results.filter((item) => !item.duplicate);
     
+    // Process more articles to ensure we have enough after filtering
     const transformed: NewsArticle[] = uniqueResults
+      .slice(0, 20) // Process first 20 to ensure we get at least 4 valid ones
       .map((item) => ({
         title: item.title || 'Untitled',
         description: item.description,
@@ -57,13 +59,40 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
         // Store article_id for deduplication
         article_id: item.article_id,
       }))
-      .filter((article) => article.title && article.title !== 'Untitled' && article.url); // Less strict validation
+      .filter((article) => {
+        // Very lenient validation - only require non-empty title
+        return article.title && article.title.trim().length > 0;
+      });
     
     // Remove duplicates by article_id or title+url
     const deduplicated = removeDuplicateArticles(transformed);
     
-    // Get first 4 articles after deduplication - ensure we have at least 4
-    // If we have fewer, we'll still show what we have
+    // Get first 4 articles after deduplication
+    // If we have fewer than 4, try to get more from the original results
+    if (deduplicated.length < 4 && uniqueResults.length > 20) {
+      // Process more articles if we don't have enough
+      const additionalTransformed: NewsArticle[] = uniqueResults
+        .slice(20, 40) // Process next 20
+        .map((item) => ({
+          title: item.title || 'Untitled',
+          description: item.description,
+          url: item.link || '#',
+          urlToImage: item.image_url,
+          publishedAt: item.pubDate || new Date().toISOString(),
+          author: item.creator?.[0] || item.source_name,
+          source: {
+            name: item.source_name || 'Unknown',
+          },
+          content: item.content,
+          article_id: item.article_id,
+        }))
+        .filter((article) => article.title && article.title.trim().length > 0);
+      
+      const additionalDeduplicated = removeDuplicateArticles(additionalTransformed);
+      const combined = [...deduplicated, ...additionalDeduplicated];
+      return combined.slice(0, 4);
+    }
+    
     return deduplicated.slice(0, 4);
   }, [data]);
 
@@ -98,12 +127,12 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
               </div>
             ))}
           </div>
-          {/* Desktop Skeleton - Original layout */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 justify-evenly">
-            {/* Main hero skeleton */}
-            <div className="md:row-span-3 md:col-span-2">
-              <div className="overflow-hidden rounded-sm relative">
-                <div className="w-full h-[520px] rounded-sm bg-gray-200 animate-pulse"></div>
+          {/* Desktop Skeleton - Grid with equal heights */}
+          <div className="hidden md:grid md:grid-cols-3 gap-4 min-h-[520px]">
+            {/* Main hero skeleton - Same height as side items, 2 columns */}
+            <div className="md:col-span-2">
+              <div className="overflow-hidden rounded-sm relative h-full min-h-[520px]">
+                <div className="w-full h-full rounded-sm bg-gray-200 animate-pulse"></div>
                 <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-gray-300/70">
                   <div className="space-y-3">
                     <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
@@ -113,17 +142,19 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                 </div>
               </div>
             </div>
-            {/* Side list skeletons */}
-            {[0, 1, 2].map((i) => (
-              <div key={`skeleton-${i}`} className="grid items-center gap-4 [grid-template-columns:40%_60%]">
-                <div className="w-full aspect-square bg-gray-200 animate-pulse rounded-sm"></div>
-                <div className="space-y-2">
-                  <div className="h-3 w-24 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-4 w-2/3 bg-gray-200 animate-pulse rounded"></div>
+            {/* Side list skeletons - Stacked in flex column with equal heights */}
+            <div className="flex flex-col gap-4 h-full">
+              {[0, 1, 2].map((i) => (
+                <div key={`skeleton-${i}`} className="flex-1 grid items-center gap-4 [grid-template-columns:40%_60%] min-h-[160px]">
+                  <div className="w-full h-full bg-gray-200 animate-pulse rounded-sm"></div>
+                  <div className="flex flex-col justify-center space-y-2 h-full">
+                    <div className="h-3 w-24 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </>
       ) : error ? (
@@ -179,89 +210,93 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             })}
           </div>
 
-          {/* Desktop Layout - Original featured + side stack */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 justify-evenly">
-            {/* Main Grid Item with Image and Overlay */}
-            {feature && (
-              <Link
-                href={`/article/${slugify(feature.title)}`}
-                className="md:row-span-3 md:col-span-2 overflow-hidden rounded-sm relative block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
-              >
-                <div className="overflow-hidden rounded-sm relative">
-                  {feature?.urlToImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={feature.urlToImage}
-                      alt={feature.title || 'news thumbnail'}
-                      className="w-full h-[520px] object-cover hover:scale-105 ease-in-out transition-transform duration-300"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="h-[520px] w-full rounded-sm bg-gray-200 animate-pulse"></div>
-                  )}
-                  {/* Overlay Card */}
-                  <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-primary">
-                    <div>
-                      <p className="text-xs px-5 py-2 bg-white text-primary w-fit rounded-lg mb-[12px]">
-                        {feature?.publishedAt ? formatDate(feature.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}
-                      </p>
-                      <p className="text-primary text-[26px] font-semibold leading-snug">
-                        {feature?.title || 'Untitled'}
+          {/* Desktop Layout - Grid with equal row heights */}
+          <div className="hidden md:grid md:grid-cols-3 gap-4 min-h-[520px]">
+            {/* Top Row: Featured article (2 cols) + First side item (1 col) */}
+            <div className="md:col-span-2">
+              {feature && (
+                <Link
+                  href={`/article/${slugify(feature.title)}`}
+                  className="block overflow-hidden rounded-sm relative hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 h-full"
+                >
+                  <div className="overflow-hidden rounded-sm relative h-full">
+                    {feature?.urlToImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={feature.urlToImage}
+                        alt={feature.title || 'news thumbnail'}
+                        className="w-full h-full object-cover hover:scale-105 ease-in-out transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-full w-full rounded-sm bg-gray-200 animate-pulse"></div>
+                    )}
+                    {/* Overlay Card */}
+                    <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-primary">
+                      <div>
+                        <p className="text-xs px-5 py-2 bg-white text-primary w-fit rounded-lg mb-[12px]">
+                          {feature?.publishedAt ? formatDate(feature.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}
+                        </p>
+                        <p className="text-primary text-[26px] font-semibold leading-snug">
+                          {feature?.title || 'Untitled'}
+                        </p>
+                      </div>
+                      <p className="text-sm text-primary">
+                        <span>By.</span>
+                        <span> {sanitizeTitle(feature?.author || 'Unknown Author')} / </span>
+                        <span>Publisher</span>
                       </p>
                     </div>
-                    <p className="text-sm text-primary">
-                      <span>By.</span>
-                      <span> {sanitizeTitle(feature?.author || 'Unknown Author')} / </span>
-                      <span>Publisher</span>
-                    </p>
                   </div>
-                </div>
-              </Link>
-            )}
-
-            {/* Right column cards */}
-            {sideStack && sideStack.length > 0
-              ? sideStack.map((article, index) => {
-                  const articleSlug = slugify(article.title);
-                  const articleUrl = `/article/${articleSlug}`;
-                  
-                  return (
-                    <Link
-                      key={article.url || `world-${index}`}
-                      href={articleUrl}
-                      className="grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
-                    >
-                      <div className="image-container mr-[8px] overflow-hidden rounded-sm relative">
-                        {article?.urlToImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={article.urlToImage}
-                            alt={article.title}
-                            className="w-full h-auto aspect-square object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full aspect-square bg-gray-300 animate-pulse rounded-sm"></div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-xs text-primary flex items-center">
-                          <span>{sanitizeTitle(article?.author || 'Unknown Author')}</span>
-                          <span className="mx-1">—</span>
-                          <span>{article?.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
-                        </p>
-                        <p className="font-semibold text-[18px] mt-1 leading-snug">
-                          {article?.title
-                            ? article.title.length > 60
-                              ? `${article.title.slice(0, 60)}...`
-                              : article.title
-                            : 'Untitled'}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })
-              : null}
+                </Link>
+              )}
+            </div>
+            
+            {/* Right column - Stack of 3 items with equal heights */}
+            <div className="flex flex-col gap-4">
+              {sideStack && sideStack.length > 0
+                ? sideStack.slice(0, 3).map((article, index) => {
+                    const articleSlug = slugify(article.title);
+                    const articleUrl = `/article/${articleSlug}`;
+                    
+                    return (
+                      <Link
+                        key={article.url || article.article_id || `world-${index}`}
+                        href={articleUrl}
+                        className="flex-1 grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md min-h-0"
+                      >
+                        <div className="image-container mr-[8px] overflow-hidden rounded-sm relative h-full">
+                          {article?.urlToImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={article.urlToImage}
+                              alt={article.title}
+                              className="w-full h-full object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-300 animate-pulse rounded-sm"></div>
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-center h-full">
+                          <p className="text-xs text-primary flex items-center mb-2">
+                            <span>{sanitizeTitle(article?.author || 'Unknown Author')}</span>
+                            <span className="mx-1">—</span>
+                            <span>{article?.publishedAt ? formatDate(article.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}</span>
+                          </p>
+                          <p className="font-semibold text-[18px] leading-snug line-clamp-3">
+                            {article?.title
+                              ? article.title.length > 60
+                                ? `${article.title.slice(0, 60)}...`
+                                : article.title
+                              : 'Untitled'}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })
+                : null}
+            </div>
           </div>
         </>
       )}

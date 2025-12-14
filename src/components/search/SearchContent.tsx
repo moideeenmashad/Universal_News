@@ -13,7 +13,8 @@ export function SearchContent() {
   const observer = useRef<IntersectionObserver | null>(null);
   const lastArticleRef = useRef<HTMLDivElement | null>(null);
 
-  const { data, isLoading, error } = useEverything(query, 20);
+  // Fetch more articles for comprehensive search results (100 is max for NewsAPI)
+  const { data, isLoading, error } = useEverything(query, 100);
   const articles = useMemo(() => data?.articles || [], [data?.articles]);
 
   const handleIntersection = useCallback(
@@ -73,11 +74,21 @@ export function SearchContent() {
       : 'Failed to load search results. Please try again.'
     : null;
 
+  const totalResults = data?.totalResults || 0;
+  const showingCount = Math.min(visibleCount, articles.length);
+
   return (
     <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-4 md:mb-6 leading-tight">
-        Search Results for &quot;{query}&quot;
-      </h1>
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-2 leading-tight">
+          Search Results for &quot;{query}&quot;
+        </h1>
+        {!isLoading && totalResults > 0 && (
+          <p className="text-sm sm:text-base text-gray-600">
+            Showing {showingCount} of {totalResults} {totalResults === 1 ? 'result' : 'results'}
+          </p>
+        )}
+      </div>
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {Array(6).fill(0).map((_, i) => (
@@ -97,16 +108,28 @@ export function SearchContent() {
         </div>
       ) : errorMessage ? (
         <ErrorMessage message={errorMessage} />
+      ) : articles.length === 0 ? (
+        <div className="text-center py-12" role="status">
+          <p className="text-gray-600 text-lg mb-2">No articles found for &quot;{query}&quot;</p>
+          <p className="text-sm text-gray-500">Try different keywords or check your spelling.</p>
+        </div>
       ) : (
-        <NewsList
-          title={`Search: ${query}`}
-          articles={visibleArticles}
-          loading={isLoading}
-          error={null}
-          category="general"
-          lastArticleRef={lastArticleRef}
-          hasMore={visibleCount < articles.length}
-        />
+        <>
+          <NewsList
+            title=""
+            articles={visibleArticles}
+            loading={isLoading}
+            error={null}
+            category="general"
+            lastArticleRef={lastArticleRef}
+            hasMore={visibleCount < articles.length}
+          />
+          {totalResults > 100 && (
+            <div className="mt-6 text-center text-sm text-gray-600">
+              <p>Showing first 100 results. NewsAPI free tier limits results to 100 articles per query.</p>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
