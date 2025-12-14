@@ -30,7 +30,8 @@ export const LiveUpdatesSection = () => {
     return fallback || null;
   }, [articles]);
 
-  if (isLoading) {
+  // Show skeleton if loading OR if no news yet (to prevent blank screen during transitions)
+  if (isLoading || !latestNews) {
     return (
       <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0">
         <FeaturedArticleSkeleton />
@@ -46,10 +47,6 @@ export const LiveUpdatesSection = () => {
         <ErrorMessage message={errorMessage} />
       </div>
     );
-  }
-
-  if (!latestNews) {
-    return null;
   }
 
   const articleUrl = getArticleUrl(latestNews);

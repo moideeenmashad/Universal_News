@@ -242,12 +242,14 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   }
 
   // Determine loading state - only check if we don't have cached content
-  const isLoading = contentType === 'news' ? isLoadingCategory || isLoadingUniversal : isLoadingPodcast;
+  const isLoading = contentType === 'news' ? (isLoadingCategory || isLoadingUniversal) : isLoadingPodcast;
   const error = contentType === 'news' ? categoryError : podcastError;
 
-  if (isLoading) {
+  // Show skeleton if loading OR if content is null and we haven't gotten an error yet
+  // This prevents showing blank content during the transition
+  if (isLoading || (!content && !error)) {
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0" aria-label="Loading content">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-24" aria-label="Loading content">
         <ArticleDetailSkeleton />
       </section>
     );

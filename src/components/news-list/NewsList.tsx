@@ -26,7 +26,10 @@ export const NewsList = ({
   hasMore,
   category,
 }: NewsListProps) => {
+  // Show skeleton if loading OR if articles are empty (to prevent blank screen during transitions)
+  // Only show "No articles found" if we're not loading, have no error, and truly have no articles
   const isInitialLoad = articles.length === 0 && loading;
+  const showSkeleton = loading || (articles.length === 0 && !error);
   const validArticles = articles.filter(isValidArticle);
 
   // Only render visible articles + buffer
@@ -44,9 +47,9 @@ export const NewsList = ({
 
         {error && <ErrorMessage message={error} className="mb-5" />}
 
-        {isInitialLoad ? (
+        {showSkeleton ? (
           <ArticleSkeleton count={6} />
-        ) : visibleArticles.length === 0 && !loading ? (
+        ) : visibleArticles.length === 0 ? (
           <div className="text-center py-12" role="status">
             <p className="text-gray-600 text-lg">No articles found.</p>
           </div>

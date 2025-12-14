@@ -75,12 +75,12 @@ export const LazyArticle = memo(({ article, index, category, onVisible }: LazyAr
     return (
       <article
         ref={articleRef}
-        className="rounded-md cursor-pointer group min-h-[400px]"
+        className="rounded-md cursor-pointer group min-h-[400px] animate-pulse"
         aria-label="Loading article"
       >
-        <div className="h-48 md:h-64 w-full skeleton-shimmer rounded-sm mb-3"></div>
-        <div className="h-6 skeleton-shimmer rounded w-2/3 mb-2"></div>
-        <div className="h-4 skeleton-shimmer rounded w-1/3"></div>
+        <div className="h-48 md:h-64 w-full bg-gray-200 rounded-sm mb-3"></div>
+        <div className="h-6 bg-gray-200 rounded w-2/3 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
       </article>
     );
   }

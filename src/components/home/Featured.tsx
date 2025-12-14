@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
@@ -54,6 +54,12 @@ const FEATURED_LIST: FeaturedItem[] = [
  */
 export const Featured = memo(() => {
   const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Ensure component is mounted on client to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Fetch articles for each category
   const worldNewsData = useTopHeadlines(undefined, 'us', 5, isVisible); // General for world news
@@ -78,19 +84,39 @@ export const Featured = memo(() => {
     };
   }, [worldNewsData.data, techData.data, healthData.data, sportsData.data]);
 
-  // Show skeleton only when ALL data sources have finished loading (either with data or error)
-  // This prevents showing partial data (some items with data, others still loading)
+  // Show skeleton if component is not mounted yet (prevents hydration mismatch)
+  // OR if ANY data source is loading OR if we don't have real articles yet
+  // This prevents showing static data with placeholder images before real data loads
   const isLoading = useMemo(() => {
-    // Check if all data sources have finished loading (not loading anymore)
-    const allFinished = 
-      !worldNewsData.isLoading && 
-      !techData.isLoading && 
-      !healthData.isLoading && 
-      !sportsData.isLoading;
+    // Always show skeleton on initial render (server and client) until mounted
+    if (!isMounted) return true;
     
-    // Show skeleton if any is still loading
-    return !allFinished;
-  }, [worldNewsData.isLoading, techData.isLoading, healthData.isLoading, sportsData.isLoading]);
+    const anyLoading = 
+      worldNewsData.isLoading || 
+      techData.isLoading || 
+      healthData.isLoading || 
+      sportsData.isLoading;
+    
+    // Check if we have at least some real articles loaded
+    const hasRealData = 
+      categoryArticles.world || 
+      categoryArticles.technology || 
+      categoryArticles.health || 
+      categoryArticles.sports;
+    
+    // Show skeleton if loading OR if we don't have real data yet
+    return anyLoading || !hasRealData;
+  }, [
+    isMounted,
+    worldNewsData.isLoading, 
+    techData.isLoading, 
+    healthData.isLoading, 
+    sportsData.isLoading,
+    categoryArticles.world,
+    categoryArticles.technology,
+    categoryArticles.health,
+    categoryArticles.sports
+  ]);
 
   return (
     <nav
@@ -103,14 +129,14 @@ export const Featured = memo(() => {
         FEATURED_LIST.map((item) => (
           <div
             key={`skeleton-${item.id}`}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 animate-pulse"
             aria-label="Loading featured category"
           >
-            <div className="relative w-20 h-20 flex-shrink-0 skeleton-shimmer rounded-sm"></div>
+            <div className="relative w-20 h-20 flex-shrink-0 bg-gray-200 rounded-sm"></div>
             <div className="min-w-0 flex-1">
-              <div className="h-4 w-20 skeleton-shimmer rounded mb-2"></div>
-              <div className="h-3 w-full skeleton-shimmer rounded"></div>
-              <div className="h-3 w-3/4 skeleton-shimmer rounded mt-1"></div>
+              <div className="h-4 w-20 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 w-full bg-gray-200 rounded"></div>
+              <div className="h-3 w-3/4 bg-gray-200 rounded mt-1"></div>
             </div>
           </div>
         ))
