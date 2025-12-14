@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { NewsList } from './NewsList';
 import { useTopHeadlines, useLatestNews } from '@/lib/hooks/useNews';
-import { isValidCategory, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidCategory, removeDuplicateArticles, isValidArticle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 
 interface NewsProps {
@@ -40,9 +40,9 @@ export const News = ({ category, title }: NewsProps) => {
       // Transform podcast data to NewsArticle format for NewsList
       if (!podcastData?.results) return [];
       transformed = podcastData.results
-        .filter((podcast) => !podcast.duplicate && podcast?.title)
+        .filter((podcast) => !podcast.duplicate && podcast?.title && podcast.title.trim().length > 0)
         .map((podcast) => ({
-          title: podcast.title,
+          title: podcast.title.trim(),
           description: podcast.description,
           url: podcast.link || '#',
           urlToImage: podcast.image_url,
@@ -53,13 +53,24 @@ export const News = ({ category, title }: NewsProps) => {
           },
           content: podcast.content,
           article_id: podcast.article_id,
-        }));
+        }))
+        .filter(isValidArticle);
     } else {
-      transformed = newsData?.articles || [];
+      // Filter and validate news articles
+      if (!newsData?.articles) return [];
+      transformed = newsData.articles
+        .filter((article) => article?.title && article.title.trim().length > 0)
+        .map((article) => ({
+          ...article,
+          title: article.title.trim(),
+        }))
+        .filter(isValidArticle);
     }
     
-    // Remove duplicates from all articles
-    return removeDuplicateArticles(transformed);
+    // Remove duplicates from all articles (this is the key deduplication step)
+    const deduplicated = removeDuplicateArticles(transformed);
+    
+    return deduplicated;
   }, [isPodcastCategory, newsData?.articles, podcastData]);
 
   const isLoading = isPodcastCategory ? isLoadingPodcast : isLoadingNews;

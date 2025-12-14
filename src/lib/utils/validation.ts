@@ -46,48 +46,92 @@ export const isValidCategory = (category: string): boolean => {
  * Normalizes a string for duplicate comparison (removes special chars, extra spaces)
  */
 const normalizeString = (str: string): string => {
+  if (!str) return '';
   return str
     .toLowerCase()
     .trim()
     .replace(/[^\w\s]/g, '') // Remove special characters
-    .replace(/\s+/g, ' '); // Normalize whitespace
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .substring(0, 100); // Limit length for comparison
+};
+
+/**
+ * Normalizes URL for comparison (removes query params, fragments, trailing slashes)
+ */
+const normalizeUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const urlObj = new URL(url);
+    // Remove query params and fragments for comparison
+    return `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`.toLowerCase().replace(/\/$/, '');
+  } catch {
+    // If URL parsing fails, just normalize the string
+    return url.toLowerCase().split('?')[0].split('#')[0].replace(/\/$/, '');
+  }
 };
 
 /**
  * Removes duplicate articles based on article_id, title, or URL
+ * Uses multiple strategies to catch duplicates more effectively
  */
 export const removeDuplicateArticles = <T extends { article_id?: string; title: string; url?: string; link?: string }>(
   articles: T[]
 ): T[] => {
-  const seen = new Set<string>();
+  const seenIds = new Set<string>();
+  const seenTitles = new Set<string>();
+  const seenUrls = new Set<string>();
+  const seenTitleUrlCombos = new Set<string>();
+  
   return articles.filter((article) => {
-    // Use article_id if available (NewsData.io) - most reliable
+    // Strategy 1: Use article_id if available (NewsData.io) - most reliable
     if (article.article_id) {
-      if (seen.has(article.article_id)) {
+      if (seenIds.has(article.article_id)) {
         return false;
       }
-      seen.add(article.article_id);
+      seenIds.add(article.article_id);
       return true;
     }
     
-    // Fallback to normalized title + URL combination for NewsAPI articles
-    const url = (article.url || article.link || '').toLowerCase().trim();
+    // Strategy 2: Normalize and check title
     const normalizedTitle = normalizeString(article.title);
+    if (!normalizedTitle) return false; // Skip articles without valid titles
     
-    // Create keys for both title-only and title+URL to catch more duplicates
-    const titleKey = normalizedTitle;
-    const urlKey = url ? `${normalizedTitle}_${url}` : normalizedTitle;
+    // Strategy 3: Normalize and check URL
+    const rawUrl = article.url || article.link || '';
+    const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : '';
     
-    // Check if we've seen this article by title or title+URL
-    if (seen.has(titleKey) || (url && seen.has(urlKey))) {
+    // Strategy 4: Check title-only duplicates (same title = likely duplicate)
+    if (normalizedTitle && seenTitles.has(normalizedTitle)) {
+      // If we have a URL, check if it's the same URL too
+      if (normalizedUrl && seenUrls.has(normalizedUrl)) {
+        return false; // Same title AND same URL = definitely duplicate
+      }
+      // Same title but different URL - might be different sources, but likely duplicate content
+      // Only filter if title is substantial (more than 20 chars) to avoid false positives
+      if (normalizedTitle.length > 20) {
+        return false;
+      }
+    }
+    
+    // Strategy 5: Check URL-only duplicates (same URL = definitely duplicate)
+    if (normalizedUrl && seenUrls.has(normalizedUrl)) {
       return false;
     }
     
-    // Add both keys to catch future duplicates
-    seen.add(titleKey);
-    if (url) {
-      seen.add(urlKey);
+    // Strategy 6: Check title+URL combination
+    const titleUrlKey = normalizedUrl 
+      ? `${normalizedTitle}_${normalizedUrl}` 
+      : normalizedTitle;
+    
+    if (seenTitleUrlCombos.has(titleUrlKey)) {
+      return false;
     }
+    
+    // Add to all tracking sets
+    if (normalizedTitle) seenTitles.add(normalizedTitle);
+    if (normalizedUrl) seenUrls.add(normalizedUrl);
+    seenTitleUrlCombos.add(titleUrlKey);
+    
     return true;
   });
 };
