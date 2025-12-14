@@ -26,7 +26,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 backdrop-blur-sm pt-20 px-4"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-sm pt-20 px-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
