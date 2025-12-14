@@ -44,11 +44,11 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
     
     const transformed: NewsArticle[] = uniqueResults
       .map((item) => ({
-        title: item.title,
+        title: item.title || 'Untitled',
         description: item.description,
         url: item.link || '#',
         urlToImage: item.image_url,
-        publishedAt: item.pubDate,
+        publishedAt: item.pubDate || new Date().toISOString(), // Fallback to current date if missing
         author: item.creator?.[0] || item.source_name,
         source: {
           name: item.source_name || 'Unknown',
@@ -57,18 +57,19 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
         // Store article_id for deduplication
         article_id: item.article_id,
       }))
-      .filter(isValidArticle);
+      .filter((article) => article.title && article.title !== 'Untitled' && article.url); // Less strict validation
     
     // Remove duplicates by article_id or title+url
     const deduplicated = removeDuplicateArticles(transformed);
     
-    // Get first 4 articles after deduplication
+    // Get first 4 articles after deduplication - ensure we have at least 4
+    // If we have fewer, we'll still show what we have
     return deduplicated.slice(0, 4);
   }, [data]);
 
   // Desktop layout: article 0 as featured, articles 1, 2, 3 as side stack
   const feature = articles[0];
-  const sideStack = articles.slice(1, 4); // Articles 1, 2, 3
+  const sideStack = articles.slice(1); // Articles 1, 2, 3 (or however many we have)
 
   return (
     <div className="mx-auto max-w-screen-xl mb-12 md:mb-[100px] px-4 md:px-0" ref={containerRef}>
@@ -219,8 +220,8 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             )}
 
             {/* Right column cards */}
-            {sideStack.length > 0
-              ? sideStack.slice(0, 3).map((article, index) => {
+            {sideStack && sideStack.length > 0
+              ? sideStack.map((article, index) => {
                   const articleSlug = slugify(article.title);
                   const articleUrl = `/article/${articleSlug}`;
                   

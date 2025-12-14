@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { PiCalendarLight } from 'react-icons/pi';
 import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews, useTopHeadlines } from '@/lib/hooks/useNews';
@@ -13,6 +13,7 @@ import type { NewsDataArticle } from '@/types/news';
 import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { SimilarNews } from './SimilarNews';
+import { useArticleStore } from '@/lib/store/articleStore';
 
 interface ContentDetailsProps {
   category?: string;
@@ -42,9 +43,21 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   // Auto-detect type from category if not provided
   const contentType = type || (category === 'podcasts' ? 'podcast' : 'news');
   
+  // Get cache functions from Zustand store
+  const getCachedArticle = useArticleStore((state) => state.getCachedArticle);
+  const setCachedArticle = useArticleStore((state) => state.setCachedArticle);
+  
+  // Check cache first
+  const cachedContent = useMemo(() => 
+    getCachedArticle(title, category, contentType),
+    [title, category, contentType, getCachedArticle]
+  );
+  
   // Fetch news article if type is news
+  // Note: 'world-news' is not a valid NewsAPI category, so we pass empty string to use universal search
+  const validCategory = category && category !== 'podcasts' && category !== 'world-news' ? category : '';
   const { data: categoryArticle, isLoading: isLoadingCategory, error: categoryError } = useArticleByTitle(
-    category && category !== 'podcasts' ? category : '',
+    validCategory,
     title
   );
   const { data: universalArticle, isLoading: isLoadingUniversal } = useArticleByTitleUniversal(title, searchQuery);
@@ -62,11 +75,13 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
     10 // Fetch more to ensure we have 3 after filtering
   );
 
-  const isLoading = contentType === 'news' ? isLoadingCategory || isLoadingUniversal : isLoadingPodcast;
-  const error = contentType === 'news' ? categoryError : podcastError;
-
   // Transform data to unified format
   const content: UnifiedContent | null = useMemo(() => {
+    // Return cached content if available - this takes priority
+    if (cachedContent) {
+      return cachedContent;
+    }
+    
     if (contentType === 'news') {
       const article: NewsArticle | null = categoryArticle || universalArticle;
       if (!article || !isValidArticle(article)) return null;
@@ -108,7 +123,15 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
         type: 'podcast',
       };
     }
-  }, [contentType, categoryArticle, universalArticle, podcastData, title]);
+  }, [contentType, categoryArticle, universalArticle, podcastData, title, cachedContent]);
+
+  // Store content in cache when it's loaded (only if not already cached)
+  // Use the slugified title (from URL) as the key, not the actual article title
+  useEffect(() => {
+    if (content && !cachedContent) {
+      setCachedArticle(title, content, category, contentType);
+    }
+  }, [content, cachedContent, category, contentType, setCachedArticle, title]);
 
   // Get similar articles (exclude current article) - Must be before early returns to follow Rules of Hooks
   const similarArticles = useMemo(() => {
@@ -123,6 +146,94 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
     );
     return filtered.slice(0, 3); // Return only 3 articles
   }, [similarNewsData, content, contentType]);
+
+  // If we have cached content, render it immediately without waiting for API calls
+  // This check happens before loading/error states to prevent showing loading when cached
+  if (cachedContent) {
+    const authorName = cachedContent.author || cachedContent.sourceName || 'Unknown Author';
+    const sourceUrl = cachedContent.url || cachedContent.link;
+    const sourceLabel = 'Read full article';
+
+    return (
+      <article className="mx-auto max-w-screen-xl px-4 md:px-0">
+        <div className="grid grid-cols-1 lg:grid-cols-4 mb-[24px] ">
+          <div className="col-span-3">
+            <div className="relative w-full h-[300px] md:h-[400px] mb-6 rounded-lg overflow-hidden">
+              <Image
+                src={cachedContent.imageUrl || getPlaceholderImage(800, 400)}
+                alt={cachedContent.title || `${type} image`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 800px"
+                loading="lazy"
+              />
+            </div>
+            <div className="publisher border-y-2 border-primary py-4 flex items-center gap-x-[10px] mb-6">
+              <div className="relative size-10 rounded-full overflow-hidden flex-shrink-0">
+                <Image
+                  className="object-cover"
+                  src="/img/avatar.webp"
+                  alt={`${authorName} avatar`}
+                  fill
+                  sizes="40px"
+                  loading="lazy"
+                />
+              </div>
+              <div className="article-profile min-w-0">
+                <p className="text-sm sm:text-base md:text-lg uppercase font-bold truncate">{authorName}</p>
+                <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                  <PiCalendarLight className="mr-[6px] flex-shrink-0" aria-hidden="true" />
+                  <time dateTime={cachedContent.publishedAt}>
+                    {formatDate(cachedContent.publishedAt, 'EEEE, MMMM d, yyyy')}
+                  </time>
+                </div>
+              </div>
+            </div>
+            <div className="article-content-container">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 leading-tight sm:leading-snug md:leading-normal">{cachedContent.title}</h1>
+              <hr className="border-b-1 border-primary mb-4 md:mb-6" aria-hidden="true" />
+              <div className="prose max-w-none">
+                {cachedContent.description && (
+                  <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-3 md:mb-4">{cachedContent.description}</p>
+                )}
+                {cachedContent.content ? (
+                  <div
+                    className="text-sm sm:text-base md:text-lg leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: cachedContent.content }}
+                  />
+                ) : (
+                  <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 italic">
+                    Full content is available on the source website.
+                  </p>
+                )}
+                {sourceUrl && (
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline mt-4 inline-block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                    aria-label={`${sourceLabel} on ${cachedContent.sourceName || 'source website'}`}
+                  >
+                    {sourceLabel} on source website →
+                  </a>
+                )}
+              </div>
+            </div>
+            <hr className="border-b border-gray-100 mt-6 " aria-hidden="true" />
+          </div>
+        </div>
+
+        {/* Similar News Section - Only for news articles */}
+        {contentType === 'news' && (
+          <SimilarNews articles={similarArticles} category={category} isLoading={isLoadingSimilar} />
+        )}
+      </article>
+    );
+  }
+
+  // Determine loading state - only check if we don't have cached content
+  const isLoading = contentType === 'news' ? isLoadingCategory || isLoadingUniversal : isLoadingPodcast;
+  const error = contentType === 'news' ? categoryError : podcastError;
 
   if (isLoading) {
     return (
