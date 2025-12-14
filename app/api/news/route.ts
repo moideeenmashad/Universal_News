@@ -24,24 +24,37 @@ export async function GET(request: NextRequest) {
   // Declare variables outside try block so they're accessible in catch
   const searchParams = request.nextUrl.searchParams;
   const type = searchParams.get('type'); // 'headlines', 'everything', 'latest'
-  const category = searchParams.get('category');
-  const query = searchParams.get('query');
-  const country = searchParams.get('country') || DEFAULT_COUNTRY;
-  const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
-  const language = searchParams.get('language') || DEFAULT_LANGUAGE;
-  const domains = searchParams.get('domains'); // Comma-separated list of domains
-
-  // Generate cache key based on type
   let cacheKey = '';
-  if (type === 'headlines') {
-    cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
-  } else if (type === 'everything') {
-    cacheKey = getEverythingCacheKey(query || '', Number(pageSize), domains || undefined);
-  } else if (type === 'latest') {
-    cacheKey = getLatestNewsCacheKey(query || 'latest news');
-  }
-
+  
   try {
+    // Validate type parameter early
+    if (!type || !['headlines', 'everything', 'latest'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Invalid or missing type parameter. Use: headlines, everything, or latest' },
+        { status: 400 }
+      );
+    }
+    
+    const category = searchParams.get('category');
+    const query = searchParams.get('query');
+    const country = searchParams.get('country') || DEFAULT_COUNTRY;
+    const pageSize = searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE);
+    const language = searchParams.get('language') || DEFAULT_LANGUAGE;
+    const domains = searchParams.get('domains'); // Comma-separated list of domains
+
+    // Generate cache key based on type
+    try {
+      if (type === 'headlines') {
+        cacheKey = getHeadlinesCacheKey(category || undefined, country, Number(pageSize));
+      } else if (type === 'everything') {
+        cacheKey = getEverythingCacheKey(query || '', Number(pageSize), domains || undefined);
+      } else if (type === 'latest') {
+        cacheKey = getLatestNewsCacheKey(query || 'latest news');
+      }
+    } catch (keyError) {
+      console.error('Error generating cache key:', keyError);
+      // Continue without cache key
+    }
 
     // If API keys are missing, try to load from cache first
     if (!NEWS_API_KEY && (type === 'headlines' || type === 'everything')) {
@@ -51,8 +64,13 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(cachedData);
       }
       return NextResponse.json(
-        { error: 'News API key is not configured and no cached data available' },
-        { status: 500 }
+        { 
+          status: 'error',
+          totalResults: 0,
+          articles: [],
+          message: 'News API key is not configured and no cached data available' 
+        },
+        { status: 200 }
       );
     }
 
@@ -63,8 +81,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(cachedData);
       }
       return NextResponse.json(
-        { error: 'NewsData API key is not configured and no cached data available' },
-        { status: 500 }
+        { 
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        },
+        { status: 200 }
       );
     }
 
@@ -89,11 +111,6 @@ export async function GET(request: NextRequest) {
     } else if (type === 'latest') {
       const searchQuery = query || 'latest news';
       url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(searchQuery)}&language=${language}`;
-    } else {
-      return NextResponse.json(
-        { error: 'Invalid type parameter. Use: headlines, everything, or latest' },
-        { status: 400 }
-      );
     }
 
     const response = await fetch(url, {
@@ -175,35 +192,49 @@ export async function GET(request: NextRequest) {
           const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
           if (cachedData) {
             console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
-            return NextResponse.json(cachedData);
+            return NextResponse.json(cachedData, { status: 200 });
           }
         } else if (type === 'latest') {
           const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
           if (cachedData) {
             console.log('Error occurred, using cached data:', error instanceof Error ? error.message : 'Unknown error');
-            return NextResponse.json(cachedData);
+            return NextResponse.json(cachedData, { status: 200 });
           }
         }
       } catch (cacheError) {
         console.error('Cache load error:', cacheError);
+        // Continue to return empty response even if cache fails
       }
     }
     
-    // Return empty response instead of 500 error to prevent breaking the app
-    if (type === 'latest') {
+    // Always return 200 status with empty data instead of 500 error to prevent breaking the app
+    // This ensures the frontend can handle the error gracefully
+    try {
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
       return NextResponse.json({
         status: 'error',
         totalResults: 0,
-        results: [],
+        articles: [],
+        message: error instanceof Error ? error.message : 'Internal server error',
       }, { status: 200 });
+    } catch (responseError) {
+      // Last resort: if even creating the response fails, return minimal JSON
+      console.error('Failed to create error response:', responseError);
+      return new NextResponse(
+        JSON.stringify({ status: 'error', totalResults: 0, articles: [] }),
+        { 
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
-    
-    return NextResponse.json({
-      status: 'error',
-      totalResults: 0,
-      articles: [],
-      message: error instanceof Error ? error.message : 'Internal server error',
-    }, { status: 200 });
   }
 }
 
