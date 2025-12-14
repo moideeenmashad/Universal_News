@@ -173,17 +173,18 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 800px"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="publisher border-y-2 border-primary py-4 flex items-center gap-x-[10px] mb-6">
             <div className="relative size-10 rounded-full overflow-hidden flex-shrink-0">
               <Image
                 className="object-cover"
-                src="https://i.ibb.co/FZpNSmN/istockphoto-2151669184-612x612-removebg-preview.png"
+                src="/img/avatar.webp"
                 alt={`${authorName} avatar`}
                 fill
                 sizes="40px"
+                loading="lazy"
               />
             </div>
             <div className="article-profile min-w-0">

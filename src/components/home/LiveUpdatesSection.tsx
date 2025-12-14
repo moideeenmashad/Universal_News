@@ -97,7 +97,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
                 fill
                 className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
                 sizes="(max-width: 768px) 100vw, 1200px"
-                priority
+                loading="lazy"
               />
             </div>
             <span

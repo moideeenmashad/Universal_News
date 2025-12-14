@@ -210,6 +210,7 @@ export const SearchBar = ({ onClose, className = '' }: SearchBarProps) => {
                             fill
                             className="object-cover"
                             sizes="64px"
+                            loading="lazy"
                           />
                         </div>
                       )}
