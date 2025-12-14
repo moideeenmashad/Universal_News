@@ -7,6 +7,7 @@ import { BsArrowRightCircle } from 'react-icons/bs';
 import { ROUTES } from '@/constants/routes';
 import { useLatestNews } from '@/lib/hooks/useNews';
 import { slugify } from '@/lib/utils/string';
+import { removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface PodcastsSectionProps {
@@ -39,10 +40,52 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
     if (!data?.results) return [];
     // Filter out duplicates from NewsData.io (where duplicate: true)
     const uniqueResults = data.results.filter((item) => !item.duplicate);
-    // Filter out invalid podcasts and limit to 6
-    return uniqueResults
-      .filter((podcast) => podcast?.title && podcast?.image_url)
-      .slice(0, 6);
+    
+    // Process more articles to ensure we get at least 6 valid ones
+    // Only require title (image_url is optional, we'll show placeholder if missing)
+    let validPodcasts = uniqueResults
+      .slice(0, 50) // Process first 50 to ensure we get at least 6 valid ones
+      .filter((podcast) => podcast?.title && podcast.title.trim().length > 0)
+      .map((podcast) => ({
+        article_id: podcast.article_id,
+        title: podcast.title,
+        link: podcast.link,
+        image_url: podcast.image_url,
+        description: podcast.description,
+        pubDate: podcast.pubDate,
+        creator: podcast.creator,
+        source_name: podcast.source_name,
+        content: podcast.content,
+      }));
+    
+    // Remove duplicates by article_id
+    validPodcasts = removeDuplicateArticles(validPodcasts);
+    
+    // If we don't have 6, try processing more
+    if (validPodcasts.length < 6 && uniqueResults.length > 50) {
+      const additionalPodcasts = uniqueResults
+        .slice(50, 100) // Process next 50
+        .filter((podcast) => podcast?.title && podcast.title.trim().length > 0)
+        .map((podcast) => ({
+          article_id: podcast.article_id,
+          title: podcast.title,
+          link: podcast.link,
+          image_url: podcast.image_url,
+          description: podcast.description,
+          pubDate: podcast.pubDate,
+          creator: podcast.creator,
+          source_name: podcast.source_name,
+          content: podcast.content,
+        }));
+      
+      const additionalDeduplicated = removeDuplicateArticles(additionalPodcasts);
+      validPodcasts = [...validPodcasts, ...additionalDeduplicated];
+      // Remove duplicates again after combining
+      validPodcasts = removeDuplicateArticles(validPodcasts);
+    }
+    
+    // Return first 6 valid podcasts
+    return validPodcasts.slice(0, 6);
   }, [data]);
 
   // Generate a random duration between 5-15 minutes for demo purposes
@@ -124,7 +167,9 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200"></div>
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No Image</span>
+                    </div>
                   )}
                 </div>
 

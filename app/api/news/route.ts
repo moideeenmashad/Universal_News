@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  NEWS_API_BASE_URL,
   NEWS_DATA_API_BASE_URL,
-  NEWS_API_KEY,
   NEWS_DATA_API_KEY,
   DEFAULT_COUNTRY,
   DEFAULT_LANGUAGE,
@@ -57,34 +55,27 @@ export async function GET(request: NextRequest) {
     }
 
     // If API keys are missing, try to load from cache first
-    if (!NEWS_API_KEY && (type === 'headlines' || type === 'everything')) {
-      const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
-      if (cachedData) {
-        console.log('API key missing, using cached data');
-        return NextResponse.json(cachedData);
+    if (!NEWS_DATA_API_KEY && (type === 'headlines' || type === 'everything' || type === 'latest')) {
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API key missing, using cached data');
+          return NextResponse.json(cachedData);
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API key missing, using cached data');
+          return NextResponse.json(cachedData);
+        }
       }
       return NextResponse.json(
         { 
           status: 'error',
           totalResults: 0,
-          articles: [],
-          message: 'News API key is not configured and no cached data available' 
-        },
-        { status: 200 }
-      );
-    }
-
-    if (!NEWS_DATA_API_KEY && type === 'latest') {
-      const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
-      if (cachedData) {
-        console.log('API key missing, using cached data');
-        return NextResponse.json(cachedData);
-      }
-      return NextResponse.json(
-        { 
-          status: 'error',
-          totalResults: 0,
-          results: [],
+          articles: type === 'latest' ? undefined : [],
+          results: type === 'latest' ? [] : undefined,
+          message: 'NewsData API key is not configured and no cached data available' 
         },
         { status: 200 }
       );
@@ -93,9 +84,27 @@ export async function GET(request: NextRequest) {
     let url = '';
 
     if (type === 'headlines') {
-      url = category
-        ? `${NEWS_API_BASE_URL}/top-headlines?category=${category}&country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`
-        : `${NEWS_API_BASE_URL}/top-headlines?country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+      // Use NewsData.io /latest endpoint with category as query
+      if (!NEWS_DATA_API_KEY) {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('API key missing, using cached data');
+          return NextResponse.json(cachedData);
+        }
+        return NextResponse.json(
+          { 
+            status: 'error',
+            totalResults: 0,
+            articles: [],
+            message: 'NewsData API key is not configured and no cached data available' 
+          },
+          { status: 200 }
+        );
+      }
+      
+      // Use category as query parameter for /latest endpoint
+      const queryParam = category || 'news';
+      url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(queryParam)}&language=${language}`;
     } else if (type === 'everything') {
       if (!query) {
         return NextResponse.json(
@@ -103,11 +112,8 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
       }
-      let everythingUrl = `${NEWS_API_BASE_URL}/everything?q=${encodeURIComponent(query)}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
-      if (domains && domains.trim().length > 0) {
-        everythingUrl += `&domains=${encodeURIComponent(domains.trim())}`;
-      }
-      url = everythingUrl;
+      // Use NewsData.io /news endpoint with query
+      url = `${NEWS_DATA_API_BASE_URL}/news?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(query)}&language=${language}`;
     } else if (type === 'latest') {
       const searchQuery = query || 'latest news';
       url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(searchQuery)}&language=${language}`;
@@ -146,13 +152,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let data: NewsApiResponse | NewsDataResponse;
-    
-    if (type === 'latest') {
-      data = await response.json() as NewsDataResponse;
-    } else {
-      data = await response.json() as NewsApiResponse;
-    }
+    let data: NewsDataResponse;
+    data = await response.json() as NewsDataResponse;
 
     if (data.status === 'error') {
       // Try to load from cache on API error response
@@ -170,15 +171,40 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      // Handle error message - NewsApiResponse has message, NewsDataResponse doesn't
-      const errorMessage = type === 'latest' 
-        ? 'API returned an error'
-        : (data as NewsApiResponse).message || 'API returned an error';
-      
       return NextResponse.json(
-        { error: errorMessage },
+        { error: 'API returned an error' },
         { status: 400 }
       );
+    }
+
+    // Convert NewsDataResponse to NewsApiResponse for headlines and everything
+    if (type === 'headlines' || type === 'everything') {
+      const convertedData: NewsApiResponse = {
+        status: data.status,
+        totalResults: data.totalResults,
+        articles: data.results.map(item => ({
+          title: item.title,
+          description: item.description,
+          url: item.link || '#',
+          urlToImage: item.image_url,
+          publishedAt: item.pubDate || new Date().toISOString(),
+          author: item.creator?.[0] || item.source_name,
+          source: {
+            name: item.source_name || 'Unknown',
+          },
+          content: item.content,
+          article_id: item.article_id,
+        })),
+      };
+      
+      // Limit to pageSize if specified
+      const pageSizeNum = Number(pageSize);
+      if (convertedData.articles.length > pageSizeNum) {
+        convertedData.articles = convertedData.articles.slice(0, pageSizeNum);
+        convertedData.totalResults = pageSizeNum;
+      }
+      
+      return NextResponse.json(convertedData);
     }
 
     return NextResponse.json(data);

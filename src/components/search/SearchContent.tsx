@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEverything } from '@/lib/hooks/useNews';
 import { NewsList } from '@/components/news-list/NewsList';
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 export function SearchContent() {
@@ -15,7 +16,10 @@ export function SearchContent() {
 
   // Fetch more articles for comprehensive search results (100 is max for NewsAPI)
   const { data, isLoading, error } = useEverything(query, 100);
-  const articles = useMemo(() => data?.articles || [], [data?.articles]);
+  const articles = useMemo(() => {
+    const allArticles = data?.articles || [];
+    return removeDuplicateArticles(allArticles);
+  }, [data?.articles]);
 
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {

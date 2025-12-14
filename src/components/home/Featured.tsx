@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
-import { isValidArticle } from '@/lib/utils/validation';
+import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 
 interface FeaturedItem {
@@ -51,9 +51,9 @@ export const Featured = memo(() => {
   // Get valid articles with images
   const articlesWithImages = useMemo(() => {
     if (!data?.articles) return [];
-    return data.articles
-      .filter((article) => isValidArticle(article) && article.urlToImage)
-      .slice(0, 4);
+    const validArticles = data.articles.filter((article) => isValidArticle(article) && article.urlToImage);
+    const deduplicated = removeDuplicateArticles(validArticles);
+    return deduplicated.slice(0, 4);
   }, [data]);
 
   return (

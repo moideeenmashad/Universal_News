@@ -1,7 +1,5 @@
 import {
-  NEWS_API_BASE_URL,
   NEWS_DATA_API_BASE_URL,
-  NEWS_API_KEY,
   NEWS_DATA_API_KEY,
   DEFAULT_COUNTRY,
   DEFAULT_LANGUAGE,
@@ -10,7 +8,7 @@ import {
   CACHE_REVALIDATE_SHORT,
   CACHE_REVALIDATE_MEDIUM,
 } from '@/constants/config';
-import type { NewsApiResponse, NewsDataResponse, NewsArticle } from '@/types/news';
+import type { NewsApiResponse, NewsDataResponse, NewsArticle, NewsDataArticle } from '@/types/news';
 import { ApiError } from '../errors/ApiError';
 import {
   saveToCache,
@@ -21,8 +19,37 @@ import {
 } from '../cache/newsCache';
 
 class NewsService {
-  private baseUrl = NEWS_API_BASE_URL;
   private newsDataUrl = NEWS_DATA_API_BASE_URL;
+
+  /**
+   * Convert NewsDataArticle to NewsArticle format
+   */
+  private convertNewsDataToNewsArticle(item: NewsDataArticle): NewsArticle {
+    return {
+      title: item.title,
+      description: item.description,
+      url: item.link || '#',
+      urlToImage: item.image_url,
+      publishedAt: item.pubDate || new Date().toISOString(),
+      author: item.creator?.[0] || item.source_name,
+      source: {
+        name: item.source_name || 'Unknown',
+      },
+      content: item.content,
+      article_id: item.article_id,
+    };
+  }
+
+  /**
+   * Convert NewsDataResponse to NewsApiResponse format
+   */
+  private convertNewsDataToNewsApi(data: NewsDataResponse): NewsApiResponse {
+    return {
+      status: data.status,
+      totalResults: data.totalResults,
+      articles: data.results.map(item => this.convertNewsDataToNewsArticle(item)),
+    };
+  }
 
   /**
    * Check if we're running on the server (server actions) or client
@@ -46,18 +73,19 @@ class NewsService {
       
       // Server-side (server actions): call external API directly (no CORS issues)
       if (this.isServerSide()) {
-        if (!NEWS_API_KEY) {
+        if (!NEWS_DATA_API_KEY) {
           // Try to load from cache if API key is missing
           const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
           if (cachedData) {
             console.log('Using cached data (API key missing)');
             return cachedData;
           }
-          throw new ApiError('News API key is not configured', 401);
+          throw new ApiError('NewsData API key is not configured', 401);
         }
-        url = category
-          ? `${this.baseUrl}/top-headlines?category=${category}&country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`
-          : `${this.baseUrl}/top-headlines?country=${country}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+        
+        // Use NewsData.io /latest endpoint with category as query parameter
+        const queryParam = category || 'news';
+        url = `${this.newsDataUrl}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(queryParam)}&language=${DEFAULT_LANGUAGE}`;
       } else {
         // Client-side: use API route proxy
         const params = new URLSearchParams({
@@ -87,7 +115,7 @@ class NewsService {
         throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
 
-      const data: NewsApiResponse = await response.json();
+      const data: NewsDataResponse = await response.json();
 
       if (data.status === 'error') {
         // Try to load from cache on API error
@@ -96,15 +124,24 @@ class NewsService {
           console.log('API returned error, using cached data');
           return cachedData;
         }
-        throw new ApiError(data.message || 'Failed to fetch headlines', 400);
+        throw new ApiError('Failed to fetch headlines', 400);
+      }
+
+      // Convert NewsDataResponse to NewsApiResponse
+      const convertedData = this.convertNewsDataToNewsApi(data);
+      
+      // Limit to pageSize
+      if (convertedData.articles.length > pageSize) {
+        convertedData.articles = convertedData.articles.slice(0, pageSize);
+        convertedData.totalResults = pageSize;
       }
 
       // Save successful response to cache
       if (this.isServerSide()) {
-        await saveToCache(cacheKey, data);
+        await saveToCache(cacheKey, convertedData);
       }
 
-      return data;
+      return convertedData;
     } catch (error) {
       // Try to load from cache on any error
       const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
@@ -148,20 +185,23 @@ class NewsService {
       
       // Server-side (server actions): call external API directly (no CORS issues)
       if (this.isServerSide()) {
-        if (!NEWS_API_KEY) {
+        if (!NEWS_DATA_API_KEY) {
           // Try to load from cache if API key is missing
           const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
           if (cachedData) {
             console.log('Using cached data (API key missing)');
             return cachedData;
           }
-          throw new ApiError('News API key is not configured', 401);
+          throw new ApiError('NewsData API key is not configured', 401);
         }
-        let baseUrl = `${this.baseUrl}/everything?q=${encodeURIComponent(query.trim())}&language=${language}&pageSize=${pageSize}&apiKey=${NEWS_API_KEY}`;
+        
+        // Use NewsData.io /news endpoint with query parameter
+        let newsDataUrl = `${this.newsDataUrl}/news?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(query.trim())}&language=${language}`;
         if (domains && domains.trim().length > 0) {
-          baseUrl += `&domains=${encodeURIComponent(domains.trim())}`;
+          // NewsData.io doesn't support domains filter directly, but we can filter results
+          // For now, we'll just use the query
         }
-        url = baseUrl;
+        url = newsDataUrl;
       } else {
         // Client-side: use API route proxy
         const params = new URLSearchParams({
@@ -194,7 +234,7 @@ class NewsService {
         throw new ApiError(errorData.error || `HTTP error! status: ${response.status}`, response.status);
       }
 
-      const data: NewsApiResponse = await response.json();
+      const data: NewsDataResponse = await response.json();
 
       if (data.status === 'error') {
         // Try to load from cache on API error
@@ -203,15 +243,24 @@ class NewsService {
           console.log('API returned error, using cached data');
           return cachedData;
         }
-        throw new ApiError(data.message || 'Failed to fetch articles', 400);
+        throw new ApiError('Failed to fetch articles', 400);
+      }
+
+      // Convert NewsDataResponse to NewsApiResponse
+      const convertedData = this.convertNewsDataToNewsApi(data);
+      
+      // Limit to pageSize
+      if (convertedData.articles.length > pageSize) {
+        convertedData.articles = convertedData.articles.slice(0, pageSize);
+        convertedData.totalResults = pageSize;
       }
 
       // Save successful response to cache
       if (this.isServerSide()) {
-        await saveToCache(cacheKey, data);
+        await saveToCache(cacheKey, convertedData);
       }
 
-      return data;
+      return convertedData;
     } catch (error) {
       // Try to load from cache on any error
       const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
@@ -417,37 +466,23 @@ class NewsService {
         console.warn('General headlines search failed');
       }
 
-      // Try NewsData.io latest news if available
-      if (NEWS_DATA_API_KEY) {
-        try {
-          const latestNewsResponse = await this.getLatestNews('latest news', DEFAULT_LANGUAGE, revalidate);
-          if (latestNewsResponse?.results) {
-            // Transform NewsDataArticle to NewsArticle format
-            const matchedArticle = latestNewsResponse.results.find((item) => {
-              const apiTitleSlug = slugify(item.title);
-              return apiTitleSlug === titleSlug;
-            });
+      // Try NewsData.io latest news
+      try {
+        const latestNewsResponse = await this.getLatestNews('latest news', DEFAULT_LANGUAGE, revalidate);
+        if (latestNewsResponse?.results) {
+          // Transform NewsDataArticle to NewsArticle format
+          const matchedArticle = latestNewsResponse.results.find((item) => {
+            const apiTitleSlug = slugify(item.title);
+            return apiTitleSlug === titleSlug;
+          });
 
-            if (matchedArticle) {
-              // Convert NewsDataArticle to NewsArticle format
-              return {
-                title: matchedArticle.title,
-                description: matchedArticle.description,
-                url: matchedArticle.link || '#',
-                urlToImage: matchedArticle.image_url,
-                publishedAt: matchedArticle.pubDate,
-                author: matchedArticle.creator?.[0] || matchedArticle.source_name,
-                source: {
-                  name: matchedArticle.source_name || 'Unknown',
-                },
-                content: matchedArticle.content,
-              };
-            }
+          if (matchedArticle) {
+            return this.convertNewsDataToNewsArticle(matchedArticle);
           }
-        } catch (error) {
-          // If NewsData.io search fails, continue to other searches
-          console.warn('NewsData.io latest news search failed, trying other sources');
         }
+      } catch (error) {
+        // If NewsData.io search fails, continue to other searches
+        console.warn('NewsData.io latest news search failed, trying other sources');
       }
 
       // Try search query if provided

@@ -43,6 +43,17 @@ export const isValidCategory = (category: string): boolean => {
 };
 
 /**
+ * Normalizes a string for duplicate comparison (removes special chars, extra spaces)
+ */
+const normalizeString = (str: string): string => {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, '') // Remove special characters
+    .replace(/\s+/g, ' '); // Normalize whitespace
+};
+
+/**
  * Removes duplicate articles based on article_id, title, or URL
  */
 export const removeDuplicateArticles = <T extends { article_id?: string; title: string; url?: string; link?: string }>(
@@ -59,15 +70,24 @@ export const removeDuplicateArticles = <T extends { article_id?: string; title: 
       return true;
     }
     
-    // Fallback to title + URL combination for NewsAPI articles
+    // Fallback to normalized title + URL combination for NewsAPI articles
     const url = (article.url || article.link || '').toLowerCase().trim();
-    const title = article.title.toLowerCase().trim();
-    const key = url ? `${title}_${url}` : title;
+    const normalizedTitle = normalizeString(article.title);
     
-    if (seen.has(key)) {
+    // Create keys for both title-only and title+URL to catch more duplicates
+    const titleKey = normalizedTitle;
+    const urlKey = url ? `${normalizedTitle}_${url}` : normalizedTitle;
+    
+    // Check if we've seen this article by title or title+URL
+    if (seen.has(titleKey) || (url && seen.has(urlKey))) {
       return false;
     }
-    seen.add(key);
+    
+    // Add both keys to catch future duplicates
+    seen.add(titleKey);
+    if (url) {
+      seen.add(urlKey);
+    }
     return true;
   });
 };

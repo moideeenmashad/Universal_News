@@ -3,7 +3,8 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { NewsList } from './NewsList';
 import { useTopHeadlines, useLatestNews } from '@/lib/hooks/useNews';
-import { isValidCategory } from '@/lib/utils/validation';
+import { isValidCategory, removeDuplicateArticles } from '@/lib/utils/validation';
+import type { NewsArticle } from '@/types/news';
 
 interface NewsProps {
   category: string;
@@ -33,11 +34,13 @@ export const News = ({ category, title }: NewsProps) => {
 
   // Transform data to unified format
   const articles = useMemo(() => {
+    let transformed: NewsArticle[] = [];
+    
     if (isPodcastCategory) {
       // Transform podcast data to NewsArticle format for NewsList
       if (!podcastData?.results) return [];
-      return podcastData.results
-        .filter((podcast) => podcast?.title && podcast?.image_url)
+      transformed = podcastData.results
+        .filter((podcast) => !podcast.duplicate && podcast?.title)
         .map((podcast) => ({
           title: podcast.title,
           description: podcast.description,
@@ -49,9 +52,14 @@ export const News = ({ category, title }: NewsProps) => {
             name: podcast.source_name || 'Unknown',
           },
           content: podcast.content,
+          article_id: podcast.article_id,
         }));
+    } else {
+      transformed = newsData?.articles || [];
     }
-    return newsData?.articles || [];
+    
+    // Remove duplicates from all articles
+    return removeDuplicateArticles(transformed);
   }, [isPodcastCategory, newsData?.articles, podcastData]);
 
   const isLoading = isPodcastCategory ? isLoadingPodcast : isLoadingNews;

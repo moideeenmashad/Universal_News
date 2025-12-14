@@ -7,7 +7,7 @@ import { BsArrowRightCircle } from 'react-icons/bs';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
-import { isValidArticle } from '@/lib/utils/validation';
+import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
 
@@ -36,7 +36,11 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
     return () => observer.disconnect();
   }, []);
 
-  const articles = data?.articles ?? [];
+  const articles = useMemo(() => {
+    const allArticles = data?.articles ?? [];
+    return removeDuplicateArticles(allArticles);
+  }, [data?.articles]);
+  
   const latestNews = useMemo(() => {
     if (!articles.length) return null;
     // Prefer valid article, otherwise take the first available with a title

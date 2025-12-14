@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { ROUTES } from '@/constants/routes';
-import { useLatestNews } from '@/lib/hooks/useNews';
+import { useEverything } from '@/lib/hooks/useNews';
 import { formatDate } from '@/lib/utils/date';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
@@ -18,8 +18,8 @@ interface WorldNewsSectionProps {
 
 export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Fetch world news from NewsData.io API
-  const { data, isLoading, error } = useLatestNews('world news');
+  // Fetch world news from NewsData.io API using everything endpoint for more results
+  const { data, isLoading, error } = useEverything('world news', 50);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -35,64 +35,19 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
     return () => observer.disconnect();
   }, []);
 
-  // Transform NewsDataArticle to NewsArticle format and get first 4 articles (0, 1, 2, 3)
+  // Transform NewsArticle format and get first 4 articles (0, 1, 2, 3)
   const articles = useMemo(() => {
-    if (!data?.results) return [];
+    if (!data?.articles) return [];
     
-    // Filter out duplicates from NewsData.io (where duplicate: true)
-    const uniqueResults = data.results.filter((item) => !item.duplicate);
-    
-    // Process more articles to ensure we have enough after filtering
-    const transformed: NewsArticle[] = uniqueResults
-      .slice(0, 20) // Process first 20 to ensure we get at least 4 valid ones
-      .map((item) => ({
-        title: item.title || 'Untitled',
-        description: item.description,
-        url: item.link || '#',
-        urlToImage: item.image_url,
-        publishedAt: item.pubDate || new Date().toISOString(), // Fallback to current date if missing
-        author: item.creator?.[0] || item.source_name,
-        source: {
-          name: item.source_name || 'Unknown',
-        },
-        content: item.content,
-        // Store article_id for deduplication
-        article_id: item.article_id,
-      }))
-      .filter((article) => {
-        // Very lenient validation - only require non-empty title
-        return article.title && article.title.trim().length > 0;
-      });
+    // Filter articles - only require non-empty title
+    const validArticles = data.articles.filter((article) => {
+      return article.title && article.title.trim().length > 0;
+    });
     
     // Remove duplicates by article_id or title+url
-    const deduplicated = removeDuplicateArticles(transformed);
+    const deduplicated = removeDuplicateArticles(validArticles);
     
     // Get first 4 articles after deduplication
-    // If we have fewer than 4, try to get more from the original results
-    if (deduplicated.length < 4 && uniqueResults.length > 20) {
-      // Process more articles if we don't have enough
-      const additionalTransformed: NewsArticle[] = uniqueResults
-        .slice(20, 40) // Process next 20
-        .map((item) => ({
-          title: item.title || 'Untitled',
-          description: item.description,
-          url: item.link || '#',
-          urlToImage: item.image_url,
-          publishedAt: item.pubDate || new Date().toISOString(),
-          author: item.creator?.[0] || item.source_name,
-          source: {
-            name: item.source_name || 'Unknown',
-          },
-          content: item.content,
-          article_id: item.article_id,
-        }))
-        .filter((article) => article.title && article.title.trim().length > 0);
-      
-      const additionalDeduplicated = removeDuplicateArticles(additionalTransformed);
-      const combined = [...deduplicated, ...additionalDeduplicated];
-      return combined.slice(0, 4);
-    }
-    
     return deduplicated.slice(0, 4);
   }, [data]);
 
@@ -255,13 +210,13 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             {/* Right column - Stack of 3 items with equal heights */}
             <div className="flex flex-col gap-4">
               {sideStack && sideStack.length > 0
-                ? sideStack.slice(0, 3).map((article, index) => {
+                ? sideStack.map((article, index) => {
                     const articleSlug = slugify(article.title);
                     const articleUrl = `/article/${articleSlug}`;
                     
                     return (
                       <Link
-                        key={article.url || article.article_id || `world-${index}`}
+                        key={article.url || article.article_id || `world-side-${index}`}
                         href={articleUrl}
                         className="flex-1 grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md min-h-0"
                       >
