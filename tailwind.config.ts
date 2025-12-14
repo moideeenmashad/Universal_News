@@ -6,21 +6,8 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#202124',
-        },
-        light: '#ffffff',
-      },
-      fontFamily: {
-        sans: ['BricolageGrotesque', 'sans-serif'],
-        bricolage: ['BricolageGrotesque', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
+  // Theme configuration is now in CSS via @theme directive
+  // Keeping this file for content paths only
 };
 
 export default config;
