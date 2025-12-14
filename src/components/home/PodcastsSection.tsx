@@ -129,7 +129,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
           <p className="text-gray-600 text-lg">No podcasts found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 [&>a]:flex [&>a]:gap-4 [&>a]:hover:opacity-90 [&>a]:transition-opacity [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&_img]:object-cover [&_img]:hover:scale-105 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-300">
           {podcasts.map((podcast, index) => {
             const author = getAuthor(podcast);
             const duration = getRandomDuration(index);
@@ -140,7 +140,6 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
               <Link
                 key={podcast.article_id || `podcast-${index}`}
                 href={podcastUrl}
-                className="flex gap-4 hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
               >
                 {/* Image */}
                 <div className="w-[120px] h-[120px] lg:w-[160px] lg:h-[160px] flex-shrink-0 relative overflow-hidden rounded-sm">
@@ -149,7 +148,6 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
                       src={podcast.image_url}
                       alt={podcast.title || 'Podcast thumbnail'}
                       fill
-                      className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
                       sizes="(max-width: 1024px) 120px, 160px"
                       loading="lazy"
                     />

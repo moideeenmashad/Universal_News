@@ -59,7 +59,7 @@ export const LiveUpdatesSection = () => {
     <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0">
       <Link
         href={articleUrl}
-        className="article-container mb-[24px] block hover:opacity-95 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
+        className="article-container mb-[24px] block hover:opacity-95 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md [&_img]:object-cover [&_img]:hover:scale-105 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-300"
         aria-label={`Read article: ${latestNews.title}`}
       >
         <article>
@@ -69,7 +69,6 @@ export const LiveUpdatesSection = () => {
                 src={latestNews.urlToImage || getPlaceholderImage(1200, 580)}
                 alt={latestNews.title || 'Latest news article'}
                 fill
-                className="object-cover hover:scale-105 ease-in-out transition-transform duration-300"
                 sizes="(max-width: 768px) 100vw, 1200px"
                 loading="lazy"
               />

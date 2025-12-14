@@ -187,7 +187,7 @@ export const PrimaryNavbar = () => {
         {/* Mobile Menu Content */}
         <div className="h-full overflow-y-auto">
           <nav className="px-4 py-6" aria-label="Mobile navigation">
-            <ul className="flex flex-col space-y-1">
+            <ul className="flex flex-col space-y-1 [&>li>a]:font-family-BG [&>li>a]:block [&>li>a]:py-4 [&>li>a]:px-4 [&>li>a]:rounded-lg [&>li>a]:transition-all [&>li>a]:duration-200 [&>li>a]:focus:outline-none">
               {NAV_ITEMS.map((item, index) => {
                 const active = isActive(item.LinkTo);
                 return (
@@ -201,11 +201,11 @@ export const PrimaryNavbar = () => {
                   >
                     <Link
                       href={item.LinkTo}
-                      className={`font-family-BG block py-4 px-4 rounded-lg transition-all duration-200 focus:outline-none ${
+                      className={
                         active
                           ? 'bg-primary/10 text-active border-l-4 border-active'
                           : 'text-primary hover:bg-gray-100 hover-text-active active:bg-gray-200'
-                      }`}
+                      }
                       onClick={closeNavbar}
                       aria-current={active ? 'page' : undefined}
                     >

@@ -66,7 +66,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
           <p className="text-gray-600 text-lg">No articles found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4 [&>a]:flex [&>a]:flex-col [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&_img]:object-cover [&_img]:hover:scale-110 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-500">
           {articles.map((article, index) => {
             const articleUrl = getArticleUrl(article, 'technology');
 
@@ -74,7 +74,6 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
               <Link
                 key={article.url || `tech-${index}`}
                 href={articleUrl}
-                className="flex flex-col focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
               >
                 <div className="relative w-full h-[180px] sm:h-[200px] mb-3 overflow-hidden rounded-sm shadow-sm transition-shadow duration-300 hover:shadow-md">
                   {article.urlToImage ? (
@@ -82,7 +81,6 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
                       src={article.urlToImage}
                       alt={article.title || 'Technology news thumbnail'}
                       fill
-                      className="object-cover hover:scale-110 ease-in-out transition-transform duration-500"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                       loading="lazy"
                     />

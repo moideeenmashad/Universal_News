@@ -111,7 +111,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
       ) : (
         <>
           {/* Mobile Layout - 2 column grid */}
-          <div className="grid grid-cols-2 md:hidden gap-4">
+          <div className="grid grid-cols-2 md:hidden gap-4 [&>a]:flex [&>a]:flex-col [&>a]:hover:opacity-90 [&>a]:transition-all [&>a]:duration-300 [&>a]:group [&>a]:transform [&>a]:hover:-translate-y-1 [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&_img]:object-cover [&_img]:group-hover:scale-110 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-500">
             {articles.slice(0, 4).map((article, index) => {
               const articleUrl = getArticleUrl(article, 'world-news');
 
@@ -119,7 +119,6 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                 <Link
                   key={article.url || `mobile-world-${index}`}
                   href={articleUrl}
-                  className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1 focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
                 >
                   <div className="relative w-full h-[180px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     {article.urlToImage ? (
@@ -127,7 +126,6 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                         src={article.urlToImage}
                         alt={article.title || 'World news thumbnail'}
                         fill
-                        className="object-cover group-hover:scale-110 ease-in-out transition-transform duration-500"
                         sizes="(max-width: 640px) 50vw, 25vw"
                         loading="lazy"
                       />
@@ -159,7 +157,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
               {feature && (
                 <Link
                   href={getArticleUrl(feature, 'world-news')}
-                  className="block overflow-hidden rounded-sm relative hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 h-full"
+                  className="block overflow-hidden rounded-sm relative hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 h-full [&_img]:w-full [&_img]:h-full [&_img]:object-cover [&_img]:hover:scale-105 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-300"
                 >
                   <div className="overflow-hidden rounded-sm relative h-full">
                     {feature?.urlToImage ? (
@@ -167,7 +165,6 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                       <img
                         src={feature.urlToImage}
                         alt={feature.title || 'news thumbnail'}
-                        className="w-full h-full object-cover hover:scale-105 ease-in-out transition-transform duration-300"
                         loading="lazy"
                       />
                     ) : (
@@ -195,7 +192,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             </div>
             
             {/* Right column - Stack of 3 items with equal heights */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 [&>a]:flex-1 [&>a]:grid [&>a]:items-center [&>a]:gap-4 [&>a]:hover:opacity-90 [&>a]:transition-opacity [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&>a]:min-h-0 [&_img]:w-full [&_img]:h-full [&_img]:object-cover [&_img]:object-center [&_img]:hover:scale-105 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-300 [&_img]:rounded-sm">
               {sideStack && sideStack.length > 0
                 ? sideStack.map((article, index) => {
                     const articleUrl = getArticleUrl(article, 'world-news');
@@ -204,7 +201,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                       <Link
                         key={article.url || article.article_id || `world-side-${index}`}
                         href={articleUrl}
-                        className="flex-1 grid items-center gap-4 [grid-template-columns:40%_60%] hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md min-h-0"
+                        style={{ gridTemplateColumns: '40% 60%' }}
                       >
                         <div className="image-container mr-[8px] overflow-hidden rounded-sm relative h-full">
                           {article?.urlToImage ? (
@@ -212,7 +209,6 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                             <img
                               src={article.urlToImage}
                               alt={article.title}
-                              className="w-full h-full object-cover object-center hover:scale-105 ease-in-out transition-transform duration-300 rounded-sm"
                               loading="lazy"
                             />
                           ) : (

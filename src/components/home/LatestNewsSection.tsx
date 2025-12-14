@@ -185,7 +185,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
       ) : (
         <>
           {/* Mobile Layout - 2 column grid */}
-          <div className="grid grid-cols-2 md:hidden gap-4">
+          <div className="grid grid-cols-2 md:hidden gap-4 [&>a]:flex [&>a]:flex-col [&>a]:hover:opacity-90 [&>a]:transition-all [&>a]:duration-300 [&>a]:group [&>a]:transform [&>a]:hover:-translate-y-1 [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&_img]:object-cover [&_img]:group-hover:scale-110 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-500">
             {articles.slice(0, 4).map((article, index) => {
               const articleUrl = getArticleUrl(article, 'general');
 
@@ -193,7 +193,6 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                 <Link
                   key={article.url || `mobile-latest-${index}`}
                   href={articleUrl}
-                  className="flex flex-col hover:opacity-90 transition-all duration-300 group transform hover:-translate-y-1 focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
                 >
                   <div className="relative w-full h-[180px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     {article.urlToImage ? (
@@ -201,7 +200,6 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                         src={article.urlToImage}
                         alt={article.title || 'Latest news thumbnail'}
                         fill
-                        className="object-cover group-hover:scale-110 ease-in-out transition-transform duration-500"
                         sizes="(max-width: 640px) 50vw, 25vw"
                         loading="lazy"
                       />
@@ -234,7 +232,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
               {feature && (
                 <Link
                   href={getArticleUrl(feature, 'general')}
-                  className="rounded-sm bg-white relative block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
+                  className="rounded-sm bg-white relative block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 [&_img]:transition-transform [&_img]:ease-in-out [&_img]:duration-300 [&_img]:hover:scale-105 [&_img]:filter [&_img]:brightness-75"
                 >
                   <div className="overflow-hidden relative rounded-sm">
                     {/* Overlay for darkening the image */}
@@ -243,7 +241,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                       <img
                         src={feature.urlToImage}
                         alt={feature.title || 'news thumbnail'}
-                        className="h-[490px] rounded-sm w-full object-cover transition-transform ease-in-out duration-300 hover:scale-105 filter brightness-75"
+                        className="h-[490px] rounded-sm w-full object-cover"
                         loading="lazy"
                       />
                     ) : (
@@ -270,7 +268,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
               )}
 
               {/* 2 & 3) Two Stacked Articles on the Right */}
-              <div>
+              <div className="[&_a]:grid [&_a]:grid-cols-2 [&_a]:md:grid-cols-2 [&_a]:mb-[30px] [&_a]:bg-white [&_a]:rounded-sm [&_a]:hover:opacity-90 [&_a]:transition-opacity [&_a]:focus:outline-none [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-[#E63946] [&_a]:focus-visible:outline-offset-2 [&_img]:transition-transform [&_img]:ease-in-out [&_img]:duration-300 [&_img]:hover:scale-105">
                 {sideStack.map((article, idx) => {
                   const articleUrl = getArticleUrl(article, 'general');
                   
@@ -278,7 +276,6 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                     <Link
                       key={article.url || `side-${idx}`}
                       href={articleUrl}
-                      className="grid grid-cols-2 md:grid-cols-2 mb-[30px] bg-white rounded-sm hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
                     >
                       <div className="flex items-center">
                         <div className="grid gap-y-[12px]">
@@ -308,7 +305,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                           <img
                             src={article.urlToImage}
                             alt={article.title || 'news thumbnail'}
-                            className="h-[230px] w-full rounded-sm object-cover transition-transform ease-in-out duration-300 hover:scale-105"
+                            className="h-[230px] w-full rounded-sm object-cover"
                             loading="lazy"
                           />
                         </div>
@@ -323,7 +320,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
 
             {/* Bottom Row (Articles #4, #5, #6) - Shows articles at indices 3, 4, 5 */}
             {bottomRow.length > 0 && (
-              <div className="gap-4 sm:gap-4 md:gap-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3">
+              <div className="gap-4 sm:gap-4 md:gap-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 [&_a]:overflow-hidden [&_a]:rounded-sm [&_a]:bg-white [&_a]:hover:opacity-90 [&_a]:transition-opacity [&_a]:focus:outline-none [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-[#E63946] [&_a]:focus-visible:outline-offset-2 [&_img]:transition-transform [&_img]:ease-in-out [&_img]:duration-300 [&_img]:hover:scale-105">
                 {bottomRow.map((article, index) => {
                 const articleUrl = getArticleUrl(article, 'general');
                 
@@ -331,14 +328,13 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
                   <Link
                     key={article.url || `bottom-${index}`}
                     href={articleUrl}
-                    className="overflow-hidden rounded-sm bg-white hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
                   >
                     {article?.urlToImage ? (
                       <div className="image-container overflow-hidden relative rounded-sm">
                         <img
                           src={article.urlToImage}
                           alt={article.title || 'news thumbnail'}
-                          className="h-[230px] w-full rounded-sm object-cover transition-transform ease-in-out duration-300 hover:scale-105"
+                          className="h-[230px] w-full rounded-sm object-cover"
                           loading="lazy"
                         />
                       </div>

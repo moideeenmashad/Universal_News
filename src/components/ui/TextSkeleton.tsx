@@ -16,13 +16,13 @@ export const TextSkeleton = ({ lines = 3, className = '', width = 'full' }: Text
   }[width];
 
   return (
-    <div className={`space-y-2 ${className}`} aria-hidden="true" role="presentation">
+    <div className={`space-y-2 ${className} [&>div]:h-4 [&>div]:skeleton-shimmer [&>div]:rounded`} aria-hidden="true" role="presentation">
       {Array(lines)
         .fill(0)
         .map((_, i) => (
           <div
             key={`text-skeleton-${i}`}
-            className={`h-4 skeleton-shimmer rounded ${i === lines - 1 ? widthClass : 'w-full'}`}
+            className={i === lines - 1 ? widthClass : 'w-full'}
           ></div>
         ))}
     </div>

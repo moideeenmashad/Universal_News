@@ -66,11 +66,11 @@ export const ErrorMessage = ({
           {variant === 'not-found' ? 'Content Not Found' : 'Oops! Something went wrong'}
         </h3>
         <p className="text-sm md:text-base mb-4 max-w-md">{message}</p>
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-center [&>button]:px-6 [&>button]:py-2 [&>button]:rounded-md [&>button]:transition-colors [&>button]:focus:outline-none [&>button]:focus:ring-2 [&>button]:focus:ring-offset-2 [&>button]:font-medium [&>a]:px-6 [&>a]:py-2 [&>a]:rounded-md [&>a]:bg-gray-200 [&>a]:hover:bg-gray-300 [&>a]:text-gray-900 [&>a]:transition-colors [&>a]:focus:outline-none [&>a]:focus:ring-2 [&>a]:focus:ring-gray-500 [&>a]:focus:ring-offset-2 [&>a]:font-medium">
           {onRetry && (
             <button
               onClick={onRetry}
-              className={`px-6 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium ${buttonClasses[variant]}`}
+              className={buttonClasses[variant]}
               aria-label="Retry loading content"
             >
               Try Again
@@ -79,7 +79,6 @@ export const ErrorMessage = ({
           {showHomeLink && (
             <Link
               href="/"
-              className="px-6 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
               aria-label="Go to home page"
             >
               Go to Home

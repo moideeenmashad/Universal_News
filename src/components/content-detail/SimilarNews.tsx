@@ -53,7 +53,7 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
     <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
       <h2 className="text-xl sm:text-2xl md:text-3xl text-primary uppercase mb-4 md:mb-6">Similar News</h2>
       <div className="border-b border-black mb-4 md:mb-6"></div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 md:gap-4 [&>a]:flex [&>a]:flex-col [&>a]:group [&>a]:focus:outline-none [&>a]:focus-visible:outline-2 [&>a]:focus-visible:outline-[#E63946] [&>a]:focus-visible:outline-offset-2 [&>a]:rounded-md [&_img]:object-cover [&_img]:group-hover:scale-110 [&_img]:ease-in-out [&_img]:transition-transform [&_img]:duration-500">
         {articles.map((article, index) => {
           const articleUrl = getArticleUrl(article, category);
 
@@ -61,7 +61,6 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
             <Link
               key={article.url || `similar-${index}`}
               href={articleUrl}
-              className="flex flex-col group focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
             >
               <div className="relative w-full h-[180px] sm:h-[200px] mb-3 overflow-hidden rounded-sm shadow-sm group-hover:shadow-md transition-shadow duration-300">
                 {article.urlToImage ? (
@@ -69,7 +68,6 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
                     src={article.urlToImage}
                     alt={article.title || 'News thumbnail'}
                     fill
-                    className="object-cover group-hover:scale-110 ease-in-out transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                     loading="lazy"
                   />

@@ -87,7 +87,7 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
     <article ref={articleRef} className="rounded-md cursor-pointer group">
       <Link
         href={articleUrl}
-        className="block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"
+        className="block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md [&_img]:object-cover [&_img]:group-hover:scale-105 [&_img]:transition-transform [&_img]:duration-300"
         aria-label={`Read article: ${article.title}`}
         prefetch={index < 4}
       >
@@ -97,7 +97,6 @@ export const LazyNewsItem = memo(({ article, index, articleUrlName, baseUrl }: L
               src={article.urlToImage || getPlaceholderImage(300, 300)}
               alt={article.title || 'News article image'}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               loading="lazy"
             />
