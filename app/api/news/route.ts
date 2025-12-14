@@ -119,14 +119,62 @@ export async function GET(request: NextRequest) {
       url = `${NEWS_DATA_API_BASE_URL}/latest?apikey=${NEWS_DATA_API_KEY}&q=${encodeURIComponent(searchQuery)}&language=${language}`;
     }
 
-    const response = await fetch(url, {
-      // Use Next.js caching for external API calls
-      next: { revalidate: 60 },
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Universal-News/1.0',
-      },
-    });
+    // Add timeout to fetch request (10 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        // Use Next.js caching for external API calls
+        next: { revalidate: 60 },
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Universal-News/1.0',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      // Handle timeout or network errors
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('API request timeout');
+      } else {
+        console.error('API fetch error:', fetchError);
+      }
+      
+      // Try to load from cache on network error
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('Network error, using cached data');
+          return NextResponse.json(cachedData, { status: 200 });
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('Network error, using cached data');
+          return NextResponse.json(cachedData, { status: 200 });
+        }
+      }
+      
+      // Return error response with 200 status to prevent 500 errors
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        articles: [],
+        message: 'Network error. Please try again later.',
+      }, { status: 200 });
+    }
 
     if (!response.ok) {
       // Try to load from cache on API error
@@ -134,26 +182,72 @@ export async function GET(request: NextRequest) {
         const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
         if (cachedData) {
           console.log('API failed, using cached data');
-          return NextResponse.json(cachedData);
+          return NextResponse.json(cachedData, { status: 200 });
         }
       } else if (type === 'latest') {
         const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
         if (cachedData) {
           console.log('API failed, using cached data');
-          return NextResponse.json(cachedData);
+          return NextResponse.json(cachedData, { status: 200 });
         }
       }
       
-      const errorText = await response.text();
+      // Return error response with 200 status to prevent 500 errors
+      const errorText = await response.text().catch(() => 'Unknown error');
       console.error('API Error:', response.status, errorText);
-      return NextResponse.json(
-        { error: `API request failed: ${response.status}` },
-        { status: response.status }
-      );
+      
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        articles: [],
+        message: `API request failed: ${response.status}`,
+      }, { status: 200 });
     }
 
     let data: NewsDataResponse;
-    data = await response.json() as NewsDataResponse;
+    try {
+      data = await response.json() as NewsDataResponse;
+    } catch (jsonError) {
+      console.error('JSON parse error:', jsonError);
+      // Try to load from cache on JSON parse error
+      if (type === 'headlines' || type === 'everything') {
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('JSON parse error, using cached data');
+          return NextResponse.json(cachedData, { status: 200 });
+        }
+      } else if (type === 'latest') {
+        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+        if (cachedData) {
+          console.log('JSON parse error, using cached data');
+          return NextResponse.json(cachedData, { status: 200 });
+        }
+      }
+      
+      // Return error response with 200 status
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        articles: [],
+        message: 'Failed to parse API response',
+      }, { status: 200 });
+    }
 
     if (data.status === 'error') {
       // Try to load from cache on API error response
@@ -171,40 +265,69 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      return NextResponse.json(
-        { error: 'API returned an error' },
-        { status: 400 }
-      );
+      // Return error response with 200 status to prevent 500 errors
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        articles: [],
+        message: 'API returned an error',
+      }, { status: 200 });
     }
 
     // Convert NewsDataResponse to NewsApiResponse for headlines and everything
     if (type === 'headlines' || type === 'everything') {
-      const convertedData: NewsApiResponse = {
-        status: data.status,
-        totalResults: data.totalResults,
-        articles: data.results.map(item => ({
-          title: item.title,
-          description: item.description,
-          url: item.link || '#',
-          urlToImage: item.image_url,
-          publishedAt: item.pubDate || new Date().toISOString(),
-          author: item.creator?.[0] || item.source_name,
-          source: {
-            name: item.source_name || 'Unknown',
-          },
-          content: item.content,
-          article_id: item.article_id,
-        })),
-      };
-      
-      // Limit to pageSize if specified
-      const pageSizeNum = Number(pageSize);
-      if (convertedData.articles.length > pageSizeNum) {
-        convertedData.articles = convertedData.articles.slice(0, pageSizeNum);
-        convertedData.totalResults = pageSizeNum;
+      try {
+        const convertedData: NewsApiResponse = {
+          status: data.status,
+          totalResults: data.totalResults || 0,
+          articles: (data.results || []).map(item => ({
+            title: item.title || 'Untitled',
+            description: item.description,
+            url: item.link || '#',
+            urlToImage: item.image_url,
+            publishedAt: item.pubDate || new Date().toISOString(),
+            author: item.creator?.[0] || item.source_name,
+            source: {
+              name: item.source_name || 'Unknown',
+            },
+            content: item.content,
+            article_id: item.article_id,
+          })),
+        };
+        
+        // Limit to pageSize if specified
+        const pageSizeNum = Number(pageSize);
+        if (convertedData.articles.length > pageSizeNum) {
+          convertedData.articles = convertedData.articles.slice(0, pageSizeNum);
+          convertedData.totalResults = pageSizeNum;
+        }
+        
+        return NextResponse.json(convertedData);
+      } catch (conversionError) {
+        console.error('Data conversion error:', conversionError);
+        // Try to load from cache on conversion error
+        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+        if (cachedData) {
+          console.log('Conversion error, using cached data');
+          return NextResponse.json(cachedData, { status: 200 });
+        }
+        
+        // Return error response with 200 status
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          articles: [],
+          message: 'Failed to process API response',
+        }, { status: 200 });
       }
-      
-      return NextResponse.json(convertedData);
     }
 
     return NextResponse.json(data);

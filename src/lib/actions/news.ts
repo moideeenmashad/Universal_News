@@ -16,10 +16,7 @@ export async function getTopHeadlines(
     return await newsService.getTopHeadlines(category, country, pageSize);
   } catch (error) {
     console.error('Error in getTopHeadlines:', error);
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    // Return empty response instead of throwing to prevent 500 errors
+    // Never throw errors - always return error response to prevent 500 errors
     return {
       status: 'error',
       totalResults: 0,
@@ -41,10 +38,7 @@ export async function getEverything(
     return await newsService.getEverything(query, pageSize, undefined, domains);
   } catch (error) {
     console.error('Error in getEverything:', error);
-    if (error instanceof ApiError && error.statusCode !== 500) {
-      throw error;
-    }
-    // Return empty response instead of throwing to prevent 500 errors
+    // Never throw errors - always return error response to prevent 500 errors
     return {
       status: 'error',
       totalResults: 0,
@@ -62,10 +56,7 @@ export async function getLatestNews(query: string = 'latest news'): Promise<News
     return await newsService.getLatestNews(query);
   } catch (error) {
     console.error('Error in getLatestNews:', error);
-    if (error instanceof ApiError && error.statusCode !== 500) {
-      throw error;
-    }
-    // Return empty response instead of throwing to prevent 500 errors
+    // Never throw errors - always return error response to prevent 500 errors
     return {
       status: 'error',
       totalResults: 0,
