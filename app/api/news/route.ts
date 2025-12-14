@@ -28,8 +28,13 @@ export async function GET(request: NextRequest) {
     // Validate type parameter early
     if (!type || !['headlines', 'everything', 'latest'].includes(type)) {
       return NextResponse.json(
-        { error: 'Invalid or missing type parameter. Use: headlines, everything, or latest' },
-        { status: 400 }
+        { 
+          status: 'error',
+          totalResults: 0,
+          articles: [],
+          message: 'Invalid or missing type parameter. Use: headlines, everything, or latest' 
+        },
+        { status: 200 }
       );
     }
     
@@ -108,8 +113,13 @@ export async function GET(request: NextRequest) {
     } else if (type === 'everything') {
       if (!query) {
         return NextResponse.json(
-          { error: 'Query parameter is required for everything endpoint' },
-          { status: 400 }
+          { 
+            status: 'error',
+            totalResults: 0,
+            articles: [],
+            message: 'Query parameter is required for everything endpoint' 
+          },
+          { status: 200 }
         );
       }
       // Use NewsData.io /news endpoint with query
@@ -249,20 +259,61 @@ export async function GET(request: NextRequest) {
       }, { status: 200 });
     }
 
+    // Validate data exists and check for error status
+    if (!data || typeof data !== 'object') {
+      console.error('Invalid data structure received');
+      // Try cache
+      try {
+        if (type === 'headlines' || type === 'everything') {
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            return NextResponse.json(cachedData, { status: 200 });
+          }
+        } else if (type === 'latest') {
+          const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+          if (cachedData) {
+            return NextResponse.json(cachedData, { status: 200 });
+          }
+        }
+      } catch (cacheError) {
+        console.error('Cache load error:', cacheError);
+      }
+      
+      // Return error response
+      if (type === 'latest') {
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+      
+      return NextResponse.json({
+        status: 'error',
+        totalResults: 0,
+        articles: [],
+        message: 'Invalid data received from API',
+      }, { status: 200 });
+    }
+
     if (data.status === 'error') {
       // Try to load from cache on API error response
-      if (type === 'headlines' || type === 'everything') {
-        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
-        if (cachedData) {
-          console.log('API returned error, using cached data');
-          return NextResponse.json(cachedData);
+      try {
+        if (type === 'headlines' || type === 'everything') {
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            console.log('API returned error, using cached data');
+            return NextResponse.json(cachedData, { status: 200 });
+          }
+        } else if (type === 'latest') {
+          const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
+          if (cachedData) {
+            console.log('API returned error, using cached data');
+            return NextResponse.json(cachedData, { status: 200 });
+          }
         }
-      } else if (type === 'latest') {
-        const cachedData = await loadFromCache<NewsDataResponse>(cacheKey);
-        if (cachedData) {
-          console.log('API returned error, using cached data');
-          return NextResponse.json(cachedData);
-        }
+      } catch (cacheError) {
+        console.error('Cache load error:', cacheError);
       }
       
       // Return error response with 200 status to prevent 500 errors
@@ -285,26 +336,30 @@ export async function GET(request: NextRequest) {
     // Convert NewsDataResponse to NewsApiResponse for headlines and everything
     if (type === 'headlines' || type === 'everything') {
       try {
+        // Safely handle data structure
+        const results = Array.isArray(data.results) ? data.results : [];
         const convertedData: NewsApiResponse = {
-          status: data.status,
+          status: data.status || 'ok',
           totalResults: data.totalResults || 0,
-          articles: (data.results || []).map(item => ({
-            title: item.title || 'Untitled',
-            description: item.description,
-            url: item.link || '#',
-            urlToImage: item.image_url,
-            publishedAt: item.pubDate || new Date().toISOString(),
-            author: item.creator?.[0] || item.source_name,
-            source: {
-              name: item.source_name || 'Unknown',
-            },
-            content: item.content,
-            article_id: item.article_id,
-          })),
+          articles: results
+            .filter(item => item && item.title) // Filter out invalid items
+            .map(item => ({
+              title: item.title || 'Untitled',
+              description: item.description || '',
+              url: item.link || '#',
+              urlToImage: item.image_url || undefined,
+              publishedAt: item.pubDate || new Date().toISOString(),
+              author: (Array.isArray(item.creator) && item.creator[0]) || item.source_name || 'Unknown',
+              source: {
+                name: item.source_name || 'Unknown',
+              },
+              content: item.content || undefined,
+              article_id: item.article_id || undefined,
+            })),
         };
         
         // Limit to pageSize if specified
-        const pageSizeNum = Number(pageSize);
+        const pageSizeNum = Number(pageSize) || DEFAULT_PAGE_SIZE;
         if (convertedData.articles.length > pageSizeNum) {
           convertedData.articles = convertedData.articles.slice(0, pageSizeNum);
           convertedData.totalResults = pageSizeNum;
@@ -314,10 +369,14 @@ export async function GET(request: NextRequest) {
       } catch (conversionError) {
         console.error('Data conversion error:', conversionError);
         // Try to load from cache on conversion error
-        const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
-        if (cachedData) {
-          console.log('Conversion error, using cached data');
-          return NextResponse.json(cachedData, { status: 200 });
+        try {
+          const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
+          if (cachedData) {
+            console.log('Conversion error, using cached data');
+            return NextResponse.json(cachedData, { status: 200 });
+          }
+        } catch (cacheError) {
+          console.error('Cache load error:', cacheError);
         }
         
         // Return error response with 200 status
@@ -330,12 +389,32 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(data);
+    // For 'latest' type, return data as-is
+    if (type === 'latest') {
+      try {
+        return NextResponse.json(data, { status: 200 });
+      } catch (jsonError) {
+        console.error('Final JSON response error:', jsonError);
+        return NextResponse.json({
+          status: 'error',
+          totalResults: 0,
+          results: [],
+        }, { status: 200 });
+      }
+    }
+    
+    // This should never be reached, but just in case
+    return NextResponse.json({
+      status: 'error',
+      totalResults: 0,
+      articles: [],
+      message: 'Unexpected error',
+    }, { status: 200 });
   } catch (error) {
     console.error('Proxy error:', error);
     
     // Try to load from cache on any error
-    if (cacheKey) {
+    if (cacheKey && type) {
       try {
         if (type === 'headlines' || type === 'everything') {
           const cachedData = await loadFromCache<NewsApiResponse>(cacheKey);
@@ -359,6 +438,7 @@ export async function GET(request: NextRequest) {
     // Always return 200 status with empty data instead of 500 error to prevent breaking the app
     // This ensures the frontend can handle the error gracefully
     try {
+      // Use type if available, otherwise default to 'headlines' format
       if (type === 'latest') {
         return NextResponse.json({
           status: 'error',
@@ -367,6 +447,7 @@ export async function GET(request: NextRequest) {
         }, { status: 200 });
       }
       
+      // Default response for headlines/everything or unknown type
       return NextResponse.json({
         status: 'error',
         totalResults: 0,
