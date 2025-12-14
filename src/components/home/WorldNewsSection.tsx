@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useEffect, useMemo, memo } from 'react';
+import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { ROUTES } from '@/constants/routes';
 import { useEverything } from '@/lib/hooks/useNews';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatDate } from '@/lib/utils/date';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
@@ -17,23 +18,9 @@ interface WorldNewsSectionProps {
 }
 
 export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   // Fetch world news from NewsData.io API using everything endpoint for more results
-  const { data, isLoading, error } = useEverything('world news', 50);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      () => {
-        // Data will be fetched automatically
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const { data, isLoading, error } = useEverything('world news', 50, undefined, isVisible);
 
   // Transform NewsArticle format and get first 4 articles (0, 1, 2, 3)
   const articles = useMemo(() => {

@@ -19,18 +19,25 @@ interface UseDataResult<T> {
 
 /**
  * Hook to fetch top headlines using Next.js server actions
+ * @param enabled - If false, the hook won't fetch data (useful for lazy loading)
  */
 export const useTopHeadlines = (
   category?: string,
   country: string = 'us',
-  pageSize: number = 20
+  pageSize: number = 20,
+  enabled: boolean = true
 ): UseDataResult<NewsApiResponse> => {
   const [data, setData] = useState<NewsApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     // Cancel previous request if still pending
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -62,26 +69,28 @@ export const useTopHeadlines = (
     return () => {
       cancelled = true;
     };
-  }, [category, country, pageSize]);
+  }, [category, country, pageSize, enabled]);
 
   return { data, isLoading, error };
 };
 
 /**
  * Hook to fetch articles by query using Next.js server actions
+ * @param enabled - If false, the hook won't fetch data (useful for lazy loading)
  */
 export const useEverything = (
   query: string,
   pageSize: number = 20,
-  domains?: string
+  domains?: string,
+  enabled: boolean = true
 ): UseDataResult<NewsApiResponse> => {
   const [data, setData] = useState<NewsApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled && query.trim().length > 0);
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!query || query.trim().length === 0) {
+    if (!enabled || !query || query.trim().length === 0) {
       // Use setTimeout to avoid setState in effect warning
       const timer = setTimeout(() => {
         setData(null);
@@ -121,21 +130,27 @@ export const useEverything = (
     return () => {
       cancelled = true;
     };
-  }, [query, pageSize, domains]);
+  }, [query, pageSize, domains, enabled]);
 
   return { data, isLoading, error };
 };
 
 /**
  * Hook to fetch latest news using Next.js server actions
+ * @param enabled - If false, the hook won't fetch data (useful for lazy loading)
  */
-export const useLatestNews = (query: string = 'worldnews'): UseDataResult<NewsDataResponse> => {
+export const useLatestNews = (query: string = 'worldnews', enabled: boolean = true): UseDataResult<NewsDataResponse> => {
   const [data, setData] = useState<NewsDataResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     // Cancel previous request if still pending
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -167,7 +182,7 @@ export const useLatestNews = (query: string = 'worldnews'): UseDataResult<NewsDa
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, enabled]);
 
   return { data, isLoading, error };
 };

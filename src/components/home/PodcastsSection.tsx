@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useEffect, useMemo, memo } from 'react';
+import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { ROUTES } from '@/constants/routes';
 import { useLatestNews } from '@/lib/hooks/useNews';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { slugify } from '@/lib/utils/string';
 import { removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
@@ -19,22 +20,8 @@ interface PodcastsSectionProps {
  * Fetches data from NewsData.io API with query "podcast"
  */
 export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error } = useLatestNews('podcast');
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      () => {
-        // Data will be fetched automatically
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const { data, isLoading, error } = useLatestNews('podcast', isVisible);
 
   const podcasts = useMemo(() => {
     if (!data?.results) return [];

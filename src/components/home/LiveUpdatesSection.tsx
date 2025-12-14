@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
@@ -16,25 +17,9 @@ interface LiveUpdatesSectionProps {
 }
 
 export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   // Fetch latest news from NewsAPI (public API)
-  const { data, isLoading, error } = useTopHeadlines(undefined, 'us', 20);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          // Data will be fetched automatically
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const { data, isLoading, error } = useTopHeadlines(undefined, 'us', 20, isVisible);
 
   const articles = useMemo(() => {
     const allArticles = data?.articles ?? [];

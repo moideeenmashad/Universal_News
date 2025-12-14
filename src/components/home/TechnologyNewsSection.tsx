@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useEffect, useMemo, memo } from 'react';
+import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { formatDate } from '@/lib/utils/date';
 import { slugify } from '@/lib/utils/string';
@@ -16,22 +17,8 @@ interface TechnologyNewsSectionProps {
 }
 
 export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error } = useTopHeadlines('technology', 'us', 20);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      () => {
-        // Data will be fetched automatically
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const { data, isLoading, error } = useTopHeadlines('technology', 'us', 20, isVisible);
 
   const articles = useMemo(() => {
     const allArticles = data?.articles || [];

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 
@@ -46,7 +47,8 @@ const FEATURED_LIST: FeaturedItem[] = [
  * Featured component - Displays featured news categories with latest news images
  */
 export const Featured = memo(() => {
-  const { data, isLoading } = useTopHeadlines(undefined, 'us', 20);
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const { data, isLoading } = useTopHeadlines(undefined, 'us', 20, isVisible);
 
   // Get valid articles with images
   const articlesWithImages = useMemo(() => {
@@ -58,6 +60,7 @@ export const Featured = memo(() => {
 
   return (
     <nav
+      ref={containerRef}
       className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mx-auto max-w-screen-xl gap-4 md:gap-8 mb-[30px] px-4 md:px-0"
       aria-label="Featured news categories"
     >
