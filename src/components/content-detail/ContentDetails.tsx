@@ -67,12 +67,14 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
 
   // Fetch similar news articles from the same category (only for news articles)
   // Always call useTopHeadlines to maintain hook order consistency
-  // Pass empty string instead of undefined to ensure consistent hook behavior
-  const similarCategory = contentType === 'news' && category && category !== 'podcasts' ? category : '';
+  // Use undefined for general headlines when category is invalid or world-news
+  const similarCategory = contentType === 'news' && category && category !== 'podcasts' && category !== 'world-news' 
+    ? category 
+    : undefined; // undefined will fetch general headlines
   const { data: similarNewsData, isLoading: isLoadingSimilar } = useTopHeadlines(
     similarCategory,
     'us',
-    10 // Fetch more to ensure we have 3 after filtering
+    20 // Fetch more to ensure we have enough after filtering and deduplication
   );
 
   // Transform data to unified format
@@ -134,20 +136,26 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
   }, [content, cachedContent, category, contentType, setCachedArticle, title]);
 
   // Get similar articles (exclude current article) - Must be before early returns to follow Rules of Hooks
+  // Use cachedContent if available, otherwise use content
+  const currentContent = cachedContent || content;
   const similarArticles = useMemo(() => {
-    if (contentType !== 'news' || !similarNewsData?.articles) return [];
-    if (!content || !content.title) return [];
+    if (contentType !== 'news' || !currentContent || !currentContent.title) return [];
+    if (!similarNewsData?.articles || similarNewsData.articles.length === 0) return [];
     
     const allArticles = similarNewsData.articles.filter(isValidArticle);
+    if (allArticles.length === 0) return [];
+    
     // Remove duplicates first
     const deduplicated = removeDuplicateArticles(allArticles);
     // Filter out current article by comparing titles (using slugified version for better matching)
-    const currentTitleSlug = slugify(content.title);
+    const currentTitleSlug = slugify(currentContent.title);
     const filtered = deduplicated.filter(
       (article) => slugify(article.title) !== currentTitleSlug
     );
-    return filtered.slice(0, 3); // Return only 3 articles
-  }, [similarNewsData, content, contentType]);
+    
+    // Return up to 3 articles, but ensure we have at least some results
+    return filtered.slice(0, 3);
+  }, [similarNewsData, currentContent, contentType]);
 
   // If we have cached content, render it immediately without waiting for API calls
   // This check happens before loading/error states to prevent showing loading when cached

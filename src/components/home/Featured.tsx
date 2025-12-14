@@ -78,7 +78,19 @@ export const Featured = memo(() => {
     };
   }, [worldNewsData.data, techData.data, healthData.data, sportsData.data]);
 
-  const isLoading = worldNewsData.isLoading || techData.isLoading || healthData.isLoading || sportsData.isLoading;
+  // Show skeleton only when ALL data sources have finished loading (either with data or error)
+  // This prevents showing partial data (some items with data, others still loading)
+  const isLoading = useMemo(() => {
+    // Check if all data sources have finished loading (not loading anymore)
+    const allFinished = 
+      !worldNewsData.isLoading && 
+      !techData.isLoading && 
+      !healthData.isLoading && 
+      !sportsData.isLoading;
+    
+    // Show skeleton if any is still loading
+    return !allFinished;
+  }, [worldNewsData.isLoading, techData.isLoading, healthData.isLoading, sportsData.isLoading]);
 
   return (
     <nav
