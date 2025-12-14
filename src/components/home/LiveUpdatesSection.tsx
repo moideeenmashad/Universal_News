@@ -31,21 +31,24 @@ export const LiveUpdatesSection = () => {
     return fallback || null;
   }, [articles]);
 
+  // Check for errors FIRST - if there's an error, show error message instead of skeleton
+  if (error) {
+    const errorMessage =
+      error instanceof Error 
+        ? error.message 
+        : 'Failed to load news. Please try again later.';
+    return (
+      <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0 pt-8">
+        <ErrorMessage message={errorMessage} />
+      </div>
+    );
+  }
+
   // Show skeleton if loading OR if no news yet (to prevent blank screen during transitions)
   if (isLoading || !latestNews) {
     return (
       <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0">
         <FeaturedArticleSkeleton />
-      </div>
-    );
-  }
-
-  if (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Please check your internet connection.';
-    return (
-      <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0 pt-8">
-        <ErrorMessage message={errorMessage} />
       </div>
     );
   }

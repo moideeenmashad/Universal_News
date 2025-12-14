@@ -8,6 +8,7 @@ import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { isValidArticle } from '@/lib/utils/validation';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
+import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface FeaturedItem {
   id: number;
@@ -84,12 +85,35 @@ export const Featured = memo(() => {
     };
   }, [worldNewsData.data, techData.data, healthData.data, sportsData.data]);
 
+  // Check if all data sources have finished loading (either with data or error)
+  // and if all have errors with no data, show error message
+  const allFinished = useMemo(() => {
+    return !worldNewsData.isLoading && 
+           !techData.isLoading && 
+           !healthData.isLoading && 
+           !sportsData.isLoading;
+  }, [worldNewsData.isLoading, techData.isLoading, healthData.isLoading, sportsData.isLoading]);
+
+  const hasAnyError = useMemo(() => {
+    return worldNewsData.error || techData.error || healthData.error || sportsData.error;
+  }, [worldNewsData.error, techData.error, healthData.error, sportsData.error]);
+
   // Show skeleton if component is not mounted yet (prevents hydration mismatch)
   // OR if ANY data source is loading OR if we don't have real articles yet
   // This prevents showing static data with placeholder images before real data loads
   const isLoading = useMemo(() => {
     // Always show skeleton on initial render (server and client) until mounted
     if (!isMounted) return true;
+    
+    // If all finished loading and we have errors but no data, don't show skeleton (will show error)
+    if (allFinished && hasAnyError) {
+      const hasRealData = 
+        categoryArticles.world || 
+        categoryArticles.technology || 
+        categoryArticles.health || 
+        categoryArticles.sports;
+      if (!hasRealData) return false; // Show error instead
+    }
     
     const anyLoading = 
       worldNewsData.isLoading || 
@@ -108,6 +132,8 @@ export const Featured = memo(() => {
     return anyLoading || !hasRealData;
   }, [
     isMounted,
+    allFinished,
+    hasAnyError,
     worldNewsData.isLoading, 
     techData.isLoading, 
     healthData.isLoading, 
@@ -124,7 +150,12 @@ export const Featured = memo(() => {
       className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mx-auto max-w-screen-xl gap-4 md:gap-8 mb-[30px] px-4 md:px-0"
       aria-label="Featured news categories"
     >
-      {isLoading ? (
+      {allFinished && hasAnyError && !categoryArticles.world && !categoryArticles.technology && !categoryArticles.health && !categoryArticles.sports ? (
+        // Show error message if all data sources failed and we have no data
+        <div className="col-span-4 py-8">
+          <ErrorMessage message="Failed to load featured news. Please try again later." />
+        </div>
+      ) : isLoading ? (
         // Skeleton loading
         FEATURED_LIST.map((item) => (
           <div
