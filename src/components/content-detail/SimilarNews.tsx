@@ -50,7 +50,7 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
   }
 
   return (
-    <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-12 border-t border-gray-200">
+    <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
       <h2 className="text-xl sm:text-2xl md:text-3xl text-primary uppercase mb-4 md:mb-6">Similar News</h2>
       <div className="border-b border-black mb-4 md:mb-6"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 md:gap-4">
