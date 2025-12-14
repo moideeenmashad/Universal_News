@@ -5,21 +5,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
+import { getArticleUrl } from '@/lib/utils/routes';
 import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
 
-interface LiveUpdatesSectionProps {
-  articleUrlName: (text: string) => string;
-}
-
-export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) => {
-  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-  // Fetch latest news from NewsAPI (public API)
-  const { data, isLoading, error } = useTopHeadlines(undefined, 'us', 20, isVisible);
+export const LiveUpdatesSection = () => {
+  // Load immediately since this is in the hero section (above the fold)
+  const { data, isLoading, error } = useTopHeadlines(undefined, 'us', 20, true);
 
   const articles = useMemo(() => {
     const allArticles = data?.articles ?? [];
@@ -37,10 +32,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
 
   if (isLoading) {
     return (
-      <div
-        ref={containerRef}
-        className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0"
-      >
+      <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0">
         <FeaturedArticleSkeleton />
       </div>
     );
@@ -50,10 +42,7 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
     const errorMessage =
       error instanceof Error ? error.message : 'Please check your internet connection.';
     return (
-      <div
-        ref={containerRef}
-        className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0 pt-8"
-      >
+      <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0 pt-8">
         <ErrorMessage message={errorMessage} />
       </div>
     );
@@ -63,15 +52,11 @@ export const LiveUpdatesSection = ({ articleUrlName }: LiveUpdatesSectionProps) 
     return null;
   }
 
-  const articleSlug = articleUrlName(latestNews.title);
-  const articleUrl = `/article/${articleSlug}`;
+  const articleUrl = getArticleUrl(latestNews);
   const publishedRelative = formatRelativeTime(latestNews.publishedAt);
 
   return (
-    <div
-      ref={containerRef}
-      className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0"
-    >
+    <div className="live-article-container mx-auto max-w-screen-xl relative mb-12 md:mb-[100px] px-4 md:px-0">
       <Link
         href={articleUrl}
         className="article-container mb-[24px] block hover:opacity-95 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 rounded-md"

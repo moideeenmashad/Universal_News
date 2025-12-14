@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatDate } from '@/lib/utils/date';
-import { slugify } from '@/lib/utils/string';
+import { getArticleUrl } from '@/lib/utils/routes';
 import { sanitizeTitle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 
@@ -55,8 +55,7 @@ export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNe
       <div className="border-b border-black mb-4 md:mb-6"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 md:gap-4">
         {articles.map((article, index) => {
-          const articleSlug = slugify(article.title);
-          const articleUrl = category ? `/${category}/${articleSlug}` : `/article/${articleSlug}`;
+          const articleUrl = getArticleUrl(article, category);
 
           return (
             <Link

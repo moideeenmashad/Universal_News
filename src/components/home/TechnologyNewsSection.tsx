@@ -8,6 +8,7 @@ import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
 import { formatDate } from '@/lib/utils/date';
+import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { ROUTES } from '@/constants/routes';
@@ -67,8 +68,7 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-4 md:gap-4">
           {articles.map((article, index) => {
-            const articleSlug = slugify(article.title);
-            const articleUrl = `/article/${articleSlug}`;
+            const articleUrl = getArticleUrl(article, 'technology');
 
             return (
               <Link

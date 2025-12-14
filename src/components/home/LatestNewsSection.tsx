@@ -8,6 +8,7 @@ import { ROUTES } from '@/constants/routes';
 import { useLatestNews } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatDate } from '@/lib/utils/date';
+import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
@@ -148,8 +149,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
           {/* Mobile Layout - 2 column grid */}
           <div className="grid grid-cols-2 md:hidden gap-4">
             {articles.slice(0, 4).map((article, index) => {
-              const articleSlug = slugify(article.title);
-              const articleUrl = `/article/${articleSlug}`;
+              const articleUrl = getArticleUrl(article, 'general');
 
               return (
                 <Link
@@ -195,7 +195,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
               {/* 1) Large Featured Article (using articles[0]) */}
               {feature && (
                 <Link
-                  href={`/article/${slugify(feature.title)}`}
+                  href={getArticleUrl(feature, 'general')}
                   className="rounded-sm bg-white relative block hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2"
                 >
                   <div className="overflow-hidden relative rounded-sm">
@@ -234,8 +234,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
               {/* 2 & 3) Two Stacked Articles on the Right */}
               <div>
                 {sideStack.map((article, idx) => {
-                  const articleSlug = slugify(article.title);
-                  const articleUrl = `/article/${articleSlug}`;
+                  const articleUrl = getArticleUrl(article, 'general');
                   
                   return (
                     <Link
@@ -287,8 +286,7 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
             {/* Bottom Row (Articles #4, #5, #6) */}
             <div className="mt-[14px] gap-x-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3">
               {bottomRow.map((article, index) => {
-                const articleSlug = slugify(article.title);
-                const articleUrl = `/article/${articleSlug}`;
+                const articleUrl = getArticleUrl(article, 'general');
                 
                 return (
                   <Link

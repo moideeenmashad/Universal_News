@@ -8,6 +8,7 @@ import { ROUTES } from '@/constants/routes';
 import { useEverything } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatDate } from '@/lib/utils/date';
+import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
 import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
@@ -112,8 +113,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
           {/* Mobile Layout - 2 column grid */}
           <div className="grid grid-cols-2 md:hidden gap-4">
             {articles.slice(0, 4).map((article, index) => {
-              const articleSlug = slugify(article.title);
-              const articleUrl = `/article/${articleSlug}`;
+              const articleUrl = getArticleUrl(article, 'world-news');
 
               return (
                 <Link
@@ -158,7 +158,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             <div className="md:col-span-2">
               {feature && (
                 <Link
-                  href={`/article/${slugify(feature.title)}`}
+                  href={getArticleUrl(feature, 'world-news')}
                   className="block overflow-hidden rounded-sm relative hover:opacity-90 transition-opacity focus:outline-none focus-visible:outline-2 focus-visible:outline-[#E63946] focus-visible:outline-offset-2 h-full"
                 >
                   <div className="overflow-hidden rounded-sm relative h-full">
@@ -198,8 +198,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
             <div className="flex flex-col gap-4">
               {sideStack && sideStack.length > 0
                 ? sideStack.map((article, index) => {
-                    const articleSlug = slugify(article.title);
-                    const articleUrl = `/article/${articleSlug}`;
+                    const articleUrl = getArticleUrl(article, 'world-news');
                     
                     return (
                       <Link

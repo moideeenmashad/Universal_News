@@ -14,6 +14,7 @@ interface FeaturedItem {
   title: string;
   assert: string;
   linkTo: string;
+  category?: string; // Category for fetching category-specific articles
 }
 
 const FEATURED_LIST: FeaturedItem[] = [
@@ -22,41 +23,62 @@ const FEATURED_LIST: FeaturedItem[] = [
     title: 'World News',
     assert: 'Economic policies are shaping international markets',
     linkTo: ROUTES.WORLD_NEWS,
+    category: undefined, // World news uses everything endpoint, not category
   },
   {
     id: 2,
     title: 'Technology',
     assert: 'The latest trends in AI and innovation',
     linkTo: ROUTES.TECHNOLOGY,
+    category: 'technology',
   },
   {
     id: 3,
     title: 'Health',
     assert: 'Analyzing the effects of global health policies',
     linkTo: ROUTES.HEALTH,
+    category: 'health',
   },
   {
     id: 4,
     title: 'Sports',
     assert: 'Effects of cutting-edge wearables in professional sports',
     linkTo: ROUTES.SPORTS,
+    category: 'sports',
   },
 ];
 
 /**
  * Featured component - Displays featured news categories with latest news images
+ * Each category shows an image from its own category-specific news
  */
 export const Featured = memo(() => {
   const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-  const { data, isLoading } = useTopHeadlines(undefined, 'us', 20, isVisible);
+  
+  // Fetch articles for each category
+  const worldNewsData = useTopHeadlines(undefined, 'us', 5, isVisible); // General for world news
+  const techData = useTopHeadlines('technology', 'us', 5, isVisible);
+  const healthData = useTopHeadlines('health', 'us', 5, isVisible);
+  const sportsData = useTopHeadlines('sports', 'us', 5, isVisible);
 
-  // Get valid articles with images
-  const articlesWithImages = useMemo(() => {
-    if (!data?.articles) return [];
-    const validArticles = data.articles.filter((article) => isValidArticle(article) && article.urlToImage);
-    const deduplicated = removeDuplicateArticles(validArticles);
-    return deduplicated.slice(0, 4);
-  }, [data]);
+  // Get first valid article with image for each category
+  const categoryArticles = useMemo(() => {
+    const getFirstValidArticle = (data: typeof worldNewsData.data) => {
+      if (!data?.articles) return null;
+      const validArticles = data.articles.filter((article) => isValidArticle(article) && article.urlToImage);
+      const deduplicated = removeDuplicateArticles(validArticles);
+      return deduplicated[0] || null;
+    };
+
+    return {
+      world: getFirstValidArticle(worldNewsData.data),
+      technology: getFirstValidArticle(techData.data),
+      health: getFirstValidArticle(healthData.data),
+      sports: getFirstValidArticle(sportsData.data),
+    };
+  }, [worldNewsData.data, techData.data, healthData.data, sportsData.data]);
+
+  const isLoading = worldNewsData.isLoading || techData.isLoading || healthData.isLoading || sportsData.isLoading;
 
   return (
     <nav
@@ -81,8 +103,20 @@ export const Featured = memo(() => {
           </div>
         ))
       ) : (
-        FEATURED_LIST.map((item, index) => {
-          const article = articlesWithImages[index];
+        FEATURED_LIST.map((item) => {
+          // Get the appropriate article for each category
+          let article = null;
+          if (item.category === 'technology') {
+            article = categoryArticles.technology;
+          } else if (item.category === 'health') {
+            article = categoryArticles.health;
+          } else if (item.category === 'sports') {
+            article = categoryArticles.sports;
+          } else {
+            // World News uses general headlines
+            article = categoryArticles.world;
+          }
+
           const imageUrl = article?.urlToImage || getPlaceholderImage(80, 80);
 
           return (
