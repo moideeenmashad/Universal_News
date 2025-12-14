@@ -140,7 +140,7 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
           ? 'Failed to load article. Please try again.'
           : 'Podcast not found.';
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-24">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
         <ErrorMessage message={errorMessage} />
       </section>
     );
@@ -148,7 +148,7 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
 
   if (!content) {
     return (
-      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8 mt-24">
+      <section className="mx-auto max-w-screen-xl px-4 md:px-0 py-8">
         <ErrorMessage 
           message={contentType === 'news' ? 'The article you are looking for could not be found. It may have been removed or the link is incorrect.' : 'The podcast you are looking for could not be found. It may have been removed or the link is incorrect.'} 
           variant="not-found"
