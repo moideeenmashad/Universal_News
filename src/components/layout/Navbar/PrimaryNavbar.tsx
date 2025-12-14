@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, startTransition } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { GoSearch } from 'react-icons/go';
@@ -33,7 +33,9 @@ export const PrimaryNavbar = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    setIsMounted(true);
+    startTransition(() => {
+      setIsMounted(true);
+    });
   }, []);
 
   const gotoHome = useCallback(() => {
