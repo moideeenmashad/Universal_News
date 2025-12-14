@@ -1,4 +1,4 @@
 // TypeScript types
 export type * from './news';
-export type * from './date-fns';
+// Note: date-fns.d.ts is a declaration file, not a module, so it cannot be exported
 
