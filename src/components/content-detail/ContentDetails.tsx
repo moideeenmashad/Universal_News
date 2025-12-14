@@ -7,7 +7,7 @@ import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews, useTopHea
 import { formatDate } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { slugify } from '@/lib/utils/string';
-import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidArticle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 import type { NewsDataArticle } from '@/types/news';
 import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
@@ -145,11 +145,9 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
     const allArticles = similarNewsData.articles.filter(isValidArticle);
     if (allArticles.length === 0) return [];
     
-    // Remove duplicates first
-    const deduplicated = removeDuplicateArticles(allArticles);
-    // Filter out current article by comparing titles (using slugified version for better matching)
+    // No duplicate checking - filter out current article by comparing titles (using slugified version for better matching)
     const currentTitleSlug = slugify(currentContent.title);
-    const filtered = deduplicated.filter(
+    const filtered = allArticles.filter(
       (article) => slugify(article.title) !== currentTitleSlug
     );
     

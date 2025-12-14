@@ -10,7 +10,7 @@ import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatDate } from '@/lib/utils/date';
 import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
-import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { sanitizeTitle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
@@ -24,47 +24,29 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
   const { data, isLoading, error } = useLatestNews('latest news', isVisible);
 
   // Transform NewsDataArticle to NewsArticle format and get first 6 articles (0-5)
+  // Keep processing results until we have 6 articles or run out of results
+  // Note: No duplicate checking - show all articles as-is
   const articles = useMemo(() => {
-    if (!data?.results) return [];
+    if (!data?.results || data.results.length === 0) return [];
     
-    // Filter out duplicates from NewsData.io (where duplicate: true)
-    // Process more results to ensure we get enough valid articles after filtering
-    const uniqueResults = data.results
-      .filter((item) => !item.duplicate && item?.title && item.title.trim().length > 0)
-      .slice(0, 50); // Process first 50 to ensure we get enough valid ones
+    const TARGET_COUNT = 6;
+    const BATCH_SIZE = 50;
+    let processedCount = 0;
+    let allArticles: NewsArticle[] = [];
     
-    const transformed: NewsArticle[] = uniqueResults
-      .map((item) => ({
-        title: item.title.trim(),
-        description: item.description,
-        url: item.link || '#',
-        urlToImage: item.image_url,
-        publishedAt: item.pubDate,
-        author: item.creator?.[0] || item.source_name,
-        source: {
-          name: item.source_name || 'Unknown',
-        },
-        content: item.content,
-        // Store article_id for deduplication
-        article_id: item.article_id,
-      }))
-      .filter(isValidArticle);
-    
-    // Remove duplicates by article_id or title+url
-    const deduplicated = removeDuplicateArticles(transformed);
-    
-    // Get first 6 articles after deduplication
-    // If we don't have 6, try processing more results
-    if (deduplicated.length < 6 && data.results.length > 50) {
-      const additionalResults = data.results
-        .slice(50, 100)
-        .filter((item) => !item.duplicate && item?.title && item.title.trim().length > 0);
-      
-      const additionalTransformed: NewsArticle[] = additionalResults
+    // Helper function to transform a batch of results
+    const transformBatch = (batch: typeof data.results): NewsArticle[] => {
+      return batch
+        .filter((item) => !item.duplicate && item?.title && item.title.trim().length > 0)
         .map((item) => ({
           title: item.title.trim(),
           description: item.description,
-          url: item.link || '#',
+          // Only use link if it's a valid URL, otherwise generate a unique placeholder
+          url: item.link && item.link !== '#' && item.link.trim().length > 0 
+            ? item.link 
+            : item.article_id 
+              ? `#article-${item.article_id}` 
+              : `#article-${item.title.substring(0, 50).replace(/\s+/g, '-')}`,
           urlToImage: item.image_url,
           publishedAt: item.pubDate,
           author: item.creator?.[0] || item.source_name,
@@ -74,16 +56,41 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
           content: item.content,
           article_id: item.article_id,
         }))
-        .filter(isValidArticle);
+        .filter((article) => {
+          // More lenient validation - allow articles without URL if they have article_id
+          if (!article.title || !article.publishedAt) return false;
+          // If no URL but has article_id, that's okay
+          if (!article.url || article.url === '#') {
+            return !!article.article_id;
+          }
+          return true;
+        });
+    };
+    
+    // Process results in batches until we have 6 articles or run out of results
+    // No duplicate checking - just collect articles
+    while (allArticles.length < TARGET_COUNT && processedCount < data.results.length) {
+      const batchStart = processedCount;
+      const batchEnd = Math.min(processedCount + BATCH_SIZE, data.results.length);
+      const batch = data.results.slice(batchStart, batchEnd);
       
-      const additionalDeduplicated = removeDuplicateArticles(additionalTransformed);
-      // Combine and deduplicate again
-      const combined = [...deduplicated, ...additionalDeduplicated];
-      const finalDeduplicated = removeDuplicateArticles(combined);
-      return finalDeduplicated.slice(0, 6);
+      // Transform this batch
+      const transformed = transformBatch(batch);
+      
+      // Combine with existing articles (no deduplication)
+      allArticles = [...allArticles, ...transformed];
+      
+      // Update processed count
+      processedCount = batchEnd;
+      
+      // If we've processed all results and still don't have enough, break
+      if (processedCount >= data.results.length) {
+        break;
+      }
     }
     
-    return deduplicated.slice(0, 6);
+    // Return up to 6 articles
+    return allArticles.slice(0, TARGET_COUNT);
   }, [data]);
 
   // Layout: 0 (feature), 1-2 (side stack), 3-5 (bottom row)
@@ -92,9 +99,14 @@ export const LatestNewsSection = memo(({ title }: LatestNewsSectionProps) => {
   const sideStack = articles.slice(1, 3); // Articles 1, 2 (indices 1-2)
   const bottomRow = articles.slice(3, 6); // Articles 4, 5, 6 (indices 3, 4, 5)
   
-  // Debug: Log if we don't have enough articles
-  if (articles.length < 6 && !isLoading) {
-    console.warn(`LatestNewsSection: Only ${articles.length} articles available, expected 6`);
+  // Debug: Log if we don't have enough articles after processing all available results
+  // This helps identify when the API doesn't return enough valid articles
+  if (process.env.NODE_ENV === 'development' && !isLoading && articles.length > 0 && articles.length < 6) {
+    const totalProcessed = data?.results?.length || 0;
+    console.warn(
+      `LatestNewsSection: Only ${articles.length} articles available after processing ${totalProcessed} results, expected 6. ` +
+      `This may indicate that many articles were filtered out or the API returned insufficient results.`
+    );
   }
 
   return (

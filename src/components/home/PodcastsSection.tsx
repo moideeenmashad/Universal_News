@@ -8,7 +8,6 @@ import { ROUTES } from '@/constants/routes';
 import { useLatestNews } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { slugify } from '@/lib/utils/string';
-import { removeDuplicateArticles } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
 interface PodcastsSectionProps {
@@ -45,8 +44,7 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
         content: podcast.content,
       }));
     
-    // Remove duplicates by article_id
-    validPodcasts = removeDuplicateArticles(validPodcasts);
+    // No duplicate checking - keep all podcasts
     
     // If we don't have 6, try processing more
     if (validPodcasts.length < 6 && uniqueResults.length > 50) {
@@ -65,10 +63,8 @@ export const PodcastsSection = memo(({ title = 'PODCASTS' }: PodcastsSectionProp
           content: podcast.content,
         }));
       
-      const additionalDeduplicated = removeDuplicateArticles(additionalPodcasts);
-      validPodcasts = [...validPodcasts, ...additionalDeduplicated];
-      // Remove duplicates again after combining
-      validPodcasts = removeDuplicateArticles(validPodcasts);
+      // Combine without deduplication
+      validPodcasts = [...validPodcasts, ...additionalPodcasts];
     }
     
     // Return first 6 valid podcasts

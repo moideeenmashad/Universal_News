@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
 import { formatDate } from '@/lib/utils/date';
 import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
@@ -24,8 +24,8 @@ export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps
   const articles = useMemo(() => {
     const allArticles = data?.articles || [];
     const validArticles = allArticles.filter(isValidArticle);
-    const deduplicated = removeDuplicateArticles(validArticles);
-    return deduplicated.slice(0, 4);
+    // No duplicate checking - return first 4 articles
+    return validArticles.slice(0, 4);
   }, [data?.articles]);
 
   return (

@@ -107,10 +107,14 @@ export const removeDuplicateArticles = <T extends { article_id?: string; title: 
         return false; // Same title AND same URL = definitely duplicate
       }
       // Same title but different URL - might be different sources, but likely duplicate content
-      // Only filter if title is substantial (more than 20 chars) to avoid false positives
-      if (normalizedTitle.length > 20) {
+      // Only filter if:
+      // 1. Title is substantial (more than 50 chars) to avoid false positives
+      // 2. AND we have a valid URL (not a placeholder) - if no valid URL, allow it (might be from different sources)
+      const isPlaceholderUrl = !normalizedUrl || normalizedUrl.startsWith('#') || normalizedUrl === '';
+      if (normalizedTitle.length > 50 && !isPlaceholderUrl) {
         return false;
       }
+      // If it's a placeholder URL, be more lenient - allow articles with same title from different sources
     }
     
     // Strategy 5: Check URL-only duplicates (same URL = definitely duplicate)

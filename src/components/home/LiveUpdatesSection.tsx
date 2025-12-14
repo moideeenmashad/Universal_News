@@ -8,7 +8,7 @@ import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 import { getArticleUrl } from '@/lib/utils/routes';
-import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidArticle } from '@/lib/utils/validation';
 import { ErrorMessage } from '../ui/ErrorMessage';
 import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
 
@@ -18,7 +18,8 @@ export const LiveUpdatesSection = () => {
 
   const articles = useMemo(() => {
     const allArticles = data?.articles ?? [];
-    return removeDuplicateArticles(allArticles);
+    // No duplicate checking - return all articles
+    return allArticles;
   }, [data?.articles]);
   
   const latestNews = useMemo(() => {

@@ -10,7 +10,7 @@ import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
 import { formatDate } from '@/lib/utils/date';
 import { getArticleUrl } from '@/lib/utils/routes';
 import { slugify } from '@/lib/utils/string';
-import { isValidArticle, sanitizeTitle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
@@ -32,11 +32,8 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
       return article.title && article.title.trim().length > 0;
     });
     
-    // Remove duplicates by article_id or title+url
-    const deduplicated = removeDuplicateArticles(validArticles);
-    
-    // Get first 4 articles after deduplication
-    return deduplicated.slice(0, 4);
+    // No duplicate checking - return first 4 articles
+    return validArticles.slice(0, 4);
   }, [data]);
 
   // Desktop layout: article 0 as featured, articles 1, 2, 3 as side stack

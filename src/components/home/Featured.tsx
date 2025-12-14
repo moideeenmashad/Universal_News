@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
 import { useTopHeadlines } from '@/lib/hooks/useNews';
 import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { isValidArticle, removeDuplicateArticles } from '@/lib/utils/validation';
+import { isValidArticle } from '@/lib/utils/validation';
 import { getPlaceholderImage } from '@/lib/utils/placeholder';
 
 interface FeaturedItem {
@@ -72,8 +72,8 @@ export const Featured = memo(() => {
     const getFirstValidArticle = (data: typeof worldNewsData.data) => {
       if (!data?.articles) return null;
       const validArticles = data.articles.filter((article) => isValidArticle(article) && article.urlToImage);
-      const deduplicated = removeDuplicateArticles(validArticles);
-      return deduplicated[0] || null;
+      // No duplicate checking - return first valid article
+      return validArticles[0] || null;
     };
 
     return {

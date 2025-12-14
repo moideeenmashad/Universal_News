@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { NewsList } from './NewsList';
 import { useTopHeadlines, useLatestNews } from '@/lib/hooks/useNews';
-import { isValidCategory, removeDuplicateArticles, isValidArticle } from '@/lib/utils/validation';
+import { isValidCategory, isValidArticle } from '@/lib/utils/validation';
 import type { NewsArticle } from '@/types/news';
 
 interface NewsProps {
@@ -67,10 +67,8 @@ export const News = ({ category, title }: NewsProps) => {
         .filter(isValidArticle);
     }
     
-    // Remove duplicates from all articles (this is the key deduplication step)
-    const deduplicated = removeDuplicateArticles(transformed);
-    
-    return deduplicated;
+    // No duplicate checking - return all transformed articles
+    return transformed;
   }, [isPodcastCategory, newsData?.articles, podcastData]);
 
   const isLoading = isPodcastCategory ? isLoadingPodcast : isLoadingNews;
