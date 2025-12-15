@@ -25,13 +25,13 @@ const selectArticleFields = (article: NewsArticle, fields?: NewsArticleField[]):
     return article;
   }
 
-  const allowedFields = mergeWithRequiredFields(fields);
-  const selected: Partial<NewsArticle> = {};
+  const allowedFields = mergeWithRequiredFields(fields) as (keyof NewsArticle)[];
+  const selected: Partial<Record<NewsArticleField, unknown>> = {};
 
   for (const field of allowedFields) {
-    const value = (article as Record<string, unknown>)[field];
+    const value = article[field];
     if (value !== undefined) {
-      (selected as Record<string, unknown>)[field] = value;
+      selected[field] = value;
     }
   }
 
