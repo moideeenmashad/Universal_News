@@ -170,7 +170,7 @@ export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
                     {/* Overlay Card */}
                     <div className="absolute top-4 left-4 right-4 p-4 rounded-sm md:w-1/2 bottom-4 grid bg-primary">
                       <div>
-                        <p className="text-xs px-5 py-2 bg-white text-primary w-fit rounded-lg mb-[12px]">
+                        <p className="text-xs px-5 py-2 bg-[#202124] text-light w-fit rounded-lg mb-[12px]">
                           {feature?.publishedAt ? formatDate(feature.publishedAt, 'MMM d, yyyy') : 'Date Unavailable'}
                         </p>
                         <p className="text-primary text-[26px] font-semibold leading-snug">
