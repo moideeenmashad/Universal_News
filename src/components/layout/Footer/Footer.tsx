@@ -35,8 +35,8 @@ export const Footer = () => {
         {/* Thick primary border at top (matching header) */}
         <div className="border-primary border-t-4"></div>
         
-        {/* Logo section - using same SVG as header, left-aligned */}
-        <div className="py-6 pl-0 pr-4">
+        {/* Logo section - original size; centered on mobile, left on desktop */}
+        <div className="py-6 flex justify-center md:justify-start px-0">
           <svg
             width="142"
             height="34"
@@ -50,7 +50,7 @@ export const Footer = () => {
                 gotoHome();
               }
             }}
-            className="cursor-pointer hover:opacity-80 transition-opacity w-auto h-auto"
+            className="cursor-pointer hover:opacity-80 transition-opacity w-auto h-auto mx-auto md:mx-0"
             role="button"
             tabIndex={0}
             aria-label="Go to home page"
