@@ -173,7 +173,8 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 800px"
-                loading="lazy"
+                loading="eager"
+                priority
               />
             </div>
             <div className="publisher border-y-2 border-primary py-4 flex items-center gap-x-[10px] mb-6">
@@ -294,7 +295,8 @@ export const ContentDetails = ({ category, title, type, searchQuery }: ContentDe
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 800px"
-              loading="lazy"
+              loading="eager"
+              priority
             />
           </div>
           <div className="publisher border-y-2 border-primary py-4 flex items-center gap-x-[10px] mb-6">
