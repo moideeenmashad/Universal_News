@@ -1,10 +1,6 @@
 'use client';
 
-interface TextSkeletonProps {
-  lines?: number;
-  className?: string;
-  width?: 'full' | '3/4' | '2/3' | '1/2' | '1/3';
-}
+import type { TextSkeletonProps } from '@/types';
 
 export const TextSkeleton = ({ lines = 3, className = '', width = 'full' }: TextSkeletonProps) => {
   const widthClass = {

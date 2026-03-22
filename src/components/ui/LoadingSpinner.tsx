@@ -1,10 +1,6 @@
 'use client';
 
-interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  variant?: 'default' | 'primary';
-}
+import type { LoadingSpinnerProps } from '@/types';
 
 export const LoadingSpinner = ({ size = 'md', className = '', variant = 'default' }: LoadingSpinnerProps) => {
   const sizeClasses = {

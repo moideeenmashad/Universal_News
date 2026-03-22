@@ -3,37 +3,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { PiCalendarLight } from 'react-icons/pi';
-import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews, useTopHeadlines } from '@/lib/hooks/useNews';
-import { formatDate } from '@/lib/utils/date';
-import { getPlaceholderImage } from '@/lib/utils/placeholder';
-import { slugify } from '@/lib/utils/string';
-import { isValidArticle } from '@/lib/utils/validation';
-import type { NewsArticle } from '@/types/news';
-import type { NewsDataArticle } from '@/types/news';
-import { ArticleDetailSkeleton } from '../ui/ArticleDetailSkeleton';
-import { ErrorMessage } from '../ui/ErrorMessage';
+import { useArticleByTitle, useArticleByTitleUniversal, useLatestNews, useTopHeadlines } from '@/lib/hooks';
+import { formatDate, getPlaceholderImage, slugify, isValidArticle } from '@/lib/utils';
+import type { NewsArticle, NewsDataArticle, ContentDetailsProps, UnifiedContent } from '@/types';
+import { ArticleDetailSkeleton, ErrorMessage } from '../ui';
 import { SimilarNews } from './SimilarNews';
 import { useArticleStore } from '@/lib/store/articleStore';
-
-interface ContentDetailsProps {
-  category?: string;
-  title: string;
-  type?: 'news' | 'podcast'; // Optional, will auto-detect from category
-  searchQuery?: string;
-}
-
-type UnifiedContent = {
-  title: string;
-  description?: string;
-  content?: string;
-  imageUrl?: string;
-  author?: string;
-  sourceName?: string;
-  publishedAt: string;
-  url?: string;
-  link?: string;
-  type: 'news' | 'podcast';
-};
 
 const isValidPodcast = (podcast: NewsDataArticle | null | undefined): boolean => {
   return !!(podcast?.title && podcast?.image_url);

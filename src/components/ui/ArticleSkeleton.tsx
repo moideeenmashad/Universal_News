@@ -1,10 +1,6 @@
 'use client';
 
-interface ArticleSkeletonProps {
-  count?: number;
-  variant?: 'grid' | 'list' | 'featured';
-  className?: string;
-}
+import type { ArticleSkeletonProps } from '@/types';
 
 export const ArticleSkeleton = ({ count = 6, variant = 'grid', className = '' }: ArticleSkeletonProps) => {
   const gridCols = variant === 'featured' ? 'lg:grid-cols-4' : variant === 'list' ? 'md:grid-cols-2' : 'md:grid-cols-3';

@@ -3,11 +3,7 @@
 import { useEffect } from 'react';
 import { GoX } from 'react-icons/go';
 import { SearchBar } from './SearchBar';
-
-interface SearchModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { SearchModalProps } from '@/types';
 
 export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   // Prevent body scroll when modal is open

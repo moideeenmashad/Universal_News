@@ -4,14 +4,10 @@ import { useState, useCallback, useEffect, startTransition } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { GoSearch } from 'react-icons/go';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES } from '@/constants';
 import { SearchModal } from '@/components/search/SearchModal';
 
-interface NavItem {
-  id: number;
-  navItem: string;
-  LinkTo: string;
-}
+import type { NavItem } from '@/types';
 
 const NAV_ITEMS: NavItem[] = [
   { id: 1, navItem: 'World News', LinkTo: ROUTES.WORLD_NEWS },

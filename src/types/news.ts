@@ -55,17 +55,10 @@ export interface NewsDataResponse {
   nextPage?: string;
 }
 
-/**
- * Allowed fields for GraphQL-style selection
- */
-export type NewsArticleField =
-  | 'source'
-  | 'author'
-  | 'title'
-  | 'description'
-  | 'url'
-  | 'urlToImage'
-  | 'publishedAt'
-  | 'content'
-  | 'article_id';
+export interface NewsChannel {
+  id: string;
+  name: string;
+  hostname: string;
+  category?: string;
+}
 

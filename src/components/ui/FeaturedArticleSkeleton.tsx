@@ -1,8 +1,6 @@
 'use client';
 
-interface FeaturedArticleSkeletonProps {
-  className?: string;
-}
+import type { FeaturedArticleSkeletonProps } from '@/types';
 
 export const FeaturedArticleSkeleton = ({ className = '' }: FeaturedArticleSkeletonProps) => {
   return (

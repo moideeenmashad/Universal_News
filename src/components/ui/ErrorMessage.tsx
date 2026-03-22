@@ -2,14 +2,7 @@
 
 import { FiAlertCircle, FiInfo, FiAlertTriangle } from 'react-icons/fi';
 import Link from 'next/link';
-
-interface ErrorMessageProps {
-  message: string;
-  onRetry?: () => void;
-  className?: string;
-  variant?: 'error' | 'warning' | 'info' | 'not-found';
-  showHomeLink?: boolean;
-}
+import type { ErrorMessageProps } from '@/types';
 
 export const ErrorMessage = ({ 
   message, 

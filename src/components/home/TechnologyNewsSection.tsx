@@ -4,18 +4,11 @@ import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
-import { useTopHeadlines } from '@/lib/hooks/useNews';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
-import { formatDate } from '@/lib/utils/date';
-import { getArticleUrl } from '@/lib/utils/routes';
-import { slugify } from '@/lib/utils/string';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { ROUTES } from '@/constants/routes';
-
-interface TechnologyNewsSectionProps {
-  title: string;
-}
+import { ROUTES } from '@/constants';
+import { useTopHeadlines, useIntersectionObserver } from '@/lib/hooks';
+import { isValidArticle, sanitizeTitle, formatDate, getArticleUrl, slugify } from '@/lib/utils';
+import { ErrorMessage } from '../ui';
+import type { TechnologyNewsSectionProps } from '@/types';
 
 export const TechnologyNewsSection = memo(({ title }: TechnologyNewsSectionProps) => {
   const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });

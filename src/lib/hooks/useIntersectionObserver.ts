@@ -1,12 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, RefObject } from 'react';
-
-interface UseIntersectionObserverOptions {
-  threshold?: number;
-  rootMargin?: string;
-  enabled?: boolean;
-}
+import type { UseIntersectionObserverOptions } from '@/types/hooks';
 
 /**
  * Hook to observe when an element enters the viewport

@@ -1,43 +1,7 @@
 import { create } from 'zustand';
+import type { ArticleStore, ArticleCacheEntry, UnifiedContent } from '@/types/store';
 
-type UnifiedContent = {
-  title: string;
-  description?: string;
-  content?: string;
-  imageUrl?: string;
-  author?: string;
-  sourceName?: string;
-  publishedAt: string;
-  url?: string;
-  link?: string;
-  type: 'news' | 'podcast';
-};
-
-type CacheEntry = {
-  data: UnifiedContent;
-  timestamp: number;
-};
-
-interface ArticleStore {
-  cache: Map<string, CacheEntry>;
-  // Get article from cache
-  getCachedArticle: (
-    title: string,
-    category?: string,
-    type?: 'news' | 'podcast'
-  ) => UnifiedContent | null;
-  // Store article in cache
-  setCachedArticle: (
-    title: string,
-    data: UnifiedContent,
-    category?: string,
-    type?: 'news' | 'podcast'
-  ) => void;
-  // Clear expired cache entries
-  clearExpiredCache: () => void;
-  // Clear all cache
-  clearAllCache: () => void;
-}
+export type { UnifiedContent };
 
 // Cache expiry: 1 hour
 const CACHE_EXPIRY = 60 * 60 * 1000;
@@ -79,10 +43,8 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
   setCachedArticle: (title, data, category, type) => {
     const key = getCacheKey(title, category, type);
     const newCache = new Map(get().cache);
-    newCache.set(key, {
-      data,
-      timestamp: Date.now(),
-    });
+    const entry: ArticleCacheEntry = { data, timestamp: Date.now() };
+    newCache.set(key, entry);
     set({ cache: newCache });
   },
 
@@ -107,4 +69,3 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
     set({ cache: new Map() });
   },
 }));
-

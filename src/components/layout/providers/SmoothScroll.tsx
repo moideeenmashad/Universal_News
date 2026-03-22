@@ -2,11 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
-
-
-interface SmoothScrollProps {
-  children: React.ReactNode;
-}
+import type { SmoothScrollProps } from '@/types';
 
 export const SmoothScroll = ({ children }: SmoothScrollProps) => {
   const lenisRef = useRef<Lenis | null>(null);

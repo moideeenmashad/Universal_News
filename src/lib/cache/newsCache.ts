@@ -1,11 +1,7 @@
 import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
+import type { CacheEntry } from '@/types/cache';
 
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-}
 
 /**
  * Get cache directory path (server-only)

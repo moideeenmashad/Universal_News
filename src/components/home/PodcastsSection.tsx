@@ -4,15 +4,11 @@ import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
-import { ROUTES } from '@/constants/routes';
-import { useLatestNews } from '@/lib/hooks/useNews';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { slugify } from '@/lib/utils/string';
-import { ErrorMessage } from '../ui/ErrorMessage';
-
-interface PodcastsSectionProps {
-  title?: string;
-}
+import { ROUTES } from '@/constants';
+import { useLatestNews, useIntersectionObserver } from '@/lib/hooks';
+import { slugify } from '@/lib/utils';
+import { ErrorMessage } from '../ui';
+import type { PodcastsSectionProps } from '@/types';
 
 /**
  * PodcastsSection component - Displays podcast articles in a grid layout

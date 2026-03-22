@@ -1,21 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
-import { isValidArticle } from '@/lib/utils/validation';
-import type { NewsArticle } from '@/types/news';
-import { ArticleSkeleton } from '../ui/ArticleSkeleton';
-import { ErrorMessage } from '../ui/ErrorMessage';
+import { isValidArticle } from '@/lib/utils';
+import type { NewsListProps } from '@/types';
+import { ArticleSkeleton, ErrorMessage } from '../ui';
 import { LazyArticle } from './LazyArticle';
-
-interface NewsListProps {
-  title: string;
-  articles: NewsArticle[];
-  loading: boolean;
-  error: string | null;
-  lastArticleRef: React.RefObject<HTMLDivElement | null>;
-  hasMore: boolean;
-  category: string;
-}
 
 export const NewsList = ({
   title,

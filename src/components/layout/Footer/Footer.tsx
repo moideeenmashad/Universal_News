@@ -4,14 +4,8 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaInstagram, FaLinkedin, FaYoutube, FaTwitter, FaReddit } from 'react-icons/fa';
-import { ROUTES } from '@/constants/routes';
-import { IconType } from 'react-icons';
-
-interface SocialLink {
-  href: string;
-  label: string;
-  Icon: IconType;
-}
+import { ROUTES } from '@/constants';
+import type { SocialLink } from '@/types';
 
 const SOCIAL_LINKS: SocialLink[] = [
   { href: 'https://instagram.com', label: 'Follow us on Instagram', Icon: FaInstagram },

@@ -4,13 +4,9 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowRightCircle } from 'react-icons/bs';
-import { useTopHeadlines } from '@/lib/hooks/useNews';
-import { formatRelativeTime } from '@/lib/utils/date';
-import { getPlaceholderImage } from '@/lib/utils/placeholder';
-import { getArticleUrl } from '@/lib/utils/routes';
-import { isValidArticle } from '@/lib/utils/validation';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { FeaturedArticleSkeleton } from '../ui/FeaturedArticleSkeleton';
+import { useTopHeadlines } from '@/lib/hooks';
+import { formatRelativeTime, getPlaceholderImage, getArticleUrl, isValidArticle } from '@/lib/utils';
+import { ErrorMessage, FeaturedArticleSkeleton } from '../ui';
 
 export const LiveUpdatesSection = () => {
   // Load immediately since this is in the hero section (above the fold)

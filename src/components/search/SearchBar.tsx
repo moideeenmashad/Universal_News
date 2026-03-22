@@ -3,18 +3,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoSearch, GoX } from 'react-icons/go';
-import { useSearchSuggestions } from '@/lib/hooks/useSearchSuggestions';
-import { slugify } from '@/lib/utils/string';
-import { findArticleCategory } from '@/lib/utils/articleCategory';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { useSearchSuggestions } from '@/lib/hooks';
+import { slugify, findArticleCategory } from '@/lib/utils';
+import { LoadingSpinner } from '../ui';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { NewsArticle } from '@/types/news';
-
-interface SearchBarProps {
-  onClose?: () => void;
-  className?: string;
-}
+import type { NewsArticle, SearchBarProps } from '@/types';
 
 export const SearchBar = ({ onClose, className = '' }: SearchBarProps) => {
   const [query, setQuery] = useState('');

@@ -1,15 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSearchSuggestionsGraphQL } from '../actions/graphqlNews';
+import { getSearchSuggestions } from '../actions/news';
 import { debounce } from '../utils/debounce';
+import type { UseSearchSuggestionsResult } from '@/types/hooks';
 import type { NewsArticle } from '@/types/news';
-
-interface UseSearchSuggestionsResult {
-  suggestions: NewsArticle[];
-  isLoading: boolean;
-  isDebouncing: boolean;
-}
 
 /**
  * Hook for debounced search suggestions using Next.js server actions
@@ -34,7 +29,7 @@ export const useSearchSuggestions = (query: string): UseSearchSuggestionsResult 
       setIsLoading(true);
 
       try {
-        const results = await getSearchSuggestionsGraphQL(searchQuery, 5);
+        const results = await getSearchSuggestions(searchQuery, 5);
         setSuggestions(results);
       } catch (error) {
         console.error('Error fetching search suggestions:', error);

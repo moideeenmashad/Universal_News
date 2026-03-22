@@ -4,19 +4,11 @@ import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
-import { ROUTES } from '@/constants/routes';
-import { useEverything } from '@/lib/hooks/useNews';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { formatDate } from '@/lib/utils/date';
-import { getArticleUrl } from '@/lib/utils/routes';
-import { slugify } from '@/lib/utils/string';
-import { isValidArticle, sanitizeTitle } from '@/lib/utils/validation';
-import type { NewsArticle } from '@/types/news';
-import { ErrorMessage } from '../ui/ErrorMessage';
-
-interface WorldNewsSectionProps {
-  title: string;
-}
+import { ROUTES } from '@/constants';
+import { useEverything, useIntersectionObserver } from '@/lib/hooks';
+import { formatDate, getArticleUrl, slugify, isValidArticle, sanitizeTitle } from '@/lib/utils';
+import { ErrorMessage } from '../ui';
+import type { NewsArticle, WorldNewsSectionProps } from '@/types';
 
 export const WorldNewsSection = memo(({ title }: WorldNewsSectionProps) => {
   const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });

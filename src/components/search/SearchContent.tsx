@@ -1,65 +1,40 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEverything } from '@/lib/hooks/useNews';
-import { NewsList } from '@/components/news-list/NewsList';
-import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { useEverything, useInfiniteScroll } from '@/lib/hooks';
+import { NewsList } from '@/components/news-list';
+import { useState, useEffect, useMemo } from 'react';
+import { ErrorMessage } from '@/components/ui';
+import { removeDuplicateArticles } from '@/lib/utils';
+
+const DEBOUNCE_MS = 500;
 
 export function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const [visibleCount, setVisibleCount] = useState(10);
-  const observer = useRef<IntersectionObserver | null>(null);
-  const lastArticleRef = useRef<HTMLDivElement | null>(null);
-
-  // Fetch more articles for comprehensive search results (100 is max for NewsAPI)
-  const { data, isLoading, error } = useEverything(query, 100);
-  const articles = useMemo(() => {
-    const allArticles = data?.articles || [];
-    // No duplicate checking - return all articles
-    return allArticles;
-  }, [data?.articles]);
-
-  const handleIntersection = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      if (entries[0].isIntersecting && visibleCount < articles.length) {
-        setVisibleCount((prev) => Math.min(prev + 5, articles.length));
-      }
-    },
-    [visibleCount, articles.length]
-  );
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
 
   useEffect(() => {
-    if (observer.current) {
-      observer.current.disconnect();
-    }
-
-    observer.current = new IntersectionObserver(handleIntersection, {
-      threshold: 0.1,
-      rootMargin: '50px',
-    });
-
-    if (lastArticleRef.current) {
-      observer.current.observe(lastArticleRef.current);
-    }
-
-    return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
-    };
-  }, [handleIntersection]);
-
-  // Reset visible count when query changes using setTimeout to avoid setState in effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisibleCount(10);
-    }, 0);
+    const timer = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Fetch more articles for comprehensive search results (100 is max for NewsAPI)
+  const { data, isLoading, error } = useEverything(debouncedQuery, 100);
+
+  const articles = useMemo(() => {
+    const allArticles = data?.articles || [];
+    return removeDuplicateArticles(allArticles);
+  }, [data?.articles]);
+
+  const { visibleCount, lastItemRef, hasMore } = useInfiniteScroll({
+    totalCount: articles.length,
+    resetKey: debouncedQuery,
+  });
+
   const visibleArticles = useMemo(() => articles.slice(0, visibleCount), [articles, visibleCount]);
+
+  const isDebouncing = query !== debouncedQuery;
 
   if (!query) {
     return (
@@ -93,7 +68,7 @@ export function SearchContent() {
           </p>
         )}
       </div>
-      {isLoading ? (
+      {isLoading || isDebouncing ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {Array(6).fill(0).map((_, i) => (
             <div key={`skeleton-${i}`} className="rounded-md overflow-hidden bg-white" aria-hidden="true" role="presentation">
@@ -114,7 +89,7 @@ export function SearchContent() {
         <ErrorMessage message={errorMessage} />
       ) : articles.length === 0 ? (
         <div className="text-center py-12" role="status">
-          <p className="text-gray-600 text-lg mb-2">No articles found for &quot;{query}&quot;</p>
+          <p className="text-gray-600 text-lg mb-2">No articles found for &quot;{debouncedQuery}&quot;</p>
           <p className="text-sm text-gray-500">Try different keywords or check your spelling.</p>
         </div>
       ) : (
@@ -122,11 +97,11 @@ export function SearchContent() {
           <NewsList
             title=""
             articles={visibleArticles}
-            loading={isLoading}
+            loading={isLoading || isDebouncing}
             error={null}
             category="general"
-            lastArticleRef={lastArticleRef}
-            hasMore={visibleCount < articles.length}
+            lastArticleRef={lastItemRef}
+            hasMore={hasMore}
           />
           {totalResults > 100 && (
             <div className="mt-6 text-center text-sm text-gray-600">

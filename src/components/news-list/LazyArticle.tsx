@@ -1,21 +1,11 @@
 'use client';
 
 import { useRef, useEffect, useState, useMemo, memo, useCallback } from 'react';
-import { formatDate } from '@/lib/utils/date';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BsDashLg } from 'react-icons/bs';
-import { slugify } from '@/lib/utils/string';
-import { sanitizeTitle, isValidArticle } from '@/lib/utils/validation';
-import { getPlaceholderImage } from '@/lib/utils/placeholder';
-import type { NewsArticle } from '@/types/news';
-
-interface LazyArticleProps {
-  article: NewsArticle;
-  index: number;
-  category: string;
-  onVisible?: () => void;
-}
+import { formatDate, slugify, sanitizeTitle, isValidArticle, getPlaceholderImage } from '@/lib/utils';
+import type { LazyArticleProps } from '@/types';
 
 const MAX_TITLE_LENGTH = 60;
 

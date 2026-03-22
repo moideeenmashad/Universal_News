@@ -1,6 +1,6 @@
-export const NEWS_DATA_API_BASE_URL = 'https://newsdata.io/api/1';
+export const NEWS_DATA_API_BASE_URL = process.env.NEXT_PUBLIC_NEWS_DATA_API_URL;
 
-export const NEWS_DATA_API_KEY = process.env.NEXT_PUBLIC_NEWS_DATA_API_KEY || '';
+export const NEWS_DATA_API_KEY = process.env.NEXT_PUBLIC_NEWS_DATA_API_KEY;
 
 export const DEFAULT_COUNTRY = 'us';
 export const DEFAULT_LANGUAGE = 'en'; // English only

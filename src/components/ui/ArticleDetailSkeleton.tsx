@@ -1,8 +1,6 @@
 'use client';
 
-interface ArticleDetailSkeletonProps {
-  className?: string;
-}
+import type { ArticleDetailSkeletonProps } from '@/types';
 
 export const ArticleDetailSkeleton = ({ className = '' }: ArticleDetailSkeletonProps) => {
   return (

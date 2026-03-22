@@ -4,12 +4,7 @@
  * Used for filtering news by specific channels
  */
 
-export interface NewsChannel {
-  id: string;
-  name: string;
-  hostname: string;
-  category?: string;
-}
+import type { NewsChannel } from '@/types';
 
 export const NEWS_CHANNELS: NewsChannel[] = [
   // Major International News

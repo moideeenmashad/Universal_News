@@ -3,20 +3,11 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ROUTES } from '@/constants/routes';
-import { useTopHeadlines } from '@/lib/hooks/useNews';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { isValidArticle } from '@/lib/utils/validation';
-import { getPlaceholderImage } from '@/lib/utils/placeholder';
-import { ErrorMessage } from '../ui/ErrorMessage';
-
-interface FeaturedItem {
-  id: number;
-  title: string;
-  assert: string;
-  linkTo: string;
-  category?: string; // Category for fetching category-specific articles
-}
+import { ROUTES } from '@/constants';
+import { useTopHeadlines, useIntersectionObserver } from '@/lib/hooks';
+import { isValidArticle, getPlaceholderImage } from '@/lib/utils';
+import { ErrorMessage } from '../ui';
+import type { FeaturedItem } from '@/types';
 
 const FEATURED_LIST: FeaturedItem[] = [
   {

@@ -2,16 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { formatDate } from '@/lib/utils/date';
-import { getArticleUrl } from '@/lib/utils/routes';
-import { sanitizeTitle } from '@/lib/utils/validation';
-import type { NewsArticle } from '@/types/news';
-
-interface SimilarNewsProps {
-  articles: NewsArticle[];
-  category?: string;
-  isLoading?: boolean;
-}
+import { formatDate, getArticleUrl, sanitizeTitle } from '@/lib/utils';
+import type { SimilarNewsProps } from '@/types';
 
 export const SimilarNews = ({ articles, category, isLoading = false }: SimilarNewsProps) => {
   if (isLoading) {
