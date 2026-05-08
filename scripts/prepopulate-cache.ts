@@ -5,14 +5,14 @@
  * Usage: npx tsx scripts/prepopulate-cache.ts
  */
 
-import { saveToCache, getHeadlinesCacheKey, getEverythingCacheKey, getLatestNewsCacheKey } from '../src/lib/cache/newsCache';
-import type { NewsApiResponse, NewsDataResponse } from '../src/types/news';
-import { getPlaceholderImage } from '../src/lib/utils/placeholder';
+import { saveToCache, getHeadlinesCacheKey, getEverythingCacheKey, getLatestNewsCacheKey } from '../src/shared/lib/cache/newsCache';
+import type { NewsApiResponse, NewsDataResponse } from '../src/shared/types';
+import { getPlaceholderImage } from '../src/shared/utils/placeholder';
 
 // Sample data structure matching API responses
 const sampleHeadlines: NewsApiResponse = {
   status: 'ok',
-  totalResults: 5,
+  totalResults: 2,
   articles: [
     {
       source: { name: 'Sample News' },
@@ -39,7 +39,7 @@ const sampleHeadlines: NewsApiResponse = {
 
 const sampleLatest: NewsDataResponse = {
   status: 'success',
-  totalResults: 3,
+  totalResults: 1,
   results: [
     {
       article_id: 'sample-1',
@@ -106,4 +106,3 @@ async function prepopulateCache() {
 }
 
 prepopulateCache();
-

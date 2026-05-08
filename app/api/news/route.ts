@@ -5,14 +5,14 @@ import {
   DEFAULT_COUNTRY,
   DEFAULT_LANGUAGE,
   DEFAULT_PAGE_SIZE,
-} from '@/constants/config';
+} from '@/shared/constants/config';
 import {
   loadFromCache,
   getHeadlinesCacheKey,
   getEverythingCacheKey,
   getLatestNewsCacheKey,
-} from '@/lib/cache/newsCache';
-import type { NewsApiResponse, NewsDataResponse } from '@/types/news';
+} from '@/shared/lib/cache/newsCache';
+import type { NewsApiResponse, NewsDataResponse } from '@/shared/types';
 
 /**
  * API Route to proxy news API requests

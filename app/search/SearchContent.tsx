@@ -1,11 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEverything } from '@/lib/hooks/useNews';
-import { NewsList } from '@/components/news-list/NewsList';
+import { useEverything } from '@/features/news/hooks/useNews';
+import { NewsList } from '@/features/news/components/NewsList';
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { ArticleSkeleton } from '@/components/ui/ArticleSkeleton';
-import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { ArticleSkeleton } from '@/shared/components/ArticleSkeleton';
+import { ErrorMessage } from '@/shared/components/ErrorMessage';
 
 export function SearchContent() {
   const searchParams = useSearchParams();

@@ -1,6 +1,6 @@
-import { News } from '@/components/news-list/News';
+import { News } from '@/features/news/components/News';
 import { notFound } from 'next/navigation';
-import { CATEGORIES } from '@/constants/routes';
+import { CATEGORIES } from '@/shared/constants/routes';
 
 type Props = {
   params: Promise<{ category: string }>;

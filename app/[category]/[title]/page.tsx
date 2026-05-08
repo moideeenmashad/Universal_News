@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { NewsDetailsContent } from './NewsDetailsContent';
-import { ArticleDetailSkeleton } from '@/components/ui/ArticleDetailSkeleton';
+import { ArticleDetailSkeleton } from '@/shared/components/ArticleDetailSkeleton';
 
 interface PageProps {
   params: Promise<{ category: string; title: string }>;
